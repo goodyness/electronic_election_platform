@@ -19,6 +19,7 @@ urlpatterns = [
     path('vote/<str:short_id>/', views.cast_vote_view, name='cast_vote'),
     path('results/<str:short_id>/', views.view_election_results, name='election_results'),
     path('election/<str:short_id>/status/<str:action>/', views.update_status, name='update_status'),
+    path('active-elections/', views.active_elections_list, name='active_elections'),
     
     # Grand Admin Views (from admin_views.py)
     path('grand-admin/dashboard/', admin_views.grand_admin_dashboard, name='grand_admin_dashboard'),

@@ -15,7 +15,13 @@ User = get_user_model()
 def home(request):
     from .models import Election
     active_elections = Election.objects.filter(status='ACTIVE').order_by('-start_time')
-    return render(request, 'election_core/home.html', {'active_elections': active_elections})
+    return render(request, 'election_core/home.html', {'elections': active_elections})
+
+def active_elections_list(request):
+    from .models import Election
+    active_elections = Election.objects.filter(status='ACTIVE').order_by('-start_time')
+    return render(request, 'election_core/active_elections.html', {'elections': active_elections})
+
 
 def organizer_signup(request):
     if request.method == 'POST':
@@ -289,6 +295,9 @@ def view_election_results(request, short_id):
         'eligible_count': eligible_count
     })
 
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def voter_dashboard(request):
     if request.user.role != 'VOTER':
         messages.error(request, "Access denied. This dashboard is for Voters only.")

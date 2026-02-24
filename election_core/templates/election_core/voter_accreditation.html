@@ -26,8 +26,7 @@
             <h2 class="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">Voter Accreditation
             </h2>
             <p class="text-slate-500 max-w-lg mx-auto font-medium">
-                Accreditation for <span class="text-indigo-600 font-bold uppercase tracking-widest text-xs">{{
-                    election.title }}</span>.
+                Accreditation for <span class="text-indigo-600 font-bold uppercase tracking-widest text-xs">{{ election.title }}</span>.
                 We'll verify your identity to grant secure voting access.
             </p>
         </div>
@@ -55,8 +54,8 @@
                     VERIFICATION GRID ACTIVE</div>
             </div>
 
-            <div class="p-10 lg:p-14">
-                <form method="POST" class="space-y-10">
+            <div class="p-10 lg:p-14 relative z-20">
+                <form method="POST" class="space-y-10 relative z-30">
                     {% csrf_token %}
 
                     <!-- Full Name Grid -->
@@ -175,7 +174,7 @@
                     </div>
 
                     <!-- Password Section (Dynamic) -->
-                    <div id="password-section" x-cloak>
+                    <div id="password-section" class="hidden">
                         <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 space-y-6">
                             <div class="flex items-center gap-3 mb-2">
                                 <div
@@ -258,7 +257,7 @@
 
                     <div class="pt-8">
                         <button type="submit"
-                            class="btn btn-primary w-full h-20 rounded-[2rem] border-none shadow-2xl shadow-indigo-200 font-black text-xl group transition-all hover:scale-[1.02] active:scale-95 leading-none">
+                            class="btn btn-primary w-full h-20 rounded-[2rem] border-none shadow-2xl shadow-indigo-200 font-black text-xl group transition-all hover:scale-[1.02] active:scale-95 leading-none cursor-pointer relative z-50 pointer-events-auto">
                             <div class="flex flex-col">
                                 <span>Initialize Accreditation</span>
                                 <span class="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60 mt-1">Dispense

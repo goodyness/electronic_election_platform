@@ -111,10 +111,8 @@
                                         class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 flex items-center justify-center text-xl text-slate-300 mb-4 group-hover/cand:scale-110 transition-transform">
                                         👤</div>
                                     {% endif %}
-                                    <h5 class="font-black text-slate-900 text-sm w-full truncate h-5">{{ cand.full_name
-                                        }}</h5>
-                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{{
-                                        cand.aka|default:"OFFICIAL" }}</p>
+                                    <h5 class="font-black text-slate-900 text-sm w-full truncate h-5">{{ cand.full_name }}</h5>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{{ cand.aka|default:"OFFICIAL" }}</p>
 
                                     <div class="mt-4 pt-4 border-t border-white flex gap-3 w-full justify-center">
                                         <a href="{% url 'edit_candidate' cand.id %}"
