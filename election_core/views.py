@@ -987,3 +987,63 @@ def election_gateway(request, slug):
         return redirect('voter_dashboard')
         
     return redirect('cast_vote', short_id=election.short_id)
+
+def generate_i_voted_asset(request, short_id):
+    from .models import Election
+    from io import BytesIO
+    from PIL import Image, ImageDraw, ImageFont
+    import os
+    from django.conf import settings
+    
+    election = get_object_or_404(Election, short_id=short_id)
+    voter_name = request.GET.get('name', 'A Dedicated Voter').upper()
+    
+    # Paths to assets
+    bg_path = os.path.join(settings.BASE_DIR, 'election_core', 'static', 'images', 'assets', 'ivoted_bg.png')
+    font_path = os.path.join(settings.BASE_DIR, 'election_core', 'static', 'images', 'assets', 'Inter-Black.ttf')
+    
+    try:
+        img = Image.open(bg_path).convert('RGBA')
+    except Exception as e:
+        # Fallback to a solid color block if background doesn't exist
+        img = Image.new('RGBA', (1200, 630), color=(15, 23, 42))  # slate-900
+        
+    draw = ImageDraw.Draw(img)
+    
+    # Load Fonts
+    try:
+        title_font = ImageFont.truetype(font_path, 95)
+        subtitle_font = ImageFont.truetype(font_path, 35)
+        name_font = ImageFont.truetype(font_path, 60)
+    except Exception:
+        # Fallback to default if font fails to load (very basic looking but safe)
+        title_font = ImageFont.load_default()
+        subtitle_font = ImageFont.load_default()
+        name_font = ImageFont.load_default()
+
+    # Draw Text
+    title_text = "I SECURELY VOTED"
+    inst_text = f"IN THE {election.institution.name.upper()} ELECTIONS"
+    elect_text = election.title.upper()
+    
+    # Colors
+    cyan_glow = (6, 182, 212, 255) # tailwind cyan-500
+    white = (255, 255, 255, 255)
+    slate_300 = (203, 213, 225, 255)
+    slate_400 = (148, 163, 184, 255)
+    
+    # Y-coordinates
+    draw.text((100, 100), title_text, font=title_font, fill=cyan_glow)
+    draw.text((100, 200), elect_text, font=name_font, fill=white)
+    draw.text((100, 260), inst_text, font=subtitle_font, fill=slate_300)
+    
+    draw.text((100, 460), "OFFICIAL BALLOT CAST BY:", font=subtitle_font, fill=slate_400)
+    draw.text((100, 490), f"{voter_name}", font=title_font, fill=white)
+
+    # Convert to bytes
+    response_io = BytesIO()
+    img.save(response_io, format='PNG')
+    response_io.seek(0)
+    
+    return HttpResponse(response_io, content_type='image/png')
+
