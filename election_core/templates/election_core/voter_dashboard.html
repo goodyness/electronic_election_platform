@@ -1,0 +1,226 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block title %}Voter Dashboard | FlashVote{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 lg:py-20 px-4 relative overflow-hidden">
+    <!-- Decorative background -->
+    <div class="absolute top-0 left-0 w-full h-64 bg-slate-900 -skew-y-3 origin-top-left -z-10"></div>
+
+    <div class="max-w-6xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div class="space-y-4">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white font-black text-[10px] uppercase tracking-widest backdrop-blur-md">
+                    <span class="relative flex h-2 w-2">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    User Node Online
+                </div>
+                <h2 class="text-4xl lg:text-5xl font-black text-white tracking-tighter leading-none">
+                    Welcome, <span class="text-indigo-400">{{ user.get_full_name|default:user.username }}</span>
+                </h2>
+                <p class="text-slate-400 font-medium text-lg">
+                    Monitor your accredited elections and academic participation data.
+                </p>
+            </div>
+
+            <div class="flex gap-4">
+                <a href="{% url 'ballot_verification' %}"
+                    class="btn bg-white hover:bg-slate-50 text-slate-900 border-none rounded-2xl px-8 h-14 font-black shadow-xl shadow-black/20 group">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5 mr-3 text-indigo-600 group-hover:scale-110 transition-transform" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Ledger Verification
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card bg-white p-8 group hover:-translate-y-1 transition-all">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Accreditation
+                            Access</div>
+                        <div class="text-3xl font-black text-slate-900 tracking-tight">{{ elections.count }} Elections
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Future stats could go here -->
+        </div>
+
+        <!-- Election List -->
+        <div class="space-y-8">
+            <div class="flex items-center gap-6">
+                <div class="flex flex-col">
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Your Election Grid</h3>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active & Historical Records
+                    </p>
+                </div>
+                <div class="h-px bg-slate-200 flex-grow"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {% for election in elections %}
+                <div class="card bg-white overflow-hidden group hover:border-indigo-600 transition-all duration-500">
+                    <div class="p-8 lg:p-10">
+                        <div class="flex justify-between items-start gap-6 mb-8">
+                            <div class="space-y-4 flex-grow">
+                                <div class="flex flex-wrap gap-2">
+                                    {% if election.status == 'ACTIVE' %}
+                                    <span
+                                        class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                                        <span class="relative flex h-1.5 w-1.5">
+                                            <span
+                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span
+                                                class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-600"></span>
+                                        </span>
+                                        Live Now
+                                    </span>
+                                    {% elif election.status == 'CLOSED' %}
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest border border-slate-200">
+                                        Concluded
+                                    </span>
+                                    {% else %}
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                                        Scheduled
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <h4
+                                    class="text-2xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight leading-tighter">
+                                    {{ election.title }}
+                                </h4>
+                                <div
+                                    class="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-widest">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    {{ election.institution.name }}
+                                </div>
+                            </div>
+
+                            <div class="shrink-0">
+                                {% if election.logo %}
+                                <div
+                                    class="w-16 h-16 rounded-2xl p-1 bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center">
+                                    <img src="{{ election.logo.url }}"
+                                        class="max-w-full max-h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500">
+                                </div>
+                                {% else %}
+                                <div
+                                    class="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="divider opacity-50 my-6"></div>
+
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                            <div class="flex -space-x-3 order-2 sm:order-1">
+                                <div
+                                    class="w-10 h-10 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
+                                    ?</div>
+                                <div
+                                    class="w-10 h-10 rounded-full border-4 border-white bg-indigo-50 flex items-center justify-center text-[10px] font-black text-indigo-400">
+                                    ?</div>
+                                <div
+                                    class="px-4 h-10 rounded-full border-4 border-white bg-slate-900 flex items-center justify-center text-[10px] font-black text-white uppercase tracking-widest">
+                                    Security Grid</div>
+                            </div>
+
+                            <div class="flex gap-3 order-1 sm:order-2 w-full sm:w-auto">
+                                {% if election.status == 'ACTIVE' %}
+                                <a href="{% url 'cast_vote' short_id=election.short_id %}"
+                                    class="btn btn-primary flex-grow sm:flex-grow-0 rounded-2xl px-10 h-14 font-black border-none shadow-xl shadow-indigo-100 group-hover:scale-105 transition-transform italic">
+                                    CAST BALLOT
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-3" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </a>
+                                {% elif election.status == 'CLOSED' %}
+                                <a href="{% url 'election_results' short_id=election.short_id %}"
+                                    class="btn btn-neutral flex-grow sm:flex-grow-0 rounded-2xl px-10 h-14 font-black border-none shadow-xl bg-slate-900 group-hover:bg-slate-800 transition-all">
+                                    VIEW RESULTS
+                                </a>
+                                {% else %}
+                                <span
+                                    class="btn btn-disabled flex-grow sm:flex-grow-0 rounded-2xl px-10 h-14 font-black">LOCKED</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-slate-50 text-center">
+                            <a href="mailto:{{ election.organizer.user.email }}"
+                                class="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-all">Report
+                                Identity Issue to Registrar</a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div
+                    class="col-span-1 md:col-span-2 py-32 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
+                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h4 class="text-2xl font-black text-slate-900 mb-3 tracking-tight">No Active Accredited Nodes</h4>
+                    <p class="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">
+                        You have not been authenticated for any elections in the current grid cycle.
+                    </p>
+                    <div class="pt-10">
+                        <a href="{% url 'home' %}"
+                            class="btn btn-primary rounded-2xl px-12 h-14 font-black shadow-xl shadow-indigo-100">Browse
+                            National Grid</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Footer Help -->
+        <div class="pt-20 text-center space-y-4">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Audit Intelligence Grid v4.0 •
+                Encrypted</p>
+            <div class="flex justify-center gap-8">
+                <a href="#" class="text-slate-400 hover:text-indigo-600 font-bold text-xs">Platform Support</a>
+                <a href="#" class="text-slate-400 hover:text-indigo-600 font-bold text-xs">Security Protocol</a>
+                <a href="#" class="text-slate-400 hover:text-indigo-600 font-bold text-xs">Terms & Integrity</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

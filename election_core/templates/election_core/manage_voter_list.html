@@ -1,0 +1,195 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}Manage Voter List | FlashVote{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-12 lg:py-20 px-6">
+
+
+    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1">
+            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
+                <a href="{% url 'organizer_dashboard' %}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'manage_election' short_id=election.short_id %}"
+                    class="hover:text-indigo-600 transition-colors">Setup</a>
+                <span>/</span>
+                <span class="text-indigo-600">Voters</span>
+            </nav>
+            <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Voter
+                Eligibility List</h2>
+            <p class="text-slate-500 font-medium">Manage authorized emails for <span
+                    class="text-indigo-600 font-bold uppercase tracking-widest text-xs">{{ election.title }}</span></p>
+        </div>
+    </div>
+
+
+    <div
+        class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="w-full">
+            <h3 class="text-lg font-black text-indigo-900 flex items-center gap-3">
+                Current Plan:
+                <span class="badge badge-lg border-none text-white font-bold tracking-widest text-xs
+                {% if election.plan == 'FREE' %}bg-slate-500
+                {% elif election.plan == 'BASIC' %}bg-blue-500
+                {% elif election.plan == 'STANDARD' %}bg-indigo-600
+                {% elif election.plan == 'PREMIUM' %}bg-purple-600
+                {% endif %}">
+                    {{ election.get_plan_display }}
+                </span>
+            </h3>
+            <p class="text-slate-600 mt-2 font-medium">
+                {% if limit > 0 %}
+                You have used <strong class="text-indigo-700">{{ current_count }}</strong> of <strong
+                    class="text-indigo-700">{{ limit }}</strong> available slots.
+                {% else %}
+                You have <strong class="text-emerald-600">Unlimited</strong> email uploads on this plan.
+                {% endif %}
+            </p>
+            {% if limit > 0 %}
+            <div class="w-full bg-indigo-200/50 rounded-full h-3 mt-4 overflow-hidden">
+                <div class="bg-indigo-600 h-3 rounded-full transition-all duration-500"
+                    style="width: {% widthratio current_count limit 100 %}%;"></div>
+            </div>
+            {% endif %}
+        </div>
+        {% if election.plan != 'PREMIUM' %}
+        <a href="{% url 'select_plan' short_id=election.short_id %}"
+            class="btn btn-primary rounded-2xl normal-case font-bold shadow-lg shadow-indigo-200">
+            Upgrade Plan
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="space-y-8">
+
+            <div
+                class="card bg-white shadow-xl shadow-slate-200/60 border border-slate-100 rounded-2xl overflow-hidden">
+                <div class="p-8">
+                    <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Add Single Voter
+                    </h3>
+                    <form method="post" class="space-y-4">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="form-control">
+                            <label class="label"><span
+                                    class="label-text font-bold text-slate-600 text-xs uppercase tracking-wider">{{
+                                    field.label }}</span></label>
+                            <input type="email" name="{{ field.name }}"
+                                class="input input-bordered w-full rounded-xl bg-slate-50 focus:bg-white focus:border-indigo-600 transition-all font-bold"
+                                placeholder="voter@example.com">
+                            {% if field.errors %}<p class="text-xs text-error mt-1">{{ field.errors.0 }}</p>{% endif %}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-neutral w-full rounded-xl normal-case font-bold mt-2">Add
+                            to List</button>
+                    </form>
+                </div>
+            </div>
+
+
+            <div
+                class="card bg-white shadow-xl shadow-slate-200/60 border border-slate-100 rounded-2xl overflow-hidden">
+                <div class="p-8">
+                    <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Bulk Upload (CSV)
+                    </h3>
+                    <form method="post" enctype="multipart/form-data" class="space-y-4">
+                        {% csrf_token %}
+                        {% for field in bulk_form %}
+                        <div class="form-control">
+                            <label class="label"><span
+                                    class="label-text font-bold text-slate-600 text-xs uppercase tracking-wider">{{
+                                    field.label }}</span></label>
+                            <input type="file" name="{{ field.name }}"
+                                class="file-input file-input-bordered file-input-primary w-full rounded-xl bg-slate-50 text-xs font-bold"
+                                accept=".csv">
+                            <p class="text-[10px] text-slate-400 mt-2 italic">Format: First column acts as email list.
+                                No headers needed.</p>
+                        </div>
+                        {% endfor %}
+                        <button type="submit"
+                            class="btn btn-primary w-full rounded-xl normal-case font-bold mt-2 shadow-lg shadow-indigo-100">Upload
+                            CSV</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="lg:col-span-2">
+            <div
+                class="card bg-white shadow-xl shadow-slate-200/60 border border-slate-100 rounded-2xl overflow-hidden min-h-[500px]">
+                <div class="p-8 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight">Authorized Voters <span
+                            class="text-slate-400 font-medium ml-2 text-base">({{ allowed_emails|length }})</span></h3>
+                    <a href="{% url 'manage_election' short_id=election.short_id %}"
+                        class="btn btn-ghost btn-sm rounded-lg normal-case text-slate-500 font-bold hover:bg-slate-50">Back
+                        to Setup</a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="table w-full">
+                        <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-widest">
+                            <tr>
+                                <th class="pl-8 py-6">Email Address</th>
+                                <th class="pr-8 py-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm font-medium text-slate-700">
+                            {% for item in allowed_emails %}
+                            <tr class="hover:bg-slate-50/50 transition-colors border-b border-slate-50">
+                                <td class="pl-8 py-5 flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                                        {{ item.email|slice:":1"|upper }}
+                                    </div>
+                                    {{ item.email }}
+                                </td>
+                                <td class="pr-8 py-5 text-right">
+                                    <a href="{% url 'delete_allowed_email' item.id %}"
+                                        onclick="return confirm('Remove {{ item.email }} from eligibility list?')"
+                                        class="btn btn-ghost btn-xs text-rose-500 hover:bg-rose-50 rounded-lg">
+                                        Remove
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center py-20">
+                                    <div
+                                        class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="text-slate-900 font-bold">No Voters Added</h4>
+                                    <p class="text-slate-400 text-xs mt-1">Add emails manually or upload a CSV to get
+                                        started.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

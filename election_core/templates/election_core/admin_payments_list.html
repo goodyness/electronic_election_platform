@@ -1,0 +1,110 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}All Payments | Grand Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-12 px-6">
+
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div>
+            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
+                <a href="{% url 'grand_admin_dashboard' %}"
+                    class="hover:text-indigo-600 transition-colors">Dashboard</a>
+                <span>/</span>
+                <span class="text-indigo-600">Payments</span>
+            </nav>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Financial Ledger</h1>
+        </div>
+
+
+        <form method="get" class="relative w-full md:w-96">
+            <input type="text" name="q" value="{{ search_query|default:'' }}"
+                placeholder="Reference, organizer, election..."
+                class="input input-lg w-full pl-12 rounded-2xl bg-white border-slate-200 focus:border-indigo-600 shadow-sm transition-all text-sm font-bold">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        </form>
+    </div>
+
+
+    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="table w-full">
+                <thead>
+                    <tr class="text-slate-400 border-slate-100">
+                        <th class="bg-transparent pl-8 py-6">Date & Reference</th>
+                        <th class="bg-transparent">Election</th>
+                        <th class="bg-transparent">Payer</th>
+                        <th class="bg-transparent">Plan Tier</th>
+                        <th class="bg-transparent pr-8 text-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in page_obj %}
+                    <tr class="hover:bg-slate-50/50 group transition-colors border-slate-50">
+                        <td class="pl-8 py-4">
+                            <div class="font-mono font-bold text-slate-600">{{ payment.paid_at|date:"M d, Y H:i" }}
+                            </div>
+                            <div class="text-[10px] uppercase tracking-widest text-slate-400 mt-1 font-mono">{{
+                                payment.reference }}</div>
+                        </td>
+                        <td>
+                            <div class="font-bold text-slate-900">{{ payment.election.title }}</div>
+                        </td>
+                        <td>
+                            <div class="text-sm font-medium">{{ payment.election.organizer.user.get_full_name }}</div>
+                            <div class="text-xs text-slate-400">{{ payment.election.organizer.user.email }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-sm badge-ghost font-bold">{{ payment.get_plan_display }}</span>
+                        </td>
+                        <td class="pr-8 text-right">
+                            <span class="font-mono font-black text-emerald-600 text-lg">₦{{ payment.amount|floatformat:2
+                                }}</span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-20 text-center">
+                            <div class="opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-slate-300"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p class="text-slate-400 font-medium">No transaction records found.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        {% if page_obj.has_other_pages %}
+        <div class="p-6 border-t border-slate-50 bg-slate-50/50 flex justify-center">
+            <div class="join">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
+                    class="join-item btn btn-sm">«</a>
+                {% endif %}
+
+                <span class="join-item btn btn-sm btn-disabled">Page {{ page_obj.number }} of {{
+                    page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
+                    class="join-item btn btn-sm">»</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

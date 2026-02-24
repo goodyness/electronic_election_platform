@@ -1,0 +1,145 @@
+{% extends "election_core/base.html" %}
+
+{% block title %}Payment Successful{% endblock %}
+
+{% block content %}
+<style>
+    .success-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        text-align: center;
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 3rem;
+        animation: popIn 0.5s ease;
+    }
+
+    @keyframes popIn {
+        0% {
+            transform: scale(0);
+        }
+
+        70% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .success-container h1 {
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .success-container p {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    .receipt-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        text-align: left;
+        margin-bottom: 2rem;
+    }
+
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .receipt-row:last-child {
+        border-bottom: none;
+    }
+
+    .receipt-row .label {
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .receipt-row .value {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .receipt-row.total .value {
+        font-size: 1.3rem;
+        color: #27ae60;
+    }
+
+    .plan-badge {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .plan-badge.BASIC {
+        background: #ebf5fb;
+        color: #2980b9;
+    }
+
+    .plan-badge.STANDARD {
+        background: #fef9e7;
+        color: #e67e22;
+    }
+
+    .plan-badge.PREMIUM {
+        background: #1a1a2e;
+        color: #f39c12;
+    }
+</style>
+
+<div class="success-container">
+    <div class="success-icon">✓</div>
+    <h1>Payment Successful!</h1>
+    <p>Your election plan has been activated. You can now manage your election.</p>
+
+    <div class="receipt-card">
+        <h3 style="margin-top: 0; color: var(--primary-color);">Payment Receipt</h3>
+        <div class="receipt-row">
+            <span class="label">Election</span>
+            <span class="value">{{ election.title }}</span>
+        </div>
+        <div class="receipt-row">
+            <span class="label">Plan</span>
+            <span><span class="plan-badge {{ payment.plan }}">{{ payment.get_plan_display }}</span></span>
+        </div>
+        <div class="receipt-row">
+            <span class="label">Voter Emails</span>
+            <span class="value">{{ payment.email_count|floatformat:0 }}</span>
+        </div>
+        <div class="receipt-row">
+            <span class="label">Reference</span>
+            <span class="value" style="font-size: 0.85rem;">{{ payment.paystack_reference }}</span>
+        </div>
+        <div class="receipt-row total">
+            <span class="label">Amount Paid</span>
+            <span class="value">₦{{ payment.amount|floatformat:0 }}</span>
+        </div>
+    </div>
+
+    <a href="{% url 'manage_election' short_id=election.short_id %}" class="btn"
+        style="padding: 14px 40px; border-radius: 10px; font-size: 1.1rem;">
+        Start Managing Your Election →
+    </a>
+</div>
+{% endblock %}

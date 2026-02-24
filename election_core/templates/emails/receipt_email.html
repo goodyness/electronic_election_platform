@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #27ae60;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .receipt-box {
+            border: 2px dashed #27ae60;
+            padding: 20px;
+            background-color: #f9fdfa;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .receipt-id {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 20px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin:0; color: #2c3e50;">E-Election System</h1>
+            <p style="margin:5px 0 0; color: #7f8c8d;">Vote Confirmation Receipt</p>
+        </div>
+
+        <h2 style="color: #2c3e50;">Thank you for voting!</h2>
+        <p>Your participation is vital to a fair and transparent election process. This email confirms that your vote
+            was successfully recorded.</p>
+
+        <div class="receipt-box">
+            <div style="font-size: 14px; color: #7f8c8d; text-transform: uppercase;">Digital Receipt ID</div>
+            <div class="receipt-id">{{ receipt_id }}</div>
+            <p style="font-size: 12px; margin-top: 15px; color: #666;">
+                <strong>Election:</strong> {{ election_title }}<br>
+                <strong>Timestamp:</strong> {{ timestamp }}
+            </p>
+        </div>
+
+        <p>You can use this ID to verify the inclusion of your vote in the final audit if needed. Please keep this email
+            for your records.</p>
+
+        <div class="footer">
+            <p>&copy; {{ current_year }} E-Election System. All rights reserved.</p>
+            <p>This is an automated message. Please do not reply.</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,444 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}Manage Ballot | {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8 lg:py-12" x-data="{ addingPosition: false }">
+
+    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1">
+            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
+                <a href="{% url 'home' %}" class="hover:text-indigo-600 transition-colors">Home</a>
+                <span>/</span>
+                <a href="{% url 'organizer_dashboard' %}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
+                <span>/</span>
+                <span class="text-indigo-600">Ballot Setup</span>
+            </nav>
+            <h2 class="text-3xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-none">
+                {{ election.title }}
+            </h2>
+            <div class="flex items-center gap-3 pt-2">
+                <span
+                    class="badge badge-sm font-black {% if election.status == 'ACTIVE' %}badge-success{% else %}badge-ghost{% endif %} px-4 py-3 rounded-lg">{{  election.get_status_display }}</span>
+                <span class="text-xs font-bold text-slate-400">ID: {{ election.short_id }}</span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'election_analytics' short_id=election.short_id %}"
+                class="btn btn-outline border-slate-200 hover:bg-slate-50 rounded-xl normal-case font-bold shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Live Turnout
+            </a>
+            {% if election.status == 'DRAFT' %}
+            <a href="{% url 'update_status' short_id=election.short_id action='activate' %}"
+                class="btn btn-primary rounded-xl normal-case font-black px-8 shadow-xl shadow-indigo-100">
+                Go Live Now
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+        <div class="lg:col-span-2 space-y-10">
+
+            <div
+                class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                <div class="p-8 lg:p-10 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900">Ballot Positions</h3>
+                            <p class="text-xs text-slate-500 font-medium">Define categories and individual candidates.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{% url 'add_position' short_id=election.short_id %}"
+                        class="btn btn-ghost bg-slate-100 hover:bg-slate-200 rounded-xl normal-case font-bold group">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 mr-2 text-indigo-600 transform group-hover:rotate-90 transition-transform"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Position
+                    </a>
+                </div>
+
+                <div class="p-8 lg:p-10 space-y-10">
+                    {% for pos in positions %}
+                    <div
+                        class="space-y-6 bg-white border border-slate-100 p-8 rounded-[2rem] hover:shadow-xl hover:shadow-slate-100 transition-all duration-300 relative">
+                        <div class="flex items-center justify-between gap-4 border-b border-slate-50 pb-6 mb-6">
+                            <div class="flex items-center gap-3">
+                                <span
+                                    class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-black">{{
+                                    pos.order }}</span>
+                                <h4 class="text-xl font-extrabold text-slate-900 leading-none">{{ pos.title }}</h4>
+                            </div>
+                            <a href="{% url 'add_candidate' pos.id %}"
+                                class="text-xs font-black text-indigo-600 hover:underline uppercase tracking-widest decoration-2 underline-offset-4 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                                New Candidate
+                            </a>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {% for cand in pos.candidates.all %}
+                            <div
+                                class="relative bg-slate-50/50 rounded-2xl p-6 border border-slate-100 hover:bg-indigo-50/30 hover:border-indigo-100 transition-all group/cand">
+                                <div class="flex flex-col items-center">
+                                    {% if cand.photo %}
+                                    <img src="{{ cand.photo.url }}"
+                                        class="w-16 h-16 rounded-2xl object-cover border-4 border-white shadow-xl mb-4 group-hover/cand:scale-110 transition-transform"
+                                        alt="">
+                                    {% else %}
+                                    <div
+                                        class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 flex items-center justify-center text-xl text-slate-300 mb-4 group-hover/cand:scale-110 transition-transform">
+                                        👤</div>
+                                    {% endif %}
+                                    <h5 class="font-black text-slate-900 text-sm w-full truncate h-5">{{ cand.full_name
+                                        }}</h5>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{{
+                                        cand.aka|default:"OFFICIAL" }}</p>
+
+                                    <div class="mt-4 pt-4 border-t border-white flex gap-3 w-full justify-center">
+                                        <a href="{% url 'edit_candidate' cand.id %}"
+                                            class="text-[10px] font-black text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">Edit</a>
+                                        <a href="{% url 'delete_candidate' cand.id %}" data-confirm="delete_candidate"
+                                            data-name="{{ cand.full_name }}"
+                                            class="text-[10px] font-black text-slate-400 hover:text-rose-600 transition-colors uppercase tracking-widest">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div
+                                class="col-span-full py-10 bg-slate-50 border border-dashed border-slate-200 rounded-3xl text-center">
+                                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">No Candidates
+                                    Registered</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-20 space-y-6">
+                        <div
+                            class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto shadow-xl shadow-indigo-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 animate-bounce" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                        </div>
+                        <div class="max-w-xs mx-auto space-y-2">
+                            <h4 class="text-lg font-black text-slate-900 tracking-tight">Empty Ballot Structure</h4>
+                            <p class="text-sm text-slate-500 font-medium leading-relaxed">Let's start by adding the
+                                first competitive position (e.g., President, Chief Justice).</p>
+                        </div>
+                        <a href="{% url 'add_position' short_id=election.short_id %}"
+                            class="btn btn-primary rounded-xl px-10 border-none shadow-lg shadow-indigo-100 normal-case font-black">Begin
+                            Setup</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -translate-y-12 translate-x-12 group-hover:bg-white/10 transition-colors">
+                    </div>
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Total Accredited</p>
+                    <div class="flex items-center gap-4">
+                        <span class="text-5xl font-black">{{ election.voters.count }}</span>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Registered</p>
+                            <a href="{% url 'manage_voter_list' short_id=election.short_id %}"
+                                class="text-[10px] font-black text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-400/30">Review
+                                List →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-600 rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
+                    <p class="text-xs font-black text-indigo-200 uppercase tracking-[0.2em] mb-4">Ballot Receipts</p>
+                    <div class="flex items-center gap-4">
+                        <span class="text-5xl font-black uppercase tracking-tighter">{{ election.send_receipts|yesno:"ON,OFF" }}</span>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-indigo-200 uppercase">Verification</p>
+                            <a href="{% url 'toggle_election_receipts' short_id=election.short_id %}"
+                                class="text-[10px] font-black text-white hover:text-indigo-100 underline underline-offset-4 decoration-indigo-100/30 transition-colors">Toggle
+                                Now →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="space-y-10">
+
+            <div
+                class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
+                <div class="absolute top-0 right-0 p-3">
+                    {% if election.plan != 'FREE' %}
+                    <div class="badge badge-primary badge-sm py-2 px-3 font-bold border-none">STANDARD+</div>
+                    {% else %}
+                    <div class="badge badge-ghost badge-sm py-2 px-3 font-bold text-slate-300 border-none">FREE PLAN
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="p-8">
+                    <h3 class="text-lg font-black text-slate-900 tracking-tight mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                        Identity & Branding
+                    </h3>
+
+                    {% if election.plan != 'FREE' %}
+                    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+                        <div class="form-control">
+                            <label class="label p-0 mb-3"><span
+                                    class="label-text font-black text-slate-400 uppercase tracking-widest text-[9px]">Event
+                                    Asset (Logo)</span></label>
+                            <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                {% if election.logo %}
+                                <img src="{{ election.logo.url }}"
+                                    class="w-12 h-12 rounded-xl object-contain bg-white border border-slate-100 p-1"
+                                    alt="">
+                                {% else %}
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-200 font-black">
+                                    ?</div>
+                                {% endif %}
+                                <input type="file" name="logo"
+                                    class="file-input file-input-bordered file-input-ghost file-input-xs w-full max-w-xs text-[10px] rounded-lg h-10 border-slate-200">
+                            </div>
+                        </div>
+
+                        {% if election.plan == 'PREMIUM' %}
+                        <div class="form-control">
+                            <label class="label p-0 mb-3"><span
+                                    class="label-text font-black text-slate-400 uppercase tracking-widest text-[9px]">Global
+                                    Interface Theme</span></label>
+                            <select name="theme"
+                                class="select select-bordered select-sm w-full rounded-xl bg-slate-50 border-slate-200 h-10 focus:border-indigo-600">
+                                <option value="default" {% if election.theme == 'default' %}selected{% endif %}>FlashVote
+                                    Original</option>
+                                <option value="glass" {% if election.theme == 'glass' %}selected{% endif %}>Modern
+                                    Glassmorphism</option>
+                                <option value="vibrant" {% if election.theme == 'vibrant' %}selected{% endif %}>Campus
+                                    Vibrant</option>
+                                <option value="dark" {% if election.theme == 'dark' %}selected{% endif %}>Midnight OLED
+                                </option>
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" name="update_branding"
+                            class="btn btn-primary w-full rounded-xl normal-case font-black border-none shadow-lg shadow-indigo-100">Save
+                            Assets</button>
+                    </form>
+                    {% else %}
+                    <div class="bg-slate-50 rounded-2xl p-6 text-center space-y-4">
+                        <p class="text-xs font-medium text-slate-500 italic">Branding controls are locked for this tier.
+                        </p>
+                        <a href="{% url 'select_plan' short_id=election.short_id %}"
+                            class="btn btn-outline btn-xs rounded-lg font-black border-slate-200">Unlock Branding</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8">
+                <h3 class="text-lg font-black text-slate-900 tracking-tight mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    Custom Permalink
+                </h3>
+
+                {% if election.plan == 'PREMIUM' %}
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="flex gap-2">
+                        <input type="text" name="custom_slug" value="{{ election.custom_slug|default:'' }}"
+                            placeholder="my-event-link"
+                            class="input input-sm input-bordered w-full rounded-xl bg-slate-50 h-10 border-slate-200 text-xs">
+                        <button type="submit" name="update_slug"
+                            class="btn btn-sm btn-primary rounded-xl normal-case font-black h-10">Update</button>
+                    </div>
+                </form>
+                {% if election.custom_slug %}
+                <div class="mt-4 p-3 bg-indigo-50/50 rounded-xl border border-indigo-50 truncate overflow-hidden">
+                    <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">Live Endpoint</p>
+                    <a href="{% url 'election_gateway' election.custom_slug %}" target="_blank"
+                        class="text-xs font-bold text-indigo-600 hover:underline">/e/{{ election.custom_slug }}/</a>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="bg-indigo-50/50 rounded-2xl p-6 text-center space-y-4">
+                    <div class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Premium Only</div>
+                    <p class="text-xs font-semibold text-indigo-900/60 leading-relaxed">Unique slugs make your election
+                        easy to find and share.</p>
+                    <a href="{% url 'select_plan' short_id=election.short_id %}"
+                        class="btn btn-ghost bg-white btn-xs border-indigo-100 rounded-lg text-indigo-600 font-bold">Upgrade
+                        Now</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+                <div
+                    class="absolute bottom-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl translate-y-12 translate-x-12">
+                </div>
+
+                <h3 class="text-lg font-black mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Adjust Window
+                </h3>
+
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Scheduled End</p>
+                <div class="text-xl font-black mb-8">{{ election.end_time|date:"M d, H:i" }}</div>
+
+                <form action="{% url 'extend_election_time' short_id=election.short_id %}" method="POST"
+                    class="space-y-4">
+                    {% csrf_token %}
+                    <div class="flex gap-2">
+                        <input type="number" name="duration" placeholder="0" min="1" required
+                            class="input input-sm w-16 rounded-xl bg-slate-800 border-none text-white font-bold h-10">
+                        <select name="unit"
+                            class="select select-sm flex-grow rounded-xl bg-slate-800 border-none text-white font-bold h-10 focus:ring-0">
+                            <option value="minutes">Mins</option>
+                            <option value="hours" selected>Hours</option>
+                        </select>
+                        <button type="submit"
+                            class="btn btn-sm bg-indigo-600 hover:bg-indigo-500 border-none rounded-xl h-10 text-white font-black normal-case">Extend</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-rose-50/50 rounded-[2.5rem] border border-rose-100 p-8">
+                <h4 class="text-xs font-black text-rose-400 uppercase tracking-widest mb-4">Urgent Actions</h4>
+                <div class="space-y-3">
+                    {% if election.is_voting_enabled %}
+                    <a href="{% url 'toggle_voting' short_id=election.short_id %}"
+                        class="btn btn-block btn-outline btn-error rounded-xl font-black normal-case border-rose-200">Deactivate
+                        Ballot Access</a>
+                    {% else %}
+                    <a href="{% url 'toggle_voting' short_id=election.short_id %}"
+                        class="btn btn-block btn-success text-white rounded-xl font-black normal-case border-none">Activate
+                        Ballot Access</a>
+                    {% endif %}
+
+                    {% if election.status != 'CLOSED' %}
+                    <a href="{% url 'update_status' short_id=election.short_id action='close' %}"
+                        data-confirm="close_election"
+                        class="btn btn-block bg-white text-rose-600 border-rose-200 hover:bg-rose-600 hover:text-white rounded-xl font-black normal-case">Permanently
+                        Close Event</a>
+                    {% endif %}
+                </div>
+            </div>
+
+        </aside>
+    </div>
+</div>
+
+<style>
+    .file-input {
+        outline: none;
+        font-size: 10px;
+        height: auto;
+        padding: 0;
+        border: none;
+        background: transparent !important;
+    }
+
+    .file-input::file-selector-button {
+        display: inline-flex;
+        cursor: pointer;
+        user-select: none;
+        appearance: none;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 200ms;
+        border-style: none;
+        font-weight: 900;
+        text-transform: none;
+        background-color: #e0e7ff;
+        color: #4338ca;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-radius: 0.5rem;
+        height: 1.5rem;
+        font-size: 0.75rem;
+    }
+</style>
+
+
+{% block extra_js %}
+<script>
+    function confirmDestructiveAction(url, title, text, icon, confirmText, confirmColor) {
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: icon,
+            showCancelButton: true,
+            confirmButtonColor: confirmColor || '#f43f5e',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: confirmText,
+            cancelButtonText: 'Cancel',
+            background: '#ffffff',
+            color: '#0f172a',
+            borderRadius: '2rem'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+
+    document.querySelectorAll('[data-confirm]').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            const url = this.getAttribute('href');
+            const action = this.getAttribute('data-confirm');
+            const name = this.getAttribute('data-name');
+
+            if (action === 'delete_candidate') {
+                confirmDestructiveAction(url, 'Remove Candidate?', `Are you sure you want to remove ${name} from the ballot? This cannot be undone.`, 'warning', 'Yes, Delete', '#f43f5e');
+            } else if (action === 'close_election') {
+                confirmDestructiveAction(url, 'Permanently Close?', 'This will finalize the results and disable all voting permanently.', 'error', 'Yes, Close Permanently', '#f43f5e');
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

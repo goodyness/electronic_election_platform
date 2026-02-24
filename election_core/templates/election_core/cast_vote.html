@@ -1,0 +1,366 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block title %}Cast Your Vote | {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 relative overflow-hidden pb-32">
+    <!-- Background Decor -->
+    <div class="absolute top-0 right-0 w-full h-96 bg-indigo-600/5 -skew-y-3 origin-top-right"></div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-16">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-8 mb-16">
+            <div class="text-center md:text-left space-y-4">
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-500 text-xs font-black uppercase tracking-[0.2em] shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Official Identity Verified
+                </div>
+                <h2 class="text-4xl lg:text-6xl font-black text-slate-900 tracking-tighter leading-none">{{
+                    election.title }}</h2>
+                <p class="text-slate-500 font-medium max-w-xl text-lg">
+                    Select exactly one candidate for each category. Your choices are final once submitted.
+                </p>
+            </div>
+
+            <div
+                class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col items-center">
+                <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Voting Key Status
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="relative flex h-3 w-3">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <span class="font-black text-slate-900 tracking-tighter">SECURE CHANNEL OPEN</span>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" id="ballotForm" class="space-y-24">
+            {% csrf_token %}
+
+            {% for position in positions %}
+            <section class="space-y-10" x-data="{ selected: null }">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="px-6 py-3 bg-indigo-600 rounded-2xl text-white font-black text-xs uppercase tracking-[0.3em] shadow-lg shadow-indigo-100 italic">
+                        {{ forloop.counter|stringformat:"02d" }}
+                    </div>
+                    <div class="flex flex-col">
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tight">{{ position.title }}</h3>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Election Position Grid 2.0
+                        </p>
+                    </div>
+                    <div class="h-px bg-slate-200 flex-grow hidden md:block"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {% for candidate in position.candidates.all %}
+                    <div x-data="{ showInfo: false }" class="relative h-full">
+                        <label class="relative group cursor-pointer h-full block">
+                            <input type="radio" name="position_{{ position.id }}" value="{{ candidate.id }}" required
+                                @change="selected = '{{ candidate.id }}'" class="peer hidden">
+
+                            <div
+                                class="h-full bg-white border-2 border-slate-100 rounded-[2.5rem] p-6 pt-10 transition-all duration-500 peer-checked:border-indigo-600 peer-checked:bg-indigo-50/20 peer-checked:shadow-2xl peer-checked:shadow-indigo-100 group-hover:border-indigo-200 flex flex-col items-center text-center relative overflow-hidden">
+
+                                <!-- Selection Badge -->
+                                <div
+                                    class="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center scale-0 peer-checked:scale-100 transition-transform duration-500 shadow-xl shadow-indigo-200 z-10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+
+                                <!-- Info Button -->
+                                <button type="button" @click.prevent.stop="showInfo = true"
+                                    class="absolute top-6 left-6 w-10 h-10 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white flex items-center justify-center transition-all border border-slate-100 group-hover:bg-white group-hover:border-slate-200 z-10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </button>
+
+                                <div class="relative mb-6">
+                                    {% if candidate.photo %}
+                                    <div
+                                        class="w-32 h-32 rounded-[2rem] p-1.5 bg-gradient-to-tr from-indigo-500 to-cyan-400 group-hover:scale-110 transition-transform duration-500 shadow-xl">
+                                        <img src="{{ candidate.photo.url }}" alt="{{ candidate.full_name }}"
+                                            class="w-full h-full rounded-[1.75rem] object-cover border-4 border-white">
+                                    </div>
+                                    {% else %}
+                                    <div
+                                        class="w-32 h-32 rounded-[2rem] bg-indigo-50 border-4 border-white flex items-center justify-center text-5xl font-black text-indigo-300 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                                        {{ candidate.full_name|slice:":1" }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="space-y-1 mb-6">
+                                    <h4
+                                        class="text-xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight leading-none">
+                                        {{ candidate.full_name }}
+                                    </h4>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                        {{ candidate.aka|default:"OFFICIAL CANDIDATE" }}
+                                    </p>
+                                </div>
+
+                                <div class="mt-auto w-full pt-6 border-t border-slate-50">
+                                    <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                                        Institutional Wing</div>
+                                    <div class="text-[11px] font-black text-slate-900 truncate uppercase">{{
+                                        candidate.faculty|default:"Independent" }}</div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Candidate Info Modal -->
+                        <template x-teleport="body">
+                            <div x-show="showInfo" x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                x-transition:leave="transition ease-in duration-200"
+                                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                class="fixed inset-0 z-[999] p-4 flex items-center justify-center bg-slate-900/80 backdrop-blur-md"
+                                @click="showInfo = false" x-cloak>
+
+                                <div class="bg-white rounded-[3rem] max-w-2xl w-full shadow-[0_0_100px_rgba(79,70,229,0.2)] relative overflow-hidden flex flex-col md:flex-row"
+                                    @click.stop>
+                                    <button @click="showInfo = false"
+                                        class="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-slate-100 text-slate-400 hover:bg-slate-900 hover:text-white flex items-center justify-center transition-all z-20">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Left side: Visual -->
+                                    <div class="md:w-2/5 h-64 md:h-auto relative bg-slate-100">
+                                        {% if candidate.photo %}
+                                        <img src="{{ candidate.photo.url }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                        <div
+                                            class="w-full h-full flex items-center justify-center text-7xl font-black text-slate-200">
+                                            {{ candidate.first_name|slice:":1" }}</div>
+                                        {% endif %}
+                                        <div
+                                            class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black/60 to-transparent text-white">
+                                            <div
+                                                class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">
+                                                Position / Office</div>
+                                            <div class="text-xl font-black leading-none">{{ position.title }}</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right side: Content -->
+                                    <div class="md:w-3/5 p-10 lg:p-14 space-y-8 flex flex-col justify-center">
+                                        <div>
+                                            <h3 class="text-3xl font-black text-slate-900 tracking-tight mb-2">{{
+                                                candidate.full_name }}</h3>
+                                            <div
+                                                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-widest">
+                                                {{ candidate.aka|default:"OFFICIAL CANDIDATE" }}
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 gap-6 pb-6 border-b border-slate-50">
+                                            <div class="flex items-center gap-4">
+                                                <div
+                                                    class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                        viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <div
+                                                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                        Dept / Faculty</div>
+                                                    <div class="text-sm font-bold text-slate-700">{{
+                                                        candidate.department|default:"Universal" }} • {{
+                                                        candidate.faculty }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <div
+                                                class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                                                Personal Manifesto</div>
+                                            <div
+                                                class="text-slate-500 font-medium text-sm leading-relaxed max-h-40 overflow-y-auto pr-4 custom-scrollbar">
+                                                {{ candidate.bio|linebreaks|default:"This candidate has chosen to let
+                                                their reputation speak for itself. No manifesto provided." }}
+                                            </div>
+                                        </div>
+
+                                        <button @click="showInfo = false"
+                                            class="btn btn-neutral btn-block rounded-2xl h-14 font-black transition-all">Dismiss
+                                            Profile</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% empty %}
+            <div class="card p-20 text-center border-dashed border-2 border-slate-200">
+                <div
+                    class="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Ballot Empty</h3>
+                <p class="text-slate-500 font-medium">No positions or candidates have been approved for this session.
+                </p>
+            </div>
+            {% endfor %}
+
+            <!-- Submit Section -->
+            <div class="pt-24 border-t border-slate-200/60 text-center flex flex-col items-center">
+                <div
+                    class="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.3em] mb-12 shadow-2xl">
+                    Verification Check Required
+                </div>
+
+                <button type="button" onclick="confirmSubmit()"
+                    class="btn btn-primary btn-lg rounded-[2.5rem] px-16 h-28 shadow-[0_20px_60px_-15px_rgba(79,70,229,0.3)] font-black text-2xl group relative overflow-hidden border-none w-full max-w-md transition-all hover:scale-[1.02] active:scale-95">
+                    <div class="relative z-10 flex flex-col">
+                        <span>Cast Official Ballot</span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.4em] opacity-60 mt-2">Sign with
+                            Cryptographic Key</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-indigo-700 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                    </div>
+                </button>
+
+                <p class="mt-8 text-slate-400 font-bold text-[11px] uppercase tracking-[0.3em] flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    ISO-9001 End-to-End Encryption
+                </p>
+            </div>
+        </form>
+
+        <!-- Help Link -->
+        <div
+            class="mt-32 p-10 bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/50 text-center max-w-3xl mx-auto">
+            <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Assistance &
+                Support</div>
+            <p class="text-slate-600 font-medium">
+                Having issues with your digital ballot? Contact your presiding election official:
+                <span class="block mt-4 text-indigo-600 font-black text-lg">{{ election.organizer.user.email }}</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmSubmit() {
+        const form = document.getElementById('ballotForm');
+        const positions = document.querySelectorAll('section');
+        let allSelected = true;
+
+        positions.forEach(section => {
+            const selected = section.querySelector('input[type="radio"]:checked');
+            if (!selected) {
+                allSelected = false;
+            }
+        });
+
+        if (!allSelected) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'INCOMPLETE BALLOT',
+                text: 'All positions require a selection before submission sequence can be initialized.',
+                confirmButtonText: 'RESUME VOTING',
+                background: '#ffffff',
+                color: '#0f172a',
+                buttonsStyling: false,
+                customClass: {
+                    container: 'rounded-box',
+                    popup: 'rounded-[3rem] p-10 shadow-2xl',
+                    confirmButton: 'btn btn-primary rounded-2xl px-12 py-4 font-black uppercase tracking-widest text-sm w-full'
+                }
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'VERIFY BALLOT INTEGRITY',
+            text: "CASTING IS FINAL. YOUR VOTE WILL BE CRYPTOGRAPHICALLY SIGNED AND RECORDED. ACCESS CANNOT BE REVERTED.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'YES, SIGN & CAST',
+            cancelButtonText: 'REVIEW CHOICES',
+            background: '#ffffff',
+            color: '#0f172a',
+            buttonsStyling: false,
+            customClass: {
+                container: 'rounded-box',
+                popup: 'rounded-[3rem] p-10 shadow-2xl',
+                confirmButton: 'btn btn-success rounded-2xl px-10 py-4 font-black uppercase tracking-widest text-xs w-full mb-3 text-white',
+                cancelButton: 'btn btn-ghost rounded-2xl px-10 py-4 font-black uppercase tracking-widest text-xs w-full text-slate-400'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'SIGNING BALLOT...',
+                    html: '<div class="space-y-4 py-4"><div class="loading loading-spinner text-primary loading-lg mx-auto block"></div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Writing to secure ledger node</p></div>',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    background: '#ffffff',
+                    color: '#0f172a',
+                    customClass: {
+                        popup: 'rounded-[3rem] p-12 shadow-2xl'
+                    }
+                });
+                setTimeout(() => { form.submit(); }, 1500);
+            }
+        });
+    }
+</script>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #4f46e5;
+    }
+</style>
+{% endblock %}

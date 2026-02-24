@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Organizer Account Approved</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            padding: 48px 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+
+        .content {
+            padding: 40px 32px;
+        }
+
+        .content p {
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+
+        .content .highlight {
+            color: #4f46e5;
+            font-weight: 700;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 16px 32px;
+            background-color: #4f46e5;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+
+        .footer {
+            padding: 32px;
+            text-align: center;
+            background-color: #f1f5f9;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .logo-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: #4f46e5;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Account Approved!</h1>
+        </div>
+        <div class="content">
+            <p>Hello <span class="highlight">{{ full_name }}</span>,</p>
+            <p>Great news! Your application to become an <strong>Election Organizer</strong> on FlashVote has been
+                reviewed and <strong>approved</strong>.</p>
+            <p>You can now go ahead to set up your voting system, create elections, add candidates, and manage voter
+                lists.</p>
+            <div style="text-align: center; margin: 40px 0;">
+                <a href="{{ dashboard_url }}" class="cta-button">Go to Dashboard</a>
+            </div>
+            <p>If you have any questions or need assistance setting up your first election, don't hesitate to reach out
+                to our support team.</p>
+            <p>Best regards,<br>The FlashVote Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ current_year }} FlashVote Secure Election System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>

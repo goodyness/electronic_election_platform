@@ -1,0 +1,14 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<p>Hello,</p>
+<p>This is a friendly reminder to cast your vote in the ongoing election: <strong>{{ election_title }}</strong>.</p>
+<p>Your participation is important to ensures a fair and representative outcome.</p>
+<div style="text-align: center; margin: 2rem 0;">
+    <a href="{{ site_url }}"
+        style="background-color: #2ecc71; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Cast
+        Your Vote Now</a>
+</div>
+<p>If you have already voted, please ignore this message.</p>
+<p>Regards,<br>The Election Team</p>
+{% endblock %}
