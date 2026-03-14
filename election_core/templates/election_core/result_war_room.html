@@ -1,234 +1,68 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>War Room | {{ election.title }}</title>
-
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@1.9.9"></script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;700;900&display=swap"
-        rel="stylesheet">
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --war-bg: #030712;
-            --accent-glow: rgba(79, 70, 229, 0.4);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--war-bg);
-            color: #f8fafc;
-        }
-
-        .font-war {
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .scanline {
-            width: 100%;
-            height: 100px;
-            z-index: 99;
-            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(0, 0, 0, 0) 100%);
-            opacity: 0.1;
-            position: absolute;
-            bottom: 100%;
-            pointer-events: none;
-            animation: scanline 8s linear infinite;
-        }
-
-        @keyframes scanline {
-            0% {
-                bottom: 120%;
-            }
-
-            100% {
-                bottom: -120%;
-            }
-        }
-
-        .glow-indigo {
-            box-shadow: 0 0 30px var(--accent-glow);
-        }
-
-        .pulse-border {
-            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse-border {
-
-            0%,
-            100% {
-                border-color: rgba(244, 63, 94, 0.3);
-            }
-
-            50% {
-                border-color: rgba(244, 63, 94, 0.6);
-            }
-        }
-
-        .data-stream-item {
-            animation: slide-in 0.5s ease-out forwards;
-        }
-
-        @keyframes slide-in {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #020617;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4f46e5;
-        }
+        body { background-color: #0f172a; color: #f8fafc; }
+        .grid-bg { background-image: radial-gradient(#1e293b 1px, transparent 1px); background-size: 30px 30px; }
     </style>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4f46e5',
-                        secondary: '#10b981',
-                        accent: '#06b6d4',
-                        dark: '#020617',
-                    }
-                }
-            }
-        }
-    </script>
 </head>
-
-<body class="min-h-screen overflow-x-hidden relative">
-    <div class="scanline"></div>
-
-    <!-- Cyber Grid Background -->
-    <div class="fixed inset-0 pointer-events-none opacity-20"
-        style="background-image: radial-gradient(#1e293b 1px, transparent 1px); background-size: 40px 40px;"></div>
-
-    <div class="max-w-[1500px] mx-auto p-6 lg:p-10 space-y-10 relative z-10">
-
+<body class="min-h-screen grid-bg relative">
+    <div class="max-w-7xl mx-auto py-10 px-6 space-y-8">
         <!-- Tactical Header -->
-        <header
-            class="glass-panel p-8 lg:p-12 rounded-[3.5rem] flex flex-col md:flex-row justify-between items-center gap-10 overflow-hidden relative">
-            <div
-                class="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2">
-            </div>
-
-            <div class="text-center md:text-left space-y-4">
-                <div
-                    class="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-500 text-[10px] font-black uppercase tracking-[0.4em] pulse-border">
+        <header class="bg-slate-900/80 backdrop-blur-md rounded-3xl border border-slate-800 p-8 flex flex-col md:flex-row justify-between items-center gap-8 shadow-2xl">
+            <div class="text-center md:text-left">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-500 text-[9px] font-bold uppercase tracking-widest mb-4">
                     <span class="relative flex h-2 w-2">
-                        <span
-                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
                     </span>
-                    LIVE SPECTAR FEED • ENCRYPTED CIPHER v4.0
+                    Live Feed Active
                 </div>
-                <h1 class="text-5xl lg:text-8xl font-black text-white tracking-tighter leading-none italic font-war">
-                    {{ election.title|upper }}
-                </h1>
-                <div class="flex flex-wrap justify-center md:justify-start items-center gap-6">
-                    <p class="text-slate-500 font-bold tracking-widest text-sm uppercase">Institutional Node: <span
-                            class="text-slate-300">{{ election.institution.name }}</span></p>
-                    <div class="h-2 w-2 rounded-full bg-slate-700"></div>
-                    <p class="text-indigo-400 font-black tracking-widest text-sm uppercase">Status: {{ election.get_status_display }}</p>
-                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight uppercase">{{ election.title }}</h1>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-2">{{ election.institution.name }}</p>
             </div>
 
-            <div class="flex flex-col items-center md:items-end gap-6 text-center md:text-right shrink-0">
-                <div class="space-y-1">
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Network Pulse Time</p>
-                    <div class="text-4xl lg:text-5xl font-black text-white font-war tracking-tighter"
-                        id="realtime-clock">00:00:00</div>
+            <div class="flex flex-col items-center md:items-end gap-4">
+                <div class="text-right">
+                    <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Network Time</div>
+                    <div class="text-3xl font-bold text-white font-mono" id="clock">00:00:00</div>
                 </div>
-                <div class="flex gap-4">
-                    <a href="{% url 'organizer_dashboard' %}"
-                        class="btn btn-ghost h-14 rounded-2xl px-8 text-slate-400 hover:text-white hover:bg-white/5 normal-case font-black border border-white/5 tracking-widest text-xs">
-                        TERMINATE FEED
-                    </a>
-                </div>
+                <a href="{% url 'organizer_dashboard' %}" class="btn btn-sm btn-ghost border border-slate-800 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-white h-10 px-6">Exit Room</a>
             </div>
         </header>
 
-        <!-- Main Real-time Container -->
-        <div id="results-container" hx-get="{% url 'result_war_room' short_id=election.short_id %}"
-            hx-trigger="every {{ refresh_interval }}s" hx-swap="innerHTML" class="transition-all duration-1000">
-
+        <!-- Dynamic Content -->
+        <div id="results-container" 
+             hx-get="{% url 'result_war_room' short_id=election.short_id %}" 
+             hx-trigger="every {{ refresh_interval }}s" 
+             hx-swap="innerHTML">
             {% include 'election_core/result_war_room_partial.html' %}
         </div>
 
-        <!-- System Footer -->
-        <footer class="pt-20 pb-12 text-center">
-            <div
-                class="inline-flex items-center gap-6 px-10 py-4 bg-slate-900/50 rounded-full border border-white/5 backdrop-blur-md">
-                <div class="flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Grid Status:
-                        Optimal</span>
-                </div>
-                <div class="w-px h-4 bg-white/10"></div>
-                <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Cipher:
-                        AES-256-GCM</span>
-                </div>
-                <div class="w-px h-4 bg-white/10"></div>
-                <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">© 2026 FLASHVOTE SECURE
-                    CORE</div>
+        <footer class="text-center flex justify-center py-6">
+            <div class="inline-flex items-center gap-4 px-6 py-2 bg-slate-900 border border-slate-800 rounded-full text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                <span>FV-CORE v4.0</span>
+                <span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+                <span class="text-emerald-500">Grid Optimal</span>
+                <span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+                <span>Encrypted AES-256</span>
             </div>
         </footer>
     </div>
 
-    <!-- UI Interaction Script -->
     <script>
         function updateClock() {
-            const now = new Date();
-            document.getElementById('realtime-clock').textContent = now.toLocaleTimeString('en-US', {
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour12: false });
         }
         setInterval(updateClock, 1000);
         updateClock();
-
-        document.body.addEventListener('htmx:afterRequest', function (evt) {
-            console.log('Tactical Update Synchronized at ' + new Date().toLocaleTimeString());
-        });
     </script>
 </body>
-
 </html>

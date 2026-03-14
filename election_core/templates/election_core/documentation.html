@@ -1,0 +1,238 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}Documentation | FlashVote Guide{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-20 px-4">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-12">
+        
+        <!-- Sticky Sidebar Nav -->
+        <aside class="hidden lg:block space-y-8">
+            <div class="sticky top-32">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 px-4">Knowledge Base</h3>
+                <nav class="space-y-1">
+                    <a href="#getting-started" class="block py-2 px-4 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-sm">Getting Started</a>
+                    <a href="#organizer-guide" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Organizer Ops</a>
+                    <a href="#voter-guide" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Voter Experience</a>
+                    <a href="#security" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Security Protocols</a>
+                    <a href="#audit-integrity" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Audit & Integrity</a>
+                    <a href="#analytics" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Turnout Analytics</a>
+                    <a href="#troubleshooting" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Troubleshooting</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="lg:col-span-3 space-y-24 bg-white p-8 md:p-16 rounded-[2.5rem] border border-slate-200 shadow-sm">
+            
+            <!-- Header -->
+            <header>
+                <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl mb-6 shadow-lg shadow-indigo-100 italic">V</div>
+                <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">FlashVote Ecosystem</h1>
+                <p class="text-lg text-slate-500 mt-4 font-medium italic">The definitive guide to secure, institutional digital democracy.</p>
+            </header>
+
+            <!-- Getting Started -->
+            <section id="getting-started" class="space-y-6 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
+                    Getting Started
+                </h2>
+                <div class="prose prose-slate max-w-none">
+                    <p class="text-slate-600 leading-relaxed">
+                        FlashVote is designed for scale and integrity. To begin, institutions must be registered on the grid. Once an institution (University, College, or Association) is created, authorized personnel can sign up as <strong>Election Organizers</strong>.
+                    </p>
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-4 mt-8">
+                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-200 shrink-0">
+                            <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Key Requirement</h4>
+                            <p class="text-xs text-slate-500 mt-1">All organizers must wait for <strong>Grand Admin Authorization</strong> before they can create active election sessions.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Organizer section -->
+            <section id="organizer-guide" class="space-y-8 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-emerald-500 rounded-full"></span>
+                    Organizer Operations
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest border-b pb-2 border-slate-100">1. Mission Parameters</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed">Define election titles, descriptions, and strict start/end windows. Use the "War Room" to monitor live turnouts once the election goes live.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest border-b pb-2 border-slate-100">2. Voter Grid</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed">Upload authenticated voter lists via bulk email CSV or registration number sets. FlashVote severely restricts access to only those on the pre-approved ledger.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest border-b pb-2 border-slate-100">3. Candidate Pool</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed">Create positions and attach candidates with high-resolution imagery and manifests. Note: Editing is locked once voting commences.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest border-b pb-2 border-slate-100">4. Settlement</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed">Select from Free, Standard, or Premium tiers. Premium tiers unlock real-time OTP delivery via high-priority email relays.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Voter Guide -->
+            <section id="voter-guide" class="space-y-6 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-amber-400 rounded-full"></span>
+                    The Voter Experience
+                </h2>
+                <div class="space-y-8">
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="w-full md:w-1/3 bg-slate-900 p-8 rounded-3xl aspect-square flex flex-col justify-center items-center text-center">
+                            <div class="text-4xl font-black text-white mb-2 italic tracking-tighter">OTP</div>
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Auth Protocol</div>
+                        </div>
+                        <div class="flex-grow space-y-4">
+                            <h3 class="text-lg font-bold text-slate-900">Accreditation Flow</h3>
+                            <p class="text-slate-600 text-sm leading-loose">Voters enter their email/ID. If matched on the ledger, a unique 6-digit One Time Password is generated and sent to their verified email. This ensures every ballot is verified by the voter's primary communication channel. OTP codes can only be sent a maximum of <strong>2 times</strong> per session to prevent abuse.</p>
+                        </div>
+                    </div>
+                    <div class="p-8 rounded-3xl bg-indigo-600 text-white relative overflow-hidden">
+                        <div class="relative z-10">
+                            <h3 class="text-xl font-bold italic mb-4">Ballot Privacy</h3>
+                            <p class="text-sm text-indigo-100 leading-relaxed opacity-90">Once the OTP is verified, the voter enters the virtual polling booth. Our "Severance" protocol ensures that while we track that you HAVE voted, we never record HOW you voted in a way that links it back to your identity.</p>
+                        </div>
+                        <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Section -->
+            <section id="security" class="space-y-6 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-rose-500 rounded-full"></span>
+                    Security & Audit
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                        <div class="text-xs font-bold text-rose-500 uppercase">Integrity</div>
+                        <h4 class="font-bold text-slate-900 text-sm">Action Logging</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">Every administrative action (Pause, Resume, Extend) is logged with a mandatory reason, visible in the final audit report.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                        <div class="text-xs font-bold text-blue-500 uppercase">Verification</div>
+                        <h4 class="font-bold text-slate-900 text-sm">Ballot Ledger</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">Voters receive a cryptographic "I Voted" asset. They can use the "Ballot Verification" module to prove their vote was counted without revealing their choice.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                        <div class="text-xs font-bold text-emerald-500 uppercase">Output</div>
+                        <h4 class="font-bold text-slate-900 text-sm">Immutable PDF</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">Official results are only available once an election is closed, exported as a signed, tamper-evident PDF document.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Public Audit & Integrity Section (NEW) -->
+            <section id="audit-integrity" class="space-y-6 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
+                    Public Audit & Integrity
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-slate-600 leading-relaxed text-sm">
+                        FlashVote implements a <strong>SHA-256 Audit Hash Publication</strong> system. When an election is closed and sealed, a deterministic hash is generated from the complete, ordered result set. This hash is published publicly and can be verified by anyone — no login required.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-2xl border border-slate-100 space-y-3" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+                            <div class="text-xs font-bold text-indigo-400 uppercase">How It Works</div>
+                            <h4 class="font-bold text-white text-sm">Audit Hash Generation</h4>
+                            <ol class="text-[11px] text-slate-400 leading-loose space-y-1 list-decimal list-inside">
+                                <li>Election is closed by the organizer</li>
+                                <li>All votes are serialized in deterministic order</li>
+                                <li>A SHA-256 hash is computed from the serialized data</li>
+                                <li>The hash is stored and published on the results page</li>
+                            </ol>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                            <div class="text-xs font-bold text-emerald-500 uppercase">Verification</div>
+                            <h4 class="font-bold text-slate-900 text-sm">Public Audit Portal</h4>
+                            <p class="text-[11px] text-slate-500 leading-relaxed">Anyone can visit the <a href="{% url 'public_audit' %}" class="text-indigo-600 font-bold hover:underline">Public Audit page</a> and enter an Election ID or Receipt ID to verify that the results haven't been tampered with.</p>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-start gap-4">
+                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-indigo-200 shrink-0">
+                            <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Integrity Guarantee</h4>
+                            <p class="text-xs text-slate-500 mt-1">If even a single vote is added, removed, or modified after sealing, the hash will completely change — making tampering immediately detectable.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Turnout Analytics Section (NEW) -->
+            <section id="analytics" class="space-y-6 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-emerald-500 rounded-full"></span>
+                    Turnout Analytics & War Room
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-slate-600 leading-relaxed text-sm">
+                        The <strong>War Room</strong> provides organizers with real-time tactical visibility during active elections. Access it from the election management dashboard.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                            <div class="text-xs font-bold text-emerald-500 uppercase">Live Data</div>
+                            <h4 class="font-bold text-slate-900 text-sm">Turnout Heatmap</h4>
+                            <p class="text-[11px] text-slate-500 leading-relaxed">Visual representation of voting velocity over time. See exactly when voters are most active and identify peak hours.</p>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                            <div class="text-xs font-bold text-blue-500 uppercase">Prediction</div>
+                            <h4 class="font-bold text-slate-900 text-sm">Smart Turnout Predictor</h4>
+                            <p class="text-[11px] text-slate-500 leading-relaxed">Analyzes current voting speed to forecast final turnout. Helps organizers decide when to send voter nudge notifications.</p>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                            <div class="text-xs font-bold text-amber-500 uppercase">Engagement</div>
+                            <h4 class="font-bold text-slate-900 text-sm">Voter Nudges</h4>
+                            <p class="text-[11px] text-slate-500 leading-relaxed">One-click email reminders to voters who haven't voted yet. Track nudge delivery and open rates in real time.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section id="troubleshooting" class="space-y-6 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-slate-900 rounded-full"></span>
+                    Troubleshooting
+                </h2>
+                <div class="space-y-4">
+                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                        <h4 class="font-bold text-slate-900 text-sm mb-2">I didn't receive my OTP code</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">Check your spam/junk folder first. OTP codes expire after 5 minutes. You can request a maximum of 2 OTPs per session. If you still haven't received it, contact your election organizer.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                        <h4 class="font-bold text-slate-900 text-sm mb-2">The election says voting is not enabled</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">The organizer controls when voting opens and closes. Ensure the election's start time has passed and that the organizer has enabled voting from their management dashboard.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                        <h4 class="font-bold text-slate-900 text-sm mb-2">I want to verify my vote was counted</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">After voting, you'll receive a "I Voted" badge and a receipt ID. Visit the <a href="{% url 'public_audit' %}" class="text-indigo-600 font-bold hover:underline">Public Audit</a> page and enter your receipt ID to confirm your participation was recorded.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer doc -->
+            <footer class="pt-16 border-t border-slate-100 text-center">
+                <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Still need assistance?</p>
+                <div class="flex justify-center gap-4">
+                    <a href="mailto:support@flashvote.io" class="btn btn-neutral btn-sm rounded-full px-8">Email Ops</a>
+                    <a href="{% url 'terms_and_conditions' %}" class="btn btn-ghost btn-sm text-slate-400 font-bold uppercase tracking-widest">Legal Portal</a>
+                </div>
+            </footer>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

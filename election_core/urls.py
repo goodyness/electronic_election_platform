@@ -3,9 +3,17 @@ from . import views
 from . import admin_views
 from . import payment_views
 
+
+
 urlpatterns = [
+    # Legal
+    path('terms/', views.terms_and_conditions, name='terms_and_conditions'),
+    path('privacy/', views.privacy_policy, name='privacy_policy'),
+    path('docs/', views.system_documentation, name='system_documentation'),
+
     path('', views.home, name='home'),
     path('api/check-user/', views.check_user_exists, name='check_user_exists'),
+    path('results/seal/<str:short_id>/', views.seal_election_results, name='seal_results'),
     path('api/resend-otp/', views.resend_otp, name='resend_otp'),
     path('signup/organizer/', views.organizer_signup, name='organizer_signup'),
     path('verify-otp/<str:email>/', views.verify_otp, name='verify_otp'),
@@ -21,6 +29,9 @@ urlpatterns = [
     path('election/<str:short_id>/status/<str:action>/', views.update_status, name='update_status'),
     path('active-elections/', views.active_elections_list, name='active_elections'),
     path('asset/i-voted/<str:short_id>/', views.generate_i_voted_asset, name='i_voted_asset'),
+    path('share/i-voted/<str:short_id>/', views.i_voted_share_page, name='i_voted_share'),
+    path('api/survey/<str:short_id>/', views.submit_sentiment_survey, name='submit_sentiment_survey'),
+    
     
     # Grand Admin Views (from admin_views.py)
     path('grand-admin/dashboard/', admin_views.grand_admin_dashboard, name='grand_admin_dashboard'),
@@ -47,7 +58,10 @@ urlpatterns = [
     # Election Creation & Management
     path('election/create/', views.create_election, name='create_election'),
     path('election/<str:short_id>/manage/', views.manage_election, name='manage_election'),
+    path('election/<str:short_id>/activity/', views.election_activity_log, name='election_activity_log'),
     path('election/<str:short_id>/position/add/', views.add_position, name='add_position'),
+    path('position/<int:position_id>/edit/', views.edit_position, name='edit_position'),
+    path('position/<int:position_id>/delete/', views.delete_position, name='delete_position'),
     path('position/<int:position_id>/candidate/add/', views.add_candidate, name='add_candidate'),
     path('candidate/<int:candidate_id>/edit/', views.edit_candidate, name='edit_candidate'),
     path('candidate/<int:candidate_id>/delete/', views.delete_candidate, name='delete_candidate'),
@@ -74,6 +88,7 @@ urlpatterns = [
     path('election/<str:short_id>/nudge/', views.nudge_voters, name='nudge_voters'),
     path('election/<str:short_id>/audit-report/', admin_views.export_audit_pdf, name='export_audit_pdf'),
     path('election/<str:short_id>/war-room/', views.result_war_room, name='result_war_room'),
+    path('audit/', views.public_audit, name='public_audit'),
     path('e/<slug:slug>/', views.election_gateway, name='election_gateway'),
 ]
 

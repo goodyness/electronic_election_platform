@@ -65,6 +65,10 @@ class Election(models.Model):
     send_receipts = models.BooleanField(default=True, help_text="Send digital receipts after voting")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Audit Integrity
+    result_hash = models.CharField(max_length=64, null=True, blank=True, help_text="SHA-256 hash of the deterministic result ledger")
+    is_sealed = models.BooleanField(default=False, help_text="True if results are final and immutable")
+
     def save(self, *args, **kwargs):
         if not self.short_id:
             import string, random
@@ -74,6 +78,25 @@ class Election(models.Model):
                     self.short_id = new_id
                     break
         super().save(*args, **kwargs)
+
+    def compute_result_hash(self):
+        """Generates a deterministic SHA-256 hash of the election results."""
+        import hashlib
+        import json
+        from .models import Vote
+        
+        # Serialize votes deterministically: [position_id, candidate_id] sorted
+        votes = Vote.objects.filter(election=self).values('position_id', 'candidate_id').order_by('position_id', 'candidate_id')
+        ledger_data = list(votes)
+        ledger_str = json.dumps(ledger_data, sort_keys=True)
+        
+        return hashlib.sha256(ledger_str.encode('utf-8')).hexdigest()
+
+    def seal_results(self):
+        if self.status == 'CLOSED' and not self.is_sealed:
+            self.result_hash = self.compute_result_hash()
+            self.is_sealed = True
+            self.save()
 
     def is_voting_allowed(self):
         now = timezone.now()
@@ -246,3 +269,16 @@ class ElectionPayment(models.Model):
 
     def __str__(self):
         return f"Payment for {self.election.title} - {self.plan} - ₦{self.amount}"
+
+class SentimentSurvey(models.Model):
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='surveys')
+    voter = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=[(i, f"{i} Stars") for i in range(1, 6)])
+    feedback = models.TextField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('election', 'voter')
+
+    def __str__(self):
+        return f"Survey for {self.election.title} by {self.voter.username}"

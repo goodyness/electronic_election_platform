@@ -1,0 +1,138 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 pt-24">
+    <div class="max-w-4xl mx-auto">
+        <!-- Brand Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-900 rounded-2xl mb-6 shadow-xl shadow-slate-200">
+                <i class="fas fa-shield-alt text-2xl text-white"></i>
+            </div>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight sm:text-5xl mb-4">
+                Public Integrity <span class="text-indigo-600">Audit</span>
+            </h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+                Transparency is at the core of our platform. Use this interface to verify individual ballots or mathematically audit entire election results.
+            </p>
+        </div>
+
+        <!-- Search Card -->
+        <div class="bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-8 mb-12 border border-slate-100">
+            <form method="GET" action="{% url 'public_audit' %}" class="space-y-6">
+                <div>
+                    <label for="q" class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider">Verification ID or Election ID</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-slate-400"></i>
+                        </div>
+                        <input type="text" name="q" id="q" value="{{ search_query }}"
+                            class="block w-full pl-11 pr-4 py-4 border-2 border-slate-100 rounded-2xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg transition-all"
+                            placeholder="e.g. VOTE-XXXX or E-XXXX">
+                    </div>
+                </div>
+                <button type="submit" 
+                    class="w-full bg-slate-900 text-white font-black py-4 px-6 rounded-2xl hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-200">
+                    <i class="fas fa-fingerprint"></i>
+                    AUDIT MATHEMATICAL INTEGRITY
+                </button>
+            </form>
+        </div>
+
+        {% if search_query %}
+            {% if ballot %}
+                <!-- Ballot Verification Result -->
+                <div class="bg-indigo-50 border-2 border-indigo-100 rounded-3xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-check-circle text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900">Ballot Successfully Verified</h3>
+                            <p class="text-slate-600">This record exists and was mathematically included in the election ledger.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-2xl border border-indigo-100">
+                            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Receipt ID</p>
+                            <p class="font-mono font-bold text-indigo-700">{{ ballot.verification_id }}</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-indigo-100">
+                            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Status</p>
+                            <p class="font-bold text-emerald-600 flex items-center gap-2">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                COMMITTED TO LEDGER
+                            </p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-indigo-100">
+                            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Election</p>
+                            <p class="font-bold text-slate-900">{{ ballot.election.title }}</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-indigo-100">
+                            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Timestamp</p>
+                            <p class="font-bold text-slate-900">{{ ballot.timestamp|date:"M d, Y H:i:s" }} UTC</p>
+                        </div>
+                    </div>
+                </div>
+            {% elif election %}
+                <!-- Election Integrity Result -->
+                <div class="bg-slate-900 text-white rounded-3xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="flex items-start gap-4 mb-8">
+                        <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-database text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-black text-white">Election Results Audited</h3>
+                            <p class="text-slate-400">Ledger hash matches the current state of immutable results.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-8">
+                        <div class="flex justify-between items-center py-4 border-b border-slate-800">
+                            <span class="text-slate-400 font-bold uppercase text-xs">Election Title</span>
+                            <span class="font-bold">{{ election.title }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-4 border-b border-slate-800">
+                            <span class="text-slate-400 font-bold uppercase text-xs">Total Votes</span>
+                            <span class="font-bold text-emerald-400">{{ election.vote_set.count }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-4 border-b border-slate-800">
+                            <span class="text-slate-400 font-bold uppercase text-xs">Status</span>
+                            <span class="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-lg text-xs font-bold border border-indigo-500/30">
+                                {{ election.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                            <i class="fas fa-lock"></i> SHA-256 RESULT HASH (AUDIT ANCHOR)
+                        </p>
+                        <p class="font-mono text-emerald-400 break-all select-all">{{ election.result_hash|default:"Hash pending (Seal not yet applied)" }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- FAQ Section -->
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center sm:text-left">
+            <div>
+                <i class="fas fa-user-shield text-indigo-600 text-xl mb-4"></i>
+                <h4 class="font-black text-slate-900 mb-2">Anonymized Audit</h4>
+                <p class="text-sm text-slate-500 leading-relaxed">Verification IDs do not reveal voter identities, preserving the secrecy of your ballot.</p>
+            </div>
+            <div>
+                <i class="fas fa-atom text-indigo-600 text-xl mb-4"></i>
+                <h4 class="font-black text-slate-900 mb-2">Deterministic Ledger</h4>
+                <p class="text-sm text-slate-500 leading-relaxed">Results are computed into a unique hash. If a single vote is altered, the hash changes.</p>
+            </div>
+            <div>
+                <i class="fas fa-file-contract text-indigo-600 text-xl mb-4"></i>
+                <h4 class="font-black text-slate-900 mb-2">Immutable Closing</h4>
+                <p class="text-sm text-slate-500 leading-relaxed">Once an election is sealed, no administrator can modify the data without breaking the hash.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

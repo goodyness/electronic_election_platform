@@ -1,0 +1,33 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}500 - Server Breach{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+    <!-- Error Number -->
+    <div class="relative group">
+        <h1 class="text-[12rem] font-black text-white leading-none select-none tracking-tighter opacity-10">500</h1>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-indigo-500 animate-pulse text-6xl">⚠</span>
+        </div>
+    </div>
+    
+    <div class="max-w-md space-y-8 -mt-8">
+        <div>
+            <h2 class="text-2xl font-black text-white uppercase tracking-tight mb-2">Core Fault Detected</h2>
+            <p class="text-sm font-medium text-slate-500 leading-relaxed uppercase tracking-wider">
+                A critical exception has occurred within the secure compute layer. Our technical team has been alerted to the breach.
+            </p>
+        </div>
+
+        <div class="h-px bg-slate-800 w-24 mx-auto"></div>
+
+        <div class="flex flex-col gap-4">
+            <a href="{% url 'home' %}" class="btn bg-white hover:bg-slate-100 text-slate-900 border-none h-14 rounded-2xl font-bold uppercase tracking-widest text-[10px]">
+                Safe Extraction
+            </a>
+            <p class="text-[9px] font-bold text-slate-600 uppercase tracking-[0.3em]">Code: ERR_INTERNAL_SERVER_FAULT</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

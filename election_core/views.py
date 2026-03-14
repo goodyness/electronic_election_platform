@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse, JsonResponse
@@ -22,6 +23,14 @@ def active_elections_list(request):
     active_elections = Election.objects.filter(status='ACTIVE').order_by('-start_time')
     return render(request, 'election_core/active_elections.html', {'elections': active_elections})
 
+def terms_and_conditions(request):
+    return render(request, 'election_core/terms_and_conditions.html')
+
+def privacy_policy(request):
+    return render(request, 'election_core/privacy_policy.html')
+
+def system_documentation(request):
+    return render(request, 'election_core/documentation.html')
 
 def organizer_signup(request):
     if request.method == 'POST':
@@ -45,6 +54,25 @@ def organizer_signup(request):
     else:
         form = OrganizerRegistrationForm()
     return render(request, 'election_core/organizer_signup.html', {'form': form})
+
+@login_required
+def seal_election_results(request, short_id):
+    election = get_object_or_404(Election, short_id=short_id)
+    if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser or election.organizer.user == request.user):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    if election.status != 'CLOSED':
+        messages.error(request, "Election must be CLOSED before results can be sealed.")
+        return redirect('election_results', short_id=election.short_id)
+
+    election.seal_results()
+    messages.success(request, "Election results have been mathematically sealed and hashed.")
+    
+    from .utils import log_action
+    log_action(request.user, f"Sealed Results for Election: {election.title} (Hash: {election.result_hash})", request)
+    
+    return redirect('election_results', short_id=election.short_id)
 
 def voter_accreditation(request, short_id):
     from .models import Election, Voter
@@ -184,6 +212,15 @@ def resend_otp(request):
             user = User.objects.get(email=email)
             purpose = 'VOTER_ACCREDITATION' if user.role == 'VOTER' else 'ORGANIZER_VERIFICATION'
             
+            # Limit resend to 2 total OTPs (initial + 1 resend)
+            from .models import OTP
+            otp_count = OTP.objects.filter(user=user, purpose=purpose).count()
+            if otp_count >= 2:
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'OTP limit reached. Please contact admin at support@flashvote.ng for assistance.'
+                }, status=400)
+
             from .utils import generate_otp
             otp_code = generate_otp(user, purpose)
             
@@ -229,6 +266,7 @@ def user_logout(request):
     logout(request)
     return redirect('home')
 
+@login_required
 def organizer_dashboard(request):
     from .models import Election, ElectionOrganizer
     if request.user.role != 'ORGANIZER' and not request.user.is_superuser:
@@ -258,6 +296,7 @@ def organizer_dashboard(request):
         'payment_history': payment_history
     })
 
+@login_required
 def view_election_results(request, short_id):
     from .models import Election, Position, Vote, AllowedEmail
     from django.db.models import Count
@@ -349,12 +388,18 @@ def cast_vote_view(request, short_id):
             user_agent = request.META.get('HTTP_USER_AGENT')
 
             success, message = cast_vote(request.user, election.id, votes_data, ip_address=ip_address, user_agent=user_agent)
+            
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': success, 'message': message})
+                
             if success:
                 from .utils import log_action
                 log_action(request.user, f"Cast Vote in Election {election.id}", request)
                 messages.success(request, message)
                 return redirect('voter_dashboard')
         except Exception as e:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': str(e)}, status=400)
             messages.error(request, str(e))
             
     return render(request, 'election_core/cast_vote.html', {
@@ -389,6 +434,7 @@ def create_election(request):
         
     return render(request, 'election_core/create_election.html', {'form': form})
 
+@login_required
 def manage_election(request, short_id):
     from .models import Election
     election = get_object_or_404(Election, short_id=short_id)
@@ -445,6 +491,7 @@ def manage_election(request, short_id):
         'is_paid': is_paid
     })
 
+@login_required
 def add_position(request, short_id):
     from .models import Election
     election = get_object_or_404(Election, short_id=short_id)
@@ -458,6 +505,10 @@ def add_position(request, short_id):
         messages.warning(request, "Please select and complete payment for a plan to add positions.")
         return redirect('select_plan', short_id=election.short_id)
         
+    if election.status == 'ACTIVE':
+        messages.error(request, "Adding positions is prohibited while the election is LIVE. Freeze the election first.")
+        return redirect('manage_election', short_id=election.short_id)
+
     if request.method == 'POST':
         from .forms import PositionForm
         form = PositionForm(request.POST)
@@ -472,6 +523,48 @@ def add_position(request, short_id):
         
     return render(request, 'election_core/add_position.html', {'form': form, 'election': election})
 
+@login_required
+def edit_position(request, position_id):
+    from .models import Position
+    from .forms import PositionForm
+    position = get_object_or_404(Position, id=position_id)
+    election = position.election
+    
+    if election.status == 'ACTIVE':
+        messages.error(request, "Editing positions is prohibited while the election is LIVE. Freeze the election first.")
+        return redirect('manage_election', short_id=election.short_id)
+
+    if request.method == 'POST':
+        form = PositionForm(request.POST, instance=position)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Position '{position.title}' updated.")
+            return redirect('manage_election', short_id=election.short_id)
+    else:
+        form = PositionForm(instance=position)
+        
+    return render(request, 'election_core/add_position.html', {
+        'form': form, 
+        'election': election,
+        'is_edit': True
+    })
+
+@login_required
+def delete_position(request, position_id):
+    from .models import Position
+    position = get_object_or_404(Position, id=position_id)
+    election = position.election
+    
+    if election.status == 'ACTIVE':
+        messages.error(request, "Deleting positions is prohibited while the election is LIVE. Freeze the election first.")
+        return redirect('manage_election', short_id=election.short_id)
+
+    title = position.title
+    position.delete()
+    messages.success(request, f"Position '{title}' and all its candidates deleted.")
+    return redirect('manage_election', short_id=election.short_id)
+
+@login_required
 def add_candidate(request, position_id):
     from .models import Position
     position = get_object_or_404(Position, id=position_id)
@@ -485,6 +578,10 @@ def add_candidate(request, position_id):
     if not election_is_paid(election):
         messages.warning(request, "Please select and complete payment for a plan to add positions.")
         return redirect('select_plan', short_id=election.short_id)
+        
+    if election.status == 'ACTIVE':
+        messages.error(request, "Adding candidates is prohibited while the election is LIVE. Freeze the election first.")
+        return redirect('manage_election', short_id=election.short_id)
         
     if request.method == 'POST':
         from .forms import CandidateForm
@@ -504,6 +601,7 @@ def add_candidate(request, position_id):
         'election': election
     })
 
+@login_required
 def edit_candidate(request, candidate_id):
     from .models import Candidate
     from .forms import CandidateForm
@@ -514,6 +612,10 @@ def edit_candidate(request, candidate_id):
     if not (election.organizer.user == request.user or request.user.is_superuser):
         messages.error(request, "Access denied.")
         return redirect('home')
+        
+    if election.status == 'ACTIVE':
+        messages.error(request, "Editing candidates is prohibited while the election is LIVE. Freeze the election first.")
+        return redirect('manage_election', short_id=election.short_id)
         
     if request.method == 'POST':
         form = CandidateForm(request.POST, request.FILES, instance=candidate)
@@ -530,19 +632,21 @@ def edit_candidate(request, candidate_id):
         'is_edit': True
     })
 
+@login_required
 def delete_candidate(request, candidate_id):
     from .models import Candidate
     candidate = get_object_or_404(Candidate, id=candidate_id)
     election = candidate.position.election
     
-    if not (election.organizer.user == request.user or request.user.is_superuser):
-        messages.error(request, "Access denied.")
-        return redirect('home')
-        
+    if election.status == 'ACTIVE':
+        messages.error(request, "Purging candidates is prohibited while the election is LIVE. Freeze the election first.")
+        return redirect('manage_election', short_id=election.short_id)
+
     name = candidate.full_name
     candidate.delete()
     return redirect('manage_election', short_id=election.short_id)
 
+@login_required
 def update_status(request, short_id, action):
     from .models import Election
     election = get_object_or_404(Election, short_id=short_id)
@@ -550,26 +654,35 @@ def update_status(request, short_id, action):
         messages.error(request, "Access denied.")
         return redirect('home')
         
+    from .utils import log_action
+    
+    reason = request.POST.get('reason', 'No reason provided')
+    
     if action == 'activate':
         if not election.positions.exists():
             messages.error(request, "Election must have at least one position before going live.")
         else:
             election.status = 'ACTIVE'
+            if election.start_time > timezone.now():
+                election.start_time = timezone.now()
             election.save()
-            messages.success(request, f"Election '{election.title}' is now LIVE!")
+            log_action(request.user, f"Election LIVE: {election.title}", request, extra_data={'election_id': election.id, 'reason': reason})
+            messages.success(request, f"Election '{election.title}' is now LIVE! Voting has officially started.")
     elif action == 'freeze':
         election.status = 'FROZEN'
         election.save()
-        messages.info(request, "Election frozen.")
+        log_action(request.user, f"Election FROZEN: {election.title}", request, extra_data={'election_id': election.id, 'reason': reason})
+        messages.info(request, f"Election frozen. Reason: {reason}")
     elif action == 'close':
         election.status = 'CLOSED'
         election.save()
+        log_action(request.user, f"Election CLOSED: {election.title}", request, extra_data={'election_id': election.id, 'reason': reason})
         
         from django.db.models import Count
         
         election_voters = Voter.objects.filter(election=election)
         
-        count = 0
+        deleted_count = 0
         for voter in election_voters:
             user = voter.user
             other_profiles = Voter.objects.filter(user=user).exclude(election=election).exists()
@@ -577,12 +690,13 @@ def update_status(request, short_id, action):
             if not other_profiles:
                 if user.role == 'VOTER':
                     user.delete()
-                    count += 1
+                    deleted_count += 1
                 
-        messages.info(request, f"Election closed. {count} temporary voter accounts cleaned up.")
+        messages.info(request, f"Election closed. {deleted_count} temporary voter accounts cleaned up.")
         
     return redirect('manage_election', short_id=election.short_id)
 
+@login_required
 def toggle_voting(request, short_id):
     from .models import Election
     election = get_object_or_404(Election, short_id=short_id)
@@ -597,6 +711,7 @@ def toggle_voting(request, short_id):
     messages.info(request, f"Voting has been {status} for this election.")
     return redirect('manage_election', short_id=election.short_id)
 
+@login_required
 def toggle_election_receipts(request, short_id):
     from .models import Election
     election = get_object_or_404(Election, short_id=short_id)
@@ -609,6 +724,7 @@ def toggle_election_receipts(request, short_id):
     messages.info(request, f"Email receipts have been {status} for this election.")
     return redirect('manage_election', short_id=election.short_id)
 
+@login_required
 def extend_election_time(request, short_id):
     from .models import Election
     from datetime import timedelta
@@ -637,6 +753,7 @@ def extend_election_time(request, short_id):
             
     return redirect('manage_election', short_id=election.short_id)
 
+@login_required
 def manage_voter_list(request, short_id):
     import csv
     import io
@@ -714,6 +831,7 @@ def manage_voter_list(request, short_id):
         'remaining_count': limit - current_count if limit > 0 else None
     })
 
+@login_required
 def delete_allowed_email(request, email_id):
     from .models import AllowedEmail
     allowed_email = get_object_or_404(AllowedEmail, id=email_id)
@@ -728,6 +846,7 @@ def delete_allowed_email(request, email_id):
     messages.success(request, f"Email {email_str} removed from the list.")
     return redirect('manage_voter_list', short_id=election.short_id)
 
+@login_required
 def export_results_csv(request, short_id):
     from django.shortcuts import get_object_or_404
     from .models import Election, Vote
@@ -740,6 +859,10 @@ def export_results_csv(request, short_id):
     if not (is_organizer or is_admin):
         messages.error(request, "Access denied.")
         return redirect('home')
+        
+    if election.status != 'CLOSED':
+        messages.warning(request, "Result export is only available after the election has been officially CLOSED.")
+        return redirect('election_results', short_id=election.short_id)
         
     if election.plan == 'FREE' and not is_admin:
         messages.warning(request, "Result export is not available on the Free plan. Please upgrade to Basic or higher.")
@@ -765,6 +888,7 @@ def export_results_csv(request, short_id):
         
     return response
 
+@login_required
 def export_results_pdf(request, short_id):
     from .models import Election, Position, Candidate
     from django.db.models import Count
@@ -782,6 +906,10 @@ def export_results_pdf(request, short_id):
     if not (is_admin or is_organizer):
         messages.error(request, "Access denied.")
         return redirect('home')
+
+    if election.status != 'CLOSED':
+        messages.warning(request, "Result export is only available after the election has been officially CLOSED.")
+        return redirect('election_results', short_id=election.short_id)
 
     if election.plan == 'FREE' and not is_admin:
         messages.warning(request, "Result export is not available on the Free plan. Please upgrade to Basic or higher.")
@@ -867,6 +995,41 @@ def export_results_pdf(request, short_id):
             
         elements.append(Spacer(1, 30))
 
+    # Add Activity Summary
+    elements.append(Paragraph("ELECTION ACTIVITY SUMMARY", styles['Heading3']))
+    elements.append(Spacer(1, 10))
+    
+    from .models import AuditLog
+    logs = AuditLog.objects.filter(extra_data__election_id=election.id).order_by('timestamp') | \
+           AuditLog.objects.filter(action__icontains=election.title).order_by('timestamp')
+    
+    log_list = sorted(list(logs), key=lambda x: x.timestamp)
+    
+    log_data = [["Timestamp", "Activity", "Context/Reason"]]
+    for log in log_list:
+        reason = log.extra_data.get('reason', 'N/A') if log.extra_data else 'N/A'
+        log_data.append([
+            log.timestamp.strftime('%Y-%m-%d %H:%M'),
+            log.action,
+            reason
+        ])
+    
+    if len(log_data) > 1:
+        log_table = Table(log_data, colWidths=[100, 230, 150])
+        log_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(log_table)
+    else:
+        elements.append(Paragraph("No activity logs recorded for this session.", styles['Normal']))
+
     elements.append(Spacer(1, 50))
     sig_data = [
         ["..........................................", ".........................................."],
@@ -903,6 +1066,7 @@ def ballot_verification(request):
             
     return render(request, 'election_core/ballot_verification.html', {'result': result, 'v_id': v_id})
 
+@login_required
 def nudge_voters(request, short_id):
     from .models import Election, Voter
     election = get_object_or_404(Election, short_id=short_id)
@@ -917,19 +1081,22 @@ def nudge_voters(request, short_id):
         
     pending_voters = Voter.objects.filter(election=election, is_accredited=True, has_voted=False)
     
+    site_url = request.build_absolute_uri('/')
+    
     v_email = request.GET.get('v_email')
     if v_email:
         from .tasks import send_voter_nudge_task
-        send_voter_nudge_task.delay(v_email, election.title)
+        send_voter_nudge_task.delay(v_email, election.title, site_url)
         messages.success(request, f"Reminder sent to {v_email}.")
     else:
         from .tasks import send_voter_nudge_task
         for voter in pending_voters:
-            send_voter_nudge_task.delay(voter.user.email, election.title)
+            send_voter_nudge_task.delay(voter.user.email, election.title, site_url)
         messages.success(request, f"Reminders are being sent to {pending_voters.count()} voters.")
         
     return redirect('election_analytics', short_id=election.short_id)
 
+@login_required
 def result_war_room(request, short_id):
     from .models import Election, Position, Vote
     election = get_object_or_404(Election, short_id=short_id)
@@ -959,10 +1126,68 @@ def result_war_room(request, short_id):
             'total_votes': sum(c['votes'] for c in cand_results)
         })
         
+    # Turnout Timeline Data (Heatmap)
+    from django.db.models.functions import ExtractHour
+    from django.db.models import Count
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    now = timezone.now()
+    twenty_four_hours_ago = now - timedelta(hours=24)
+    
+    turnout_timeline = Vote.objects.filter(
+        election=election, 
+        timestamp__gte=twenty_four_hours_ago
+    ).annotate(hour=ExtractHour('timestamp')).values('hour').annotate(count=Count('id')).order_by('hour')
+    
+    # Prepare labels and data for Chart.js
+    timeline_labels = [f"{i}:00" for i in range(24)]
+    timeline_data = [0] * 24
+    for entry in turnout_timeline:
+        timeline_data[entry['hour']] = entry['count']
+
+    # Sort labels starting from 24 hours ago
+    current_hour = now.hour
+    
+    # --- Smart Turnout Predictor Logic ---
+    total_allowed = election.allowedemail_set.count()
+    current_turnout = Vote.objects.filter(election=election).count()
+    
+    elapsed_time = now - election.start_time
+    total_duration = election.end_time - election.start_time
+    
+    predicted_turnout = 0
+    if elapsed_time.total_seconds() > 0 and current_turnout > 0:
+        velocity = current_turnout / elapsed_time.total_seconds()
+        predicted_turnout = int(velocity * total_duration.total_seconds())
+        # Cap at total allowed
+        if predicted_turnout > total_allowed:
+            predicted_turnout = total_allowed
+        # Floor at current turnout
+        if predicted_turnout < current_turnout:
+            predicted_turnout = current_turnout
+
     context = {
         'election': election,
         'results_data': results_data,
-        'refresh_interval': 10
+        'timeline_labels': timeline_labels,
+        'timeline_data': timeline_data,
+        'turnout_percentage': (current_turnout / total_allowed * 100) if total_allowed > 0 else 0,
+        'predicted_turnout': predicted_turnout,
+        'total_eligible': total_allowed,
+        'current_hour': current_hour
+    }
+    
+    return render(request, 'election_core/result_war_room.html', context)
+    sorted_labels = timeline_labels[current_hour+1:] + timeline_labels[:current_hour+1]
+    sorted_data = timeline_data[current_hour+1:] + timeline_data[:current_hour+1]
+
+    context = {
+        'election': election,
+        'results_data': results_data,
+        'refresh_interval': 10,
+        'timeline_labels': sorted_labels,
+        'timeline_data': sorted_data
     }
     
     if request.headers.get('HX-Request') == 'true':
@@ -1046,4 +1271,99 @@ def generate_i_voted_asset(request, short_id):
     response_io.seek(0)
     
     return HttpResponse(response_io, content_type='image/png')
+
+@login_required
+def election_activity_log(request, short_id):
+    from .models import Election, AuditLog
+    election = get_object_or_404(Election, short_id=short_id)
+    
+    if not (election.organizer.user == request.user or request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    logs = AuditLog.objects.filter(extra_data__election_id=election.id).order_by('-timestamp') | \
+           AuditLog.objects.filter(action__icontains=election.title).order_by('-timestamp')
+    
+    # Sort distinct logs
+    logs = sorted(list(logs), key=lambda x: x.timestamp, reverse=True)
+    
+    return render(request, 'election_core/election_activity_log.html', {
+        'election': election,
+        'logs': logs
+    })
+
+@login_required
+def i_voted_share_page(request, short_id):
+    from .models import Election
+    election = get_object_or_404(Election, short_id=short_id)
+    voter_name = request.user.get_full_name() or request.user.username
+    
+    share_url = request.build_absolute_uri()
+    share_text = f"I just voted in the {election.title} on FlashVote! ⚡🗳️ #FlashVote #DigitalDemocracy"
+    
+    return render(request, 'election_core/i_voted_share.html', {
+        'election': election,
+        'voter_name': voter_name,
+        'share_url': share_url,
+        'share_text': share_text
+    })
+
+@login_required
+def submit_sentiment_survey(request, short_id):
+    from .models import Election, SentimentSurvey
+    import json
+    if request.method == 'POST':
+        election = get_object_or_404(Election, short_id=short_id)
+        try:
+            data = json.loads(request.body)
+            rating = data.get('rating')
+            feedback = data.get('feedback', '')
+            
+            if rating:
+                SentimentSurvey.objects.update_or_create(
+                    election=election,
+                    voter=request.user,
+                    defaults={'rating': int(rating), 'feedback': feedback}
+                )
+                return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'method_not_allowed'}, status=405)
+
+def public_audit(request):
+    from .models import Vote, Election
+    from django.contrib import messages
+    search_query = request.GET.get('q', '').strip()
+    ballot_result = None
+    election_result = None
+    
+    if search_query:
+        # Check if it's a Digital Receipt ID (Verification ID)
+        ballot_result = Vote.objects.filter(verification_id=search_query).first()
+        
+        # Check if it's an Election Short ID (for Integrity check)
+        election_result = Election.objects.filter(short_id=search_query).first()
+        
+        if not ballot_result and not election_result:
+            messages.error(request, "No matching ballot or election found for this ID.")
+
+    return render(request, 'election_core/public_audit.html', {
+        'search_query': search_query,
+        'ballot': ballot_result,
+        'election': election_result
+    })
+
+# --- Custom Error Handlers ---
+def handler404(request, exception):
+    return render(request, '404.html', status=404)
+
+def handler500(request):
+    return render(request, '500.html', status=500)
+
+def handler403(request, exception=None):
+    return render(request, '403.html', status=403)
+
+def handler400(request, exception=None):
+    return render(request, '400.html', status=400)
+
 

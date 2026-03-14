@@ -3,124 +3,87 @@
 {% block title %}All Elections | Grand Admin{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto py-12 px-6">
-
-
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+<div class="max-w-7xl mx-auto py-12 px-4">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div>
-            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
-                <a href="{% url 'grand_admin_dashboard' %}"
-                    class="hover:text-indigo-600 transition-colors">Dashboard</a>
+            <nav class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2 text-slate-400">
+                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
                 <span>/</span>
                 <span class="text-indigo-600">Elections</span>
             </nav>
-            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Active Deployments</h1>
+            <h1 class="text-3xl font-bold text-slate-900">Active Deployments</h1>
         </div>
 
-
-        <form method="get" class="relative w-full md:w-96">
-            <input type="text" name="q" value="{{ search_query|default:'' }}"
-                placeholder="Search elections, organizers..."
-                class="input input-lg w-full pl-12 rounded-2xl bg-white border-slate-200 focus:border-indigo-600 shadow-sm transition-all text-sm font-bold">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <form method="get" class="relative w-full md:w-80">
+            <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Search elections..." class="input input-sm h-11 w-full pl-10 rounded-lg border-slate-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
         </form>
     </div>
 
-
-    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+    <!-- Table -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="table w-full">
+            <table class="table w-full text-sm">
                 <thead>
-                    <tr class="text-slate-400 border-slate-100">
-                        <th class="bg-transparent pl-8 py-6">Election Details</th>
-                        <th class="bg-transparent">Organizer</th>
-                        <th class="bg-transparent">Plan Tier</th>
-                        <th class="bg-transparent">Status</th>
-                        <th class="bg-transparent pr-8 text-right">Actions</th>
+                    <tr class="text-[10px] font-bold uppercase text-slate-400 bg-white border-slate-100">
+                        <th class="px-8 py-4">Election</th>
+                        <th>Organizer</th>
+                        <th>Tier</th>
+                        <th>Status</th>
+                        <th class="text-right px-8">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-100">
                     {% for election in page_obj %}
-                    <tr class="hover:bg-slate-50/50 group transition-colors border-slate-50">
-                        <td class="pl-8 py-4">
-                            <div class="font-bold text-slate-900">{{ election.title }}</div>
-                            <div class="text-xs text-slate-400 font-medium">{{ election.institution.name }}</div>
-                            <div class="text-[10px] text-slate-300 mt-1">{{ election.start_time|date:"M d, Y" }} - {{
-                                election.end_time|date:"M d, Y" }}</div>
-                        </td>
-                        <td>
-                            <div class="flex items-center gap-3">
-                                <div class="avatar placeholder">
-                                    <div class="bg-indigo-50 text-indigo-600 rounded-full w-8">
-                                        <span class="text-xs font-bold">{{
-                                            election.organizer.user.get_full_name|slice:":1" }}</span>
-                                    </div>
-                                </div>
-                                <div class="text-sm font-medium">{{ election.organizer.user.get_full_name }}</div>
-                            </div>
-                        </td>
-                        <td>
-                            <div
-                                class="badge badge-sm font-bold opacity-80
-                                {% if election.plan == 'PREMIUM' %}badge-primary{% elif election.plan == 'STANDARD' %}badge-info{% elif election.plan == 'BASIC' %}badge-accent{% else %}badge-ghost{% endif %}">
-                                {{ election.get_plan_display }}
-                            </div>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-8 py-4">
+                            <div class="font-bold text-slate-900 leading-none">{{ election.title }}</div>
+                            <div class="text-[10px] text-slate-500 mt-1">{{ election.institution.name }}</div>
                         </td>
                         <td>
                             <div class="flex items-center gap-2">
-                                <div
-                                    class="w-1.5 h-1.5 rounded-full {% if election.status == 'ACTIVE' %}bg-emerald-500{% elif election.status == 'CLOSED' %}bg-slate-300{% else %}bg-amber-400{% endif %}">
+                                <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600">
+                                    {{ election.organizer.user.get_full_name|slice:":1" }}
                                 </div>
-                                <span class="text-xs font-bold text-slate-500">{{ election.get_status_display }}</span>
+                                <div class="text-xs font-medium text-slate-700">{{ election.organizer.user.get_full_name }}</div>
                             </div>
                         </td>
-                        <td class="pr-8 text-right">
-                            <div class="join">
-                                <a href="{% url 'election_analytics' short_id=election.short_id %}"
-                                    class="btn btn-sm join-item btn-ghost">Analytics</a>
-                                <a href="{% url 'election_results' short_id=election.short_id %}"
-                                    class="btn btn-sm join-item btn-ghost text-indigo-600">Results</a>
+                        <td>
+                            <span class="text-[10px] font-bold uppercase tracking-tight text-slate-400">{{ election.get_plan_display }}</span>
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full {% if election.status == 'ACTIVE' %}bg-green-500{% elif election.status == 'CLOSED' %}bg-slate-300{% else %}bg-amber-400{% endif %}"></span>
+                                <span class="text-[10px] font-bold uppercase text-slate-500">{{ election.get_status_display }}</span>
+                            </div>
+                        </td>
+                        <td class="text-right px-8">
+                            <div class="flex justify-end gap-3 text-xs font-bold uppercase tracking-widest">
+                                <a href="{% url 'election_analytics' short_id=election.short_id %}" class="text-slate-400 hover:text-indigo-600 transition-colors">Analytics</a>
+                                <a href="{% url 'election_results' short_id=election.short_id %}" class="text-indigo-600 hover:underline">Results</a>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="5" class="py-20 text-center">
-                            <div class="opacity-50">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-slate-300"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
-                                <p class="text-slate-400 font-medium">No elections found matching your search.</p>
-                            </div>
-                        </td>
-                    </tr>
+                    <tr><td colspan="5" class="p-20 text-center text-slate-400 italic">No elections found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-
+        <!-- Pagination -->
         {% if page_obj.has_other_pages %}
-        <div class="p-6 border-t border-slate-50 bg-slate-50/50 flex justify-center">
+        <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-center">
             <div class="join">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
-                    class="join-item btn btn-sm">«</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-xs rounded-l-lg h-9 px-4">«</a>
                 {% endif %}
-
-                <span class="join-item btn btn-sm btn-disabled">Page {{ page_obj.number }} of {{
-                    page_obj.paginator.num_pages }}</span>
-
+                <span class="btn btn-xs h-9 px-4 bg-white border-slate-200 text-slate-500 pointer-events-none">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
-                    class="join-item btn btn-sm">»</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-xs rounded-r-lg h-9 px-4">»</a>
                 {% endif %}
             </div>
         </div>

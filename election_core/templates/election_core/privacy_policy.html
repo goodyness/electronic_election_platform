@@ -1,0 +1,87 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}Privacy Policy | FlashVote{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-20 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-900 px-8 py-12 text-center">
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">Privacy & Data Governance</h1>
+                <p class="text-slate-400 mt-2 font-medium uppercase tracking-[0.2em] text-xs">NDPC Licensed Data Controller</p>
+            </div>
+            
+            <div class="p-8 md:p-12 prose prose-slate max-w-none">
+                <div class="space-y-10">
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">01</span>
+                            Regulatory Compliance
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed mt-4">
+                            FlashVote is fully licensed and regulated by the <strong>Nigeria Data Protection Commission (NDPC)</strong>. We adhere strictly to the Nigeria Data Protection Act (NDPA) and international best practices for data sovereignty and security.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">02</span>
+                            Information We Collect
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                                <h3 class="font-bold text-slate-900 text-sm mb-2">Institutional Data</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed">
+                                    We collect university-provided voter lists (Emails) uploaded by authorized Election Organizers for the sole purpose of voter accreditation.
+                                </p>
+                            </div>
+                            <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                                <h3 class="font-bold text-slate-900 text-sm mb-2">Technical Metadata</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed">
+                                    IP addresses, device information, and browser types are logged for security auditing and to prevent fraudulent voting activities.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">03</span>
+                            Data Minimization & Security
+                        </h2>
+                        <ul class="space-y-4 mt-4">
+                            <li class="flex gap-4">
+                                <svg class="h-5 w-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <span class="text-sm text-slate-600"><strong>End-to-End Encryption:</strong> All data in transit and at rest is protected by AES-256 standard encryption.</span>
+                            </li>
+                            <li class="flex gap-4">
+                                <svg class="h-5 w-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <span class="text-sm text-slate-600"><strong>Voter Anonymity:</strong> Once a vote is cast, the link between the voter's identity and their specific ballot is cryptographically severed.</span>
+                            </li>
+                            <li class="flex gap-4">
+                                <svg class="h-5 w-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <span class="text-sm text-slate-600"><strong>Data Access:</strong> Only authorized system administrators and specific election organizers have access to voter lists.</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">04</span>
+                            Your Rights
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed mt-4">
+                            Under the NDPA, users have the right to access their personal data, request corrections, and object to processing. Institutional users (Voters) should primarily contact their University Election Committee as the primary Data Controller, with FlashVote acting as the Data Processor.
+                        </p>
+                    </section>
+
+                    <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Effective Date: March 12, 2026</p>
+                        <a href="mailto:privacy@flashvote.io" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest">Contact Data Protection Officer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

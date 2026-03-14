@@ -4,421 +4,241 @@
 {% block title %}System Command Center | Grand Admin{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-slate-50 py-8 lg:py-12 px-4 space-y-10">
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-7xl mx-auto space-y-10">
 
-    <!-- Sophisticated Header -->
-    <div
-        class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-white p-8 lg:p-12 rounded-[3.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
-        <div
-            class="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60">
-        </div>
-
-        <div class="space-y-3 relative z-10">
-            <div
-                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em]">
-                <span class="relative flex h-2 w-2">
-                    <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
-                </span>
-                Global Control Node active
+        <!-- Simple Header -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-white p-8 rounded-2xl border border-slate-200">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 italic">System Command Center</h1>
+                <p class="text-slate-500 mt-1">Centralized oversight for the FlashVote secure grid.</p>
             </div>
-            <h1 class="text-4xl lg:text-6xl font-black text-slate-900 tracking-tighter leading-none italic">System
-                Command <span class="text-indigo-600">Center</span></h1>
-            <p class="text-slate-500 font-medium text-lg">Centralized oversight for the FlashVote secure grid.</p>
-        </div>
 
-        <div class="flex flex-col md:flex-row gap-6 relative z-10">
-            <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100 text-center min-w-[140px]">
-                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Deployments
+            <div class="flex gap-4">
+                <div class="px-6 py-4 bg-slate-50 rounded-lg border border-slate-100 text-center">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Deployments</div>
+                    <div class="text-2xl font-bold text-indigo-600">{{ elections_count }}</div>
                 </div>
-                <div class="text-3xl font-black text-indigo-600 tabular-nums">{{ elections.count }}</div>
-            </div>
-            <div class="p-6 bg-emerald-50 rounded-3xl border border-emerald-100 text-center min-w-[140px]">
-                <div class="text-[10px] font-black text-emerald-700/50 uppercase tracking-widest mb-1">System Revenue
-                </div>
-                <div class="text-3xl font-black text-emerald-600 tabular-nums">₦{{ payment_history|length|default:"0" }}
+                <div class="px-6 py-4 bg-slate-50 rounded-lg border border-slate-100 text-center">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Revenue</div>
+                    <div class="text-2xl font-bold text-emerald-600">₦{{ total_revenue }}</div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-
-        <!-- Sidebar Controls -->
-        <aside class="lg:col-span-3 space-y-8">
-            <div class="card bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
-                <h3
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 border-b border-slate-50 pb-4">
-                    Management Modules</h3>
-                <ul class="space-y-3">
-                    <li>
-                        <a href="{% url 'analytics' %}"
-                            class="flex items-center justify-between p-4 rounded-2xl bg-indigo-600 text-white font-black text-sm tracking-tight shadow-lg shadow-indigo-100 transition-all hover:scale-[1.02]">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                Intelligence
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar Navigation -->
+            <aside class="space-y-6">
+                <div class="card bg-white p-6 border border-slate-200">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 border-b pb-2">Modules</h3>
+                    <nav class="space-y-2">
+                        <a href="{% url 'analytics' %}" class="flex items-center gap-3 p-3 rounded-lg bg-indigo-600 text-white font-bold text-sm">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10" /></svg>
+                            Intelligence
                         </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'list_organizers' %}"
-                            class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 text-slate-700 hover:bg-slate-100 font-bold text-sm tracking-tight transition-all">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                Partners
-                            </div>
+                        <a href="{% url 'list_organizers' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 text-slate-700 font-medium text-sm">
+                            Partners
                         </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'list_institutions' %}"
-                            class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 text-slate-700 hover:bg-slate-100 font-bold text-sm tracking-tight transition-all">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                                Nodes
-                            </div>
+                        <a href="{% url 'list_institutions' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 text-slate-700 font-medium text-sm">
+                            Nodes
                         </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'audit_logs' %}"
-                            class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 text-slate-700 hover:bg-slate-100 font-bold text-sm tracking-tight transition-all">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                                Grid Logs
-                            </div>
+                        <a href="{% url 'list_all_elections' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 text-slate-700 font-medium text-sm">
+                            Mission Control
                         </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="card bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl text-white overflow-hidden relative">
-                <div
-                    class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl -translate-y-12 translate-x-12">
+                        <a href="{% url 'list_all_payments' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 text-slate-700 font-medium text-sm">
+                            Financials
+                        </a>
+                        <a href="{% url 'audit_logs' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 text-slate-700 font-medium text-sm">
+                            Grid Logs
+                        </a>
+                    </nav>
                 </div>
 
-                <h3
-                    class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6 border-b border-white/5 pb-4 relative z-10">
-                    Network Protocols</h3>
-                <div class="space-y-6 relative z-10">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Email
-                                OTP</span>
-                            <span class="text-[10px] text-slate-600 font-bold">2FA Authorization</span>
+                <div class="card bg-slate-900 p-6 rounded-2xl text-white">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Protocols</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-400">Email OTP</span>
+                            <a href="{% url 'toggle_system_otp' %}" class="btn btn-xs {% if config.enable_otp_emails %}btn-success{% else %}btn-ghost border-white/10{% endif %}">
+                                {{ config.enable_otp_emails|yesno:"ON,OFF" }}
+                            </a>
                         </div>
-                        <a href="{% url 'toggle_system_otp' %}"
-                            class="btn btn-sm h-10 px-4 rounded-xl font-black text-[10px] transition-all {% if config.enable_otp_emails %}bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20{% else %}bg-white/5 text-slate-400 border-white/5 hover:bg-white/10{% endif %}">
-                            {{ config.enable_otp_emails|yesno:"ENABLED,DISABLED" }}
-                        </a>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span
-                                class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Receipts</span>
-                            <span class="text-[10px] text-slate-600 font-bold">Audit Notifications</span>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-400">Receipts</span>
+                            <a href="{% url 'toggle_system_receipts' %}" class="btn btn-xs {% if config.enable_receipt_emails %}btn-success{% else %}btn-ghost border-white/10{% endif %}">
+                                {{ config.enable_receipt_emails|yesno:"ON,OFF" }}
+                            </a>
                         </div>
-                        <a href="{% url 'toggle_system_receipts' %}"
-                            class="btn btn-sm h-10 px-4 rounded-xl font-black text-[10px] transition-all {% if config.enable_receipt_emails %}bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20{% else %}bg-white/5 text-slate-400 border-white/5 hover:bg-white/10{% endif %}">
-                            {{ config.enable_receipt_emails|yesno:"ENABLED,DISABLED" }}
-                        </a>
                     </div>
                 </div>
-            </div>
 
-            <!-- Pricing Overhaul -->
-            <div class="card bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
-                <h3
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 border-b border-slate-50 pb-4">
-                    Revenue Engine</h3>
-                <div class="space-y-4">
-                    {% for plan in plans %}
-                    <form action="{% url 'manage_plan_pricing' %}" method="POST"
-                        class="p-4 bg-slate-50 rounded-2xl border border-slate-100 group transition-all hover:border-indigo-200">
-                        {% csrf_token %}
-                        <input type="hidden" name="plan_id" value="{{ plan.id }}">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-xs font-black text-indigo-600 uppercase tracking-widest">{{ plan.get_plan_name_display }}</span>
-                            <button type="submit"
-                                class="text-[10px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-widest transition-colors">Apply</button>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
+                <!-- Plan Pricing Settings -->
+                <div class="card bg-white p-6 border border-slate-200">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 border-b pb-2">Global Rates</h3>
+                    <div class="space-y-4">
+                        {% for plan in plans %}
+                        <form action="{% url 'manage_plan_pricing' %}" method="POST" class="space-y-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-slate-900 uppercase">{{ plan.get_plan_name_display }}</span>
+                                <span class="text-[10px] font-bold text-indigo-600">₦{{ plan.price_per_email }}/msg</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="number" name="price" value="{{ plan.price_per_email }}" class="input input-xs input-bordered w-full h-8 px-2 font-bold" step="0.01">
+                                <input type="number" name="limit" value="{{ plan.max_emails }}" class="input input-xs input-bordered w-full h-8 px-2 font-bold" placeholder="Limit">
+                                <button type="submit" class="btn btn-xs btn-neutral h-8">Set</button>
+                            </div>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3 space-y-8">
+                
+                {% if anomalies %}
+                <section class="space-y-4">
+                    <h3 class="text-lg font-bold text-rose-600 border-l-4 border-rose-600 pl-4 uppercase tracking-tight flex items-center gap-2">
+                        <svg class="h-5 w-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        Security Anomalies Detected
+                    </h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        {% for anomaly in anomalies %}
+                        <div class="card bg-white p-4 border-l-4 border-rose-500 shadow-sm flex flex-row items-center justify-between">
                             <div class="space-y-1">
-                                <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block">Unit
-                                    Price</label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[10px]">₦</span>
-                                    <input type="number" step="0.01" name="price" value="{{ plan.price_per_email }}"
-                                        class="input input-xs bg-white h-10 rounded-xl border-slate-200 focus:border-indigo-600 w-full pl-7 text-xs font-bold tabular-nums"
-                                        {% if plan.plan_name == 'FREE' %}readonly{% endif %}>
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-xs {% if anomaly.severity == 'CRITICAL' %}badge-error{% else %}badge-warning{% endif %} font-bold">
+                                        {{ anomaly.type }}
+                                    </span>
+                                    <span class="text-xs font-mono font-bold text-slate-400">{{ anomaly.ip }}</span>
+                                </div>
+                                <p class="text-sm font-medium text-slate-700">{{ anomaly.message }}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn btn-xs btn-ghost text-slate-400">Dimiss</button>
+                                <button class="btn btn-xs btn-outline btn-error">Block IP</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if pending_organizers %}
+                <section class="space-y-4">
+                    <h3 class="text-lg font-bold text-slate-900 border-l-4 border-amber-400 pl-4 uppercase tracking-tight">Authorization Queue</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for org in pending_organizers %}
+                        <div class="card bg-white p-4 border border-slate-200 flex flex-row items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center font-bold text-slate-600">
+                                    {{ org.user.first_name|slice:":1" }}{{ org.user.last_name|slice:":1" }}
+                                </div>
+                                <div class="text-sm">
+                                    <div class="font-bold text-slate-900">{{ org.user.get_full_name }}</div>
+                                    <div class="text-xs text-slate-500">{{ org.user.institution.name }}</div>
                                 </div>
                             </div>
-                            <div class="space-y-1">
-                                <label
-                                    class="text-[8px] font-black text-slate-400 uppercase tracking-widest block">Cap</label>
-                                <input type="number" name="limit" value="{{ plan.max_emails }}"
-                                    class="input input-xs bg-white h-10 rounded-xl border-slate-200 focus:border-indigo-600 w-full text-xs font-bold tabular-nums">
+                            <div class="flex gap-2">
+                                <a href="{% url 'approve_organizer' org.id 'approve' %}" class="btn btn-sm btn-circle btn-success text-white">✓</a>
+                                <a href="{% url 'approve_organizer' org.id 'reject' %}" class="btn btn-sm btn-circle btn-error text-white">✕</a>
                             </div>
                         </div>
-                    </form>
-                    {% endfor %}
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Display -->
-        <main class="lg:col-span-9 space-y-10">
-
-            {% if pending_organizers %}
-            <section class="space-y-6">
-                <div class="flex items-center gap-6">
-                    <h3
-                        class="text-lg font-black text-slate-900 uppercase tracking-widest bg-amber-400 px-6 py-2 rounded-xl shadow-lg shadow-amber-100 leading-none italic">
-                        Authorization Queue</h3>
-                    <div class="h-px bg-slate-200 flex-grow"></div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for org in pending_organizers %}
-                    <div
-                        class="card bg-white p-6 rounded-[2.5rem] border border-amber-100 shadow-xl shadow-amber-50/50 flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div
-                                class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 font-black text-xl">
-                                {{ org.user.first_name|slice:":1" }}{{ org.user.last_name|slice:":1" }}
-                            </div>
-                            <div>
-                                <div class="font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{{ org.user.get_full_name }}</div>
-                                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{{ org.user.institution.name }}</div>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <a href="{% url 'approve_organizer' org.id 'reject' %}" data-confirm="reject"
-                                data-name="{{ org.user.get_full_name }}"
-                                class="btn btn-circle btn-sm bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-500 hover:text-white transition-all">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </a>
-                            <a href="{% url 'approve_organizer' org.id 'approve' %}" data-confirm="approve"
-                                data-name="{{ org.user.get_full_name }}"
-                                class="btn btn-circle btn-sm bg-emerald-50 border-emerald-100 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                            </a>
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
-            </section>
-            {% endif %}
+                </section>
+                {% endif %}
 
-            <!-- Active Deployments Table -->
-            <section
-                class="card bg-white rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                <div
-                    class="p-8 lg:p-10 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center relative gap-6">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-600"></div>
-                    <div>
-                        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tighter italic">Fleet Operations
-                        </h3>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Live Grid
-                            Monitoring</p>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="badge bg-indigo-50 border-none text-indigo-600 font-black px-4 py-3">{{ elections|length }} ACTIVE NODES</span>
-                        <a href="{% url 'list_all_elections' %}"
-                            class="btn btn-sm h-10 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all">Analyze
-                            All</a>
-                    </div>
-                </div>
 
-                <div class="overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr class="text-slate-400 border-b border-slate-100">
-                                <th class="bg-transparent pl-10 font-black uppercase text-[10px] tracking-widest py-6">
-                                    Mission Details</th>
-                                <th class="bg-transparent font-black uppercase text-[10px] tracking-widest">Operator
-                                </th>
-                                <th class="bg-transparent font-black uppercase text-[10px] tracking-widest">Service Tier
-                                </th>
-                                <th class="bg-transparent font-black uppercase text-[10px] tracking-widest">Status</th>
-                                <th
-                                    class="bg-transparent pr-10 text-right font-black uppercase text-[10px] tracking-widest">
-                                    Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50">
-                            {% for election in elections %}
-                            <tr class="group hover:bg-slate-50/50 transition-colors">
-                                <td class="pl-10 py-6">
-                                    <div
-                                        class="font-black text-slate-900 tracking-tight text-lg group-hover:text-indigo-600 transition-colors">
-                                        {{ election.title|upper }}</div>
-                                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{{ election.institution.name }}</div>
-                                </td>
-                                <td>
-                                    <div class="text-sm font-bold text-slate-700">{{ election.organizer.user.get_full_name }}</div>
-                                </td>
-                                <td>
-                                    <div
-                                        class="badge badge-lg font-black text-[9px] border-none px-4 py-3 uppercase tracking-widest
-                                        {% if election.plan == 'PREMIUM' %}bg-indigo-600 text-white shadow-lg shadow-indigo-100{% elif election.plan == 'STANDARD' %}bg-cyan-500 text-white shadow-lg shadow-cyan-100{% elif election.plan == 'BASIC' %}bg-emerald-500 text-white shadow-lg shadow-emerald-100{% else %}bg-slate-100 text-slate-500{% endif %}">
-                                        {{ election.get_plan_display }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-2 h-2 rounded-full animate-pulse {% if election.status == 'ACTIVE' %}bg-emerald-500 shadow-[0_0_10px_#10b981]{% elif election.status == 'CLOSED' %}bg-slate-300{% else %}bg-amber-400 shadow-[0_0_10px_#fbbf24]{% endif %}">
+
+                <!-- Financial Ledger -->
+                <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-900 uppercase italic">Recent Transactions</h3>
+                        <a href="{% url 'list_all_payments' %}" class="btn btn-xs btn-outline">Show Receipts</a>
+                    </div>
+                    {% if payment_history %}
+                    <div class="overflow-x-auto">
+                        <table class="table w-full">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="text-xs uppercase text-slate-400">Election</th>
+                                    <th class="text-xs uppercase text-slate-400">Reference</th>
+                                    <th class="text-xs uppercase text-slate-400">Amount</th>
+                                    <th class="text-right text-xs uppercase text-slate-400">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for payment in payment_history %}
+                                <tr class="hover:bg-slate-50">
+                                    <td class="text-xs font-bold text-slate-900">{{ payment.election.title }}</td>
+                                    <td class="text-[10px] uppercase font-mono text-slate-500">{{ payment.reference }}</td>
+                                    <td class="text-sm font-bold text-emerald-600">₦{{ payment.amount }}</td>
+                                    <td class="text-right text-[10px] font-bold text-slate-400">{{ payment.paid_at|date:"d M Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-12 text-center">
+                        <p class="text-sm text-slate-500 font-medium">No verified transactions in recent logs.</p>
+                    </div>
+                    {% endif %}
+                </section>
+
+                <!-- Fleet Operations -->
+                <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-900 uppercase">Fleet Operations</h3>
+                        <a href="{% url 'list_all_elections' %}" class="btn btn-xs btn-outline">Analyze All</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table w-full">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="text-xs uppercase text-slate-400">Mission</th>
+                                    <th class="text-xs uppercase text-slate-400">Operator</th>
+                                    <th class="text-xs uppercase text-slate-400">Tier</th>
+                                    <th class="text-xs uppercase text-slate-400">Status</th>
+                                    <th class="text-right text-xs uppercase text-slate-400">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for election in elections %}
+                                <tr class="hover:bg-slate-100">
+                                    <td>
+                                        <div class="font-bold text-slate-900">{{ election.title }}</div>
+                                        <div class="text-[10px] text-slate-500">{{ election.institution.name }}</div>
+                                    </td>
+                                    <td class="text-sm font-medium">{{ election.organizer.user.get_full_name }}</td>
+                                    <td>
+                                        <span class="badge badge-sm font-bold {% if election.plan == 'PREMIUM' %}badge-primary{% elif election.plan == 'STANDARD' %}badge-secondary{% else %}badge-ghost{% endif %}">
+                                            {{ election.get_plan_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-2 h-2 rounded-full {% if election.status == 'ACTIVE' %}bg-green-500{% elif election.status == 'CLOSED' %}bg-slate-300{% else %}bg-amber-400{% endif %}"></div>
+                                            <span class="text-xs font-semibold">{{ election.get_status_display }}</span>
                                         </div>
-                                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">{{ election.get_status_display }}</span>
-                                    </div>
-                                </td>
-                                <td class="pr-10 text-right">
-                                    <div class="flex justify-end gap-2">
-                                        <a href="{% url 'election_analytics' short_id=election.short_id %}"
-                                            class="btn btn-xs h-10 px-4 rounded-xl border-slate-200 font-black text-[10px] hover:bg-slate-900 hover:text-white transition-all">ANALYTICS</a>
-                                        <a href="{% url 'election_results' short_id=election.short_id %}"
-                                            class="btn btn-xs h-10 px-4 rounded-xl border-indigo-100 bg-indigo-50 text-indigo-600 font-black text-[10px] hover:bg-indigo-600 hover:text-white transition-all">RESULTS</a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="py-20 text-center text-slate-400 font-medium">No encrypted
-                                    missions detected in the current grid.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Ledger Activity -->
-            <section
-                class="card bg-white rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                <div
-                    class="p-8 lg:p-10 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center relative gap-6">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
-                    <div>
-                        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tighter italic">Financial Ledger
-                        </h3>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Transaction
-                            Processing Stream</p>
+                                    </td>
+                                    <td class="text-right">
+                                        <div class="join">
+                                            <a href="{% url 'election_analytics' short_id=election.short_id %}" class="btn btn-xs join-item">Data</a>
+                                            <a href="{% url 'election_results' short_id=election.short_id %}" class="btn btn-xs join-item btn-primary">Results</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <a href="{% url 'list_all_payments' %}"
-                        class="btn btn-sm h-10 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">View
-                        Full Log</a>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr class="text-slate-400 border-b border-slate-100">
-                                <th class="bg-transparent pl-10 font-black uppercase text-[10px] tracking-widest py-6">
-                                    Timestamp</th>
-                                <th class="bg-transparent font-black uppercase text-[10px] tracking-widest">Mission Node
-                                </th>
-                                <th class="bg-transparent font-black uppercase text-[10px] tracking-widest">Tier</th>
-                                <th
-                                    class="bg-transparent pr-10 text-right font-black uppercase text-[10px] tracking-widest">
-                                    Amount Cleared</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50">
-                            {% for payment in payment_history %}
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="pl-10 py-6">
-                                    <div class="font-mono text-xs font-bold text-slate-500">{{ payment.paid_at|date:"Y-m-d H:i" }}</div>
-                                </td>
-                                <td>
-                                    <div class="font-black text-slate-900 tracking-tight">{{ payment.election.title|upper }}</div>
-                                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ payment.election.organizer.user.get_full_name }}</div>
-                                </td>
-                                <td><span class="badge badge-sm font-black text-[9px] bg-slate-100 border-none px-3 uppercase tracking-widest">{{ payment.get_plan_display }}</span></td>
-                                <td class="pr-10 text-right">
-                                    <div class="text-lg font-black text-emerald-600 tabular-nums">₦{{ payment.amount|floatformat:2 }}</div>
-                                    <div class="text-[9px] font-black text-emerald-500/50 uppercase tracking-widest">
-                                        Verified Session</div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="py-20 text-center text-slate-400 font-medium">No verified
-                                    transactions sequenced in the current cycle.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
+                </section>
+            </div>
+        </div>
     </div>
 </div>
-{% block extra_js %}
-<script>
-    function confirmAdminAction(url, title, text, icon, confirmText, confirmColor) {
-        Swal.fire({
-            title: title,
-            text: text,
-            icon: icon,
-            showCancelButton: true,
-            confirmButtonColor: confirmColor || '#4f46e5',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: confirmText,
-            cancelButtonText: 'Cancel',
-            background: '#ffffff',
-            color: '#0f172a',
-            borderRadius: '2rem'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = url;
-            }
-        });
-    }
-
-    document.querySelectorAll('[data-confirm]').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            const url = this.getAttribute('href');
-            const action = this.getAttribute('data-confirm');
-            const name = this.getAttribute('data-name');
-
-            if (action === 'approve') {
-                confirmAdminAction(url, 'Approve Organizer?', `Authorize ${name} to begin hosting elections on the platform?`, 'question', 'Yes, Approve', '#10b981');
-            } else if (action === 'reject') {
-                confirmAdminAction(url, 'Reject Application?', `Deny access for ${name}? This will prevent them from creating elections.`, 'warning', 'Yes, Reject', '#f43f5e');
-            }
-        });
-    });
-</script>
-{% endblock extra_js %}
 {% endblock %}

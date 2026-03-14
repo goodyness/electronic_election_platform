@@ -4,127 +4,49 @@
 {% block title %}Sign In | FlashVote{% endblock %}
 
 {% block content %}
-<div class="min-h-[80vh] flex items-center justify-center px-4 py-12 lg:py-24 bg-slate-50 relative overflow-hidden">
-    <!-- Decorative background elements -->
-    <div
-        class="absolute top-0 left-0 w-64 h-64 bg-indigo-100 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-50">
-    </div>
-    <div
-        class="absolute bottom-0 right-0 w-96 h-96 bg-cyan-50 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 opacity-50">
-    </div>
-
-    <div class="max-w-md w-full space-y-8 relative z-10" x-data="{ showPassword: false }">
-        <div class="text-center">
-            <div
-                class="inline-flex items-center justify-center p-3 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-200 mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <h2 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-none">Welcome Back</h2>
-            <p class="mt-3 text-slate-500 font-medium">Please enter your credentials to access the system.</p>
+<div class="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-slate-50">
+    <div class="max-w-md w-full" x-data="{ showPassword: false }">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Welcome</h2>
+            <p class="mt-2 text-slate-500 font-medium">Continue to your election portal</p>
         </div>
 
-        <div class="card bg-white p-8 lg:p-10 shadow-2xl shadow-slate-200 border border-slate-100 rounded-[2.5rem]">
+        <div class="bg-white rounded-3xl border border-slate-200 p-10 shadow-sm">
             <form method="post" class="space-y-6">
                 {% csrf_token %}
 
                 <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-black text-slate-700 uppercase tracking-widest text-[10px]">Email
-                            Address</span>
-                    </label>
-                    <div class="relative group">
-                        <div
-                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
-                            </svg>
-                        </div>
-                        <input type="email" name="email" required
-                            class="input input-bordered w-full pl-12 h-14 rounded-2xl bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-600 transition-all font-bold text-slate-900 ring-0"
-                            placeholder="name@institution.com">
-                    </div>
-                    {% if form.email.errors %}
-                    <p class="text-[10px] font-black text-rose-500 mt-2 uppercase tracking-widest pl-2">
-                        {{ form.email.errors.0 }}
-                    </p>
-                    {% endif %}
+                    <label class="label p-0 mb-1"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</span></label>
+                    <input type="email" name="email" required class="input input-bordered w-full h-14 rounded-xl font-medium focus:border-indigo-600 focus:bg-slate-50 transition-all" placeholder="name@institution.com">
+                    {% if form.email.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ form.email.errors.0 }}</p>{% endif %}
                 </div>
 
                 <div class="form-control">
-                    <label class="label">
-                        <span
-                            class="label-text font-black text-slate-700 uppercase tracking-widest text-[10px]">Password</span>
-                        <a href="{% url 'forgot_password' %}"
-                            class="label-text-alt font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Forgot?</a>
-                    </label>
-                    <div class="relative group">
-                        <div
-                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <input :type="showPassword ? 'text' : 'password'" name="password" required
-                            class="input input-bordered w-full pl-12 pr-12 h-14 rounded-2xl bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-600 transition-all font-bold text-slate-900"
-                            placeholder="••••••••">
-                        <button type="button" @click="showPassword = !showPassword"
-                            class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-indigo-600 transition-colors">
-                            <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            <svg x-show="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" x-cloak>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.076m3.108-3.377A10.081 10.081 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.059 10.059 0 01-2.27 4.018M9.88 9.88l4.24 4.24M10.73 5.08l1.41 1.41M18.36 18.36l1.41 1.41M1 1l22 22" />
-                            </svg>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="label p-0"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Password</span></label>
+                        <a href="{% url 'forgot_password' %}" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:underline">Reset?</a>
+                    </div>
+                    <div class="relative">
+                        <input :type="showPassword ? 'text' : 'password'" name="password" required class="input input-bordered w-full h-14 rounded-xl font-medium pr-14 focus:border-indigo-600 focus:bg-slate-50 transition-all" placeholder="••••••••">
+                        <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400">
+                             <span x-show="!showPassword" class="text-[10px] font-bold uppercase tracking-widest">Show</span>
+                             <span x-show="showPassword" class="text-[10px] font-bold uppercase tracking-widest" x-cloak>Hide</span>
                         </button>
                     </div>
-                    {% if form.password.errors %}
-                    <p class="text-[10px] font-black text-rose-500 mt-2 uppercase tracking-widest pl-2">
-                        {{ form.password.errors.0 }}
-                    </p>
-                    {% endif %}
+                    {% if form.password.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ form.password.errors.0 }}</p>{% endif %}
                 </div>
 
-                <div class="pt-2">
-                    <button type="submit"
-                        class="btn btn-primary btn-block h-14 rounded-2xl border-none shadow-xl shadow-indigo-100 font-black text-lg group transition-all hover:scale-[1.02] active:scale-95">
-                        Secure Sign In
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                        </svg>
-                    </button>
+                <div class="pt-4">
+                    <button type="submit" class="btn btn-primary w-full h-14 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-indigo-100">Sign In</button>
                 </div>
             </form>
 
             <div class="mt-8 pt-8 border-t border-slate-50 text-center">
-                <p class="text-slate-400 text-sm font-medium">
-                    New to the system?
-                    <a href="{% url 'organizer_signup' %}"
-                        class="text-indigo-600 font-bold hover:underline underline-offset-4">Create organizer
-                        account</a>
+                <p class="text-xs text-slate-400 font-medium">
+                    New institution leader? <a href="{% url 'organizer_signup' %}" class="text-indigo-600 font-bold hover:underline">Join as Organizer</a>
                 </p>
             </div>
         </div>
-
-        <p class="text-center text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">
-            Shielded by AES-256 Encryption
-        </p>
     </div>
 </div>
 {% endblock %}

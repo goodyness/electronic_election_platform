@@ -4,280 +4,147 @@
 {% block title %}Organizer Command Center | FlashVote{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-slate-50 py-12 lg:py-16 px-4 relative overflow-hidden">
-    <!-- Sophisticated Background Decor -->
-    <div class="absolute top-0 right-0 w-full h-[600px] bg-slate-900 -skew-y-3 origin-top-right -z-10 shadow-2xl"></div>
-
-    <div class="max-w-7xl mx-auto space-y-12">
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-7xl mx-auto space-y-10">
         <!-- Dashboard Header -->
-        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
-            <div class="space-y-4">
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 font-black text-[10px] uppercase tracking-[0.2em] backdrop-blur-md">
-                    <span class="relative flex h-2 w-2">
-                        <span
-                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-400"></span>
-                    </span>
-                    Administrative Console
-                </div>
-                <h2 class="text-4xl lg:text-6xl font-black text-white tracking-tighter leading-none">
-                    Command <span class="text-indigo-400">Center</span>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-900">
+                    Dashboard
                 </h2>
-                <p class="text-slate-400 font-medium text-lg max-w-2xl">
-                    Manage institutional democracy with precision. Monitor live participation, adjust protocols, and
-                    oversee result transparency.
+                <p class="text-slate-500 mt-1">
+                    Manage institutional democracy with precision. Monitor live participation, adjust protocols, and oversee results.
                 </p>
             </div>
 
-            <div class="flex flex-wrap gap-4">
+            <div class="flex gap-4">
                 {% if organizer.status == 'APPROVED' or user.is_superuser %}
-                <a href="{% url 'create_election' %}"
-                    class="btn btn-primary h-16 px-8 rounded-2xl border-none font-black text-lg shadow-[0_20px_50px_-15px_rgba(79,70,229,0.4)] transition-all hover:scale-[1.02] active:scale-95 group">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6 mr-3 group-hover:rotate-90 transition-transform duration-500" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                    </svg>
-                    New Election Sequence
+                <a href="{% url 'create_election' %}" class="btn btn-primary">
+                    New Election
                 </a>
                 {% endif %}
             </div>
         </div>
 
         {% if organizer.status == 'PENDING_APPROVAL' %}
-        <div
-            class="bg-white/5 backdrop-blur-xl rounded-[3rem] border border-white/10 p-12 lg:p-20 text-center space-y-8 shadow-2xl relative overflow-hidden">
-            <div class="absolute -top-20 -right-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl"></div>
-            <div
-                class="w-24 h-24 bg-amber-500 text-white rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl shadow-amber-500/20 scale-110">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="space-y-4">
-                <h3 class="text-3xl lg:text-5xl font-black text-white tracking-tight">Access Verification in Progress
-                </h3>
-                <p class="text-slate-400 max-w-2xl mx-auto text-lg font-medium leading-relaxed">
-                    Our Grand Admins are verifying the credentials for <span class="text-amber-400 font-black">{{
-                        organizer.user.institution.name }}</span>.
-                    You will receive 2FA access tokens once the security audit is complete.
-                </p>
-            </div>
-            <div class="pt-6">
-                <span
-                    class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 font-black text-xs uppercase tracking-[0.3em]">
-                    Institutional Integrity Scan: 65% Complete
-                </span>
-            </div>
+        <div class="card p-12 text-center bg-white">
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Access Verification in Progress</h3>
+            <p class="text-slate-600 max-w-xl mx-auto">
+                Our team is verifying the credentials for <span class="font-semibold text-slate-900">{{ organizer.user.institution.name }}</span>. You will receive access once the audit is complete.
+            </p>
         </div>
         {% elif organizer.status == 'REJECTED' %}
-        <div
-            class="bg-rose-500/10 backdrop-blur-md border border-rose-500/20 rounded-[3rem] p-16 text-center space-y-6 shadow-2xl">
-            <div
-                class="w-20 h-20 bg-rose-500 text-white rounded-3xl flex items-center justify-center mx-auto shadow-xl">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </div>
-            <h3 class="text-3xl font-black text-white">Application Denied</h3>
-            <p class="text-rose-200 max-w-lg mx-auto font-medium">Your credentials could not be verified against
-                institutional records. Please contact core security support for a manual override request.</p>
+        <div class="card p-12 text-center bg-red-50 border-red-100">
+            <h3 class="text-2xl font-bold text-red-700 mb-2">Application Denied</h3>
+            <p class="text-red-600 max-w-xl mx-auto">
+                Your credentials could not be verified against institutional records. Please contact support.
+            </p>
         </div>
         {% else %}
 
         <!-- Active Elections Grid -->
-        <div class="space-y-8">
-            <div class="flex items-center gap-6">
-                <h3
-                    class="text-xl font-black text-white uppercase tracking-widest bg-indigo-600 px-6 py-2 rounded-xl shadow-lg leading-none">
-                    Election Pipeline</h3>
-                <div class="bg-white/10 px-4 py-2 rounded-xl text-white font-black text-xs">{{ elections.count }} ACTIVE
-                    NODES</div>
-                <div class="h-px bg-white/10 flex-grow"></div>
+        <div class="space-y-6">
+            <div class="flex items-center gap-4 border-b border-slate-200 pb-2">
+                <h3 class="text-xl font-bold text-slate-900">Active Elections</h3>
+                <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-semibold">{{ elections.count }} TOTAL</span>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {% for election in elections %}
-                <div
-                    class="card bg-white p-0 overflow-hidden group hover:border-indigo-600 transition-all duration-500 shadow-2xl shadow-slate-200/50">
-                    <div class="p-8 lg:p-10 space-y-8">
-                        <div class="flex justify-between items-start gap-6">
-                            <div class="space-y-3">
-                                <div class="flex items-center gap-3">
-                                    <span
-                                        class="badge badge-lg border-none font-black text-[10px] tracking-widest rounded-lg py-4 px-5
-                                        {% if election.status == 'ACTIVE' %}bg-emerald-50 text-emerald-600{% elif election.status == 'CLOSED' %}bg-rose-50 text-rose-600{% else %}bg-slate-100 text-slate-500{% endif %}">
-                                        {{ election.get_status_display }}
-                                    </span>
-                                    <span
-                                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic opacity-60">ID:
-                                        {{ election.short_id }}</span>
-                                </div>
-                                <h4
-                                    class="text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tighter leading-none">
-                                    {{ election.title }}
-                                </h4>
+                <div class="card bg-white p-6 hover:border-indigo-300 transition-colors flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="px-2 py-1 text-xs font-semibold rounded 
+                                {% if election.status == 'ACTIVE' %}bg-green-100 text-green-700
+                                {% elif election.status == 'CLOSED' %}bg-red-100 text-red-700
+                                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                {{ election.get_status_display }}
+                            </span>
+                            <span class="text-xs font-medium text-slate-500 border px-2 py-1 rounded">
+                                {{ election.get_plan_display }}
+                            </span>
+                        </div>
+                        <h4 class="text-xl font-bold text-slate-900 mb-2">{{ election.title }}</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm mt-4 mb-6">
+                            <div class="bg-slate-50 p-3 rounded">
+                                <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Participation</p>
+                                <p class="font-bold text-slate-900 text-lg">{{ election.voters.count }} <span class="font-normal text-sm text-slate-600">voters</span></p>
                             </div>
-                            <div
-                                class="p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner group-hover:bg-indigo-50 transition-colors">
-                                <span
-                                    class="badge badge-sm font-black uppercase text-[9px] rounded-md py-3 px-3 border-none
-                                    {% if election.plan == 'PREMIUM' %}bg-indigo-600 text-white shadow-lg shadow-indigo-100{% else %}bg-slate-200 text-slate-600{% endif %}">
-                                    {{ election.get_plan_display }}
-                                </span>
+                            <div class="bg-slate-50 p-3 rounded">
+                                <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Timeline</p>
+                                <p class="font-medium text-slate-900">{{ election.start_time|date:"M j" }} - {{ election.end_time|date:"M j" }}</p>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <a href="{% url 'manage_election' short_id=election.short_id %}" class="btn btn-outline flex-grow">Manage</a>
+                        <a href="{% url 'election_results' short_id=election.short_id %}" class="btn btn-primary flex-grow">Results</a>
 
-                        <div class="grid grid-cols-2 gap-6 bg-slate-50/50 rounded-3xl p-6 border border-slate-100/50">
-                            <div>
-                                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                                    Participation</div>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-2xl font-black text-slate-900 leading-none">{{  election.voters.count }}</span>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Accredited</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                                    Timeline</div>
-                                <div class="text-xs font-black text-slate-900 leading-none uppercase tracking-tighter">
-                                    {{ election.start_time|date:"M j" }} → {{ election.end_time|date:"M j" }}
-                                </div>
-                            </div>
-                        </div>
+                        {% if election.status == 'ACTIVE' %}
+                        <a href="{% url 'update_status' short_id=election.short_id action='freeze' %}" data-confirm="freeze" class="btn btn-warning" title="Freeze">
+                            Pause
+                        </a>
+                        {% elif election.status == 'FROZEN' %}
+                        <a href="{% url 'update_status' short_id=election.short_id action='activate' %}" data-confirm="activate" class="btn btn-success" title="Activate">
+                            Resume
+                        </a>
+                        {% endif %}
 
-                        <div class="flex flex-wrap gap-2 pt-4">
-                            <a href="{% url 'manage_election' short_id=election.short_id %}"
-                                class="btn btn-neutral flex-grow h-14 rounded-2xl font-black text-xs uppercase tracking-widest border-none shadow-xl hover:scale-105 transition-transform bg-slate-900">
-                                Manage Core
-                            </a>
-                            <a href="{% url 'election_results' short_id=election.short_id %}"
-                                class="btn btn-ghost flex-grow h-14 rounded-2xl font-black text-xs uppercase tracking-widest border border-slate-200 text-slate-600 hover:bg-slate-50">
-                                Analytical Feed
-                            </a>
-
-                            {% if election.status == 'ACTIVE' %}
-                            <a href="{% url 'update_status' short_id=election.short_id action='freeze' %}"
-                                data-confirm="freeze"
-                                class="btn btn-warning h-14 w-14 rounded-2xl p-0 shadow-lg shadow-amber-100 border-none bg-amber-400 hover:bg-amber-500 text-white scale-100 hover:scale-110 transition-transform"
-                                title="Emergency Freeze">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                </svg>
-                            </a>
-                            {% elif election.status == 'FROZEN' %}
-                            <a href="{% url 'update_status' short_id=election.short_id action='activate' %}"
-                                data-confirm="activate"
-                                class="btn btn-success h-14 w-14 rounded-2xl p-0 shadow-lg shadow-emerald-100 border-none bg-emerald-500 hover:bg-emerald-600 text-white scale-100 hover:scale-110 transition-transform"
-                                title="Restore Node">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                            </a>
-                            {% endif %}
-
-                            {% if election.status != 'CLOSED' %}
-                            <a href="{% url 'update_status' short_id=election.short_id action='close' %}"
-                                data-confirm="close"
-                                class="btn btn-error h-14 w-14 rounded-2xl p-0 shadow-lg shadow-rose-100 border-none bg-rose-500 hover:bg-rose-600 text-white scale-100 hover:scale-110 transition-transform"
-                                title="Terminate Session">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </a>
-                            {% endif %}
-                        </div>
+                        {% if election.status != 'CLOSED' %}
+                        <a href="{% url 'update_status' short_id=election.short_id action='close' %}" data-confirm="close" class="btn btn-error" title="Close">
+                            Close
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
                 {% empty %}
-                <div class="col-span-1 lg:col-span-2 card p-24 text-center border-dashed border-2 border-slate-200">
-                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-300" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-black text-slate-900 mb-4">No Active Deployments</h3>
-                    <p class="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed mb-10">Your institutional node
-                        is idle. Initialize a new election sequence to begin.</p>
-                    <a href="{% url 'create_election' %}"
-                        class="btn btn-primary btn-lg rounded-2xl h-16 px-12 font-black shadow-xl shadow-indigo-100">Initialize
-                        Wave</a>
+                <div class="col-span-1 lg:col-span-2 card p-16 text-center border-dashed bg-slate-50">
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">No Active Elections</h3>
+                    <p class="text-slate-500 mb-6">You don't have any active elections right now.</p>
+                    <a href="{% url 'create_election' %}" class="btn btn-primary">Create New Election</a>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <!-- Financial History Section -->
-        <div class="space-y-8">
-            <div class="flex items-center gap-6">
-                <h3
-                    class="text-xl font-black text-slate-900 uppercase tracking-widest bg-emerald-50 text-emerald-600 px-6 py-2 rounded-xl border border-emerald-100 leading-none">
-                    Subscription Ledger</h3>
-                <div class="h-px bg-slate-200 flex-grow"></div>
+        <div class="space-y-6">
+            <div class="flex items-center gap-4 border-b border-slate-200 pb-2">
+                <h3 class="text-xl font-bold text-slate-900">Subscription Ledger</h3>
             </div>
 
-            <div class="card bg-white p-0 overflow-hidden shadow-2xl shadow-slate-200/50">
+            <div class="card bg-white overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="table w-full">
-                        <thead>
-                            <tr class="bg-slate-50/50 border-b border-slate-100">
-                                <th class="py-6 pl-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">
-                                    Timestamp</th>
-                                <th class="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Target
-                                    Election</th>
-                                <th
-                                    class="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">
-                                    Protocol Tier</th>
-                                <th class="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Quantum
-                                </th>
-                                <th
-                                    class="pr-10 text-right font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">
-                                    Network ID</th>
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="text-slate-500 font-semibold text-xs py-4 pl-6">Date</th>
+                                <th class="text-slate-500 font-semibold text-xs">Target Election</th>
+                                <th class="text-slate-500 font-semibold text-xs">Plan</th>
+                                <th class="text-slate-500 font-semibold text-xs">Amount</th>
+                                <th class="text-slate-500 font-semibold text-xs text-right pr-6">Reference</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-50">
+                        <tbody class="divide-y divide-slate-100">
                             {% for payment in payment_history %}
-                            <tr class="hover:bg-indigo-50/30 transition-colors group">
-                                <td class="py-6 pl-10 font-bold text-slate-600">
-                                    <div class="flex flex-col">
-                                        <span class="text-slate-900">{{ payment.paid_at|date:"M d, Y" }}</span>
-                                        <span class="text-[9px] uppercase tracking-widest opacity-50">{{
-                                            payment.paid_at|date:"H:i" }} UTC</span>
-                                    </div>
+                            <tr class="hover:bg-slate-50">
+                                <td class="py-4 pl-6 text-sm">
+                                    <div class="font-medium text-slate-900">{{ payment.paid_at|date:"M d, Y" }}</div>
+                                    <div class="text-xs text-slate-500">{{ payment.paid_at|date:"H:i" }}</div>
                                 </td>
-                                <td class="font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{{ payment.election.title }}</td>
-                                <td class="text-center">
-                                    <span
-                                        class="badge badge-sm rounded-lg px-3 py-3 border-none font-black text-[9px] uppercase tracking-widest
-                                        {% if payment.plan == 'PREMIUM' %}bg-indigo-600 text-white shadow-lg{% else %}bg-slate-100 text-slate-500{% endif %}">
+                                <td class="text-sm font-medium text-slate-900">{{ payment.election.title }}</td>
+                                <td>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-600">
                                         {{ payment.get_plan_display }}
                                     </span>
                                 </td>
-                                <td class="font-black text-slate-900 leading-none">
-                                    ₦{{ payment.amount|floatformat:2 }}
-                                </td>
-                                <td
-                                    class="pr-10 text-right font-mono text-[9px] font-black text-slate-300 uppercase select-all group-hover:text-slate-500 transition-colors">
-                                    {{ payment.paystack_reference }}
-                                </td>
+                                <td class="text-sm font-medium text-slate-900">₦{{ payment.amount|floatformat:2 }}</td>
+                                <td class="text-sm text-slate-500 text-right pr-6 font-mono">{{ payment.paystack_reference }}</td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5"
-                                    class="py-16 text-center text-slate-400 font-bold uppercase tracking-widest text-xs italic">
-                                    No transaction pulses detected in current period</td>
+                                <td colspan="5" class="py-8 text-center text-slate-500 text-sm">No transaction history found.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -287,55 +154,46 @@
         </div>
 
         {% endif %}
-
-        <!-- Platform Footer -->
-        <div
-            class="pt-20 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
-            <div class="space-y-2">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Advanced Election Management
-                    Grid v8.2.1</p>
-                <div
-                    class="flex gap-4 text-[10px] font-black text-slate-300 uppercase tracking-widest justify-center md:justify-start">
-                    <a href="#" class="hover:text-indigo-600 transition-colors">API Keys</a>
-                    <span class="opacity-20">•</span>
-                    <a href="#" class="hover:text-indigo-600 transition-colors">Compliance Logs</a>
-                    <span class="opacity-20">•</span>
-                    <a href="#" class="hover:text-indigo-600 transition-colors">Global Trust Node</a>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-6">
-                <div class="flex flex-col items-end">
-                    <div class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Grid Load</div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                            <div class="w-1/3 h-full bg-emerald-500"></div>
-                        </div>
-                        <span class="text-[10px] font-black text-emerald-600 tracking-tighter">OPTIMAL</span>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 {% block extra_js %}
 <script>
-    function confirmAction(url, title, text, icon, confirmText) {
+    function confirmAction(url, title, text, icon, confirmText, actionType) {
         Swal.fire({
             title: title,
-            text: text,
+            text: 'Provide a technical reason for this status change:',
+            input: 'textarea',
+            inputPlaceholder: 'e.g. Starting election cycle, maintenance, emergency closure...',
             icon: icon,
             showCancelButton: true,
-            confirmButtonColor: '#4f46e5',
-            cancelButtonColor: '#f43f5e',
             confirmButtonText: confirmText,
-            cancelButtonText: 'Abort',
-            background: '#ffffff',
-            color: '#0f172a',
-            borderRadius: '2rem'
+            cancelButtonText: 'Cancel',
+            buttonsStyling: false,
+            customClass: {
+                title: 'text-xl font-black text-slate-900 tracking-tight',
+                popup: 'rounded-[2.5rem] p-10',
+                confirmButton: `btn ${actionType === 'freeze' ? 'bg-amber-500 hover:bg-amber-600' : 'btn-primary'} px-8 rounded-xl h-12 text-[10px] font-black uppercase tracking-widest ml-3`,
+                cancelButton: 'btn btn-ghost border-slate-200 px-8 rounded-xl h-12 text-[10px] font-black uppercase tracking-widest'
+            }
         }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = url;
+            if (result.isConfirmed && result.value) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = url;
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = 'csrfmiddlewaretoken';
+                csrf.value = '{{ csrf_token }}';
+                form.appendChild(csrf);
+                const reasonInput = document.createElement('input');
+                reasonInput.type = 'hidden';
+                reasonInput.name = 'reason';
+                reasonInput.value = result.value;
+                form.appendChild(reasonInput);
+                document.body.appendChild(form);
+                form.submit();
+            } else if (result.isConfirmed && !result.value) {
+                Swal.fire('Reason Required', 'You must provide a reason for this status change.', 'error');
             }
         });
     }
@@ -347,11 +205,11 @@
             const action = this.getAttribute('data-confirm');
 
             if (action === 'freeze') {
-                confirmAction(url, 'Emergency Freeze?', 'This will immediately halt all voting activity for this election.', 'warning', 'Yes, Freeze it!');
+                confirmAction(url, 'Pause Election?', 'This will temporarily halt voting.', 'warning', 'Yes, Pause', 'freeze');
             } else if (action === 'activate') {
-                confirmAction(url, 'Activate Election?', 'This will set the election to LIVE and allow accredited voters to cast ballots.', 'info', 'Yes, Go Live!');
+                confirmAction(url, 'Resume Election?', 'This will allow accredited voters to cast ballots.', 'info', 'Yes, Resume', 'activate');
             } else if (action === 'close') {
-                confirmAction(url, 'Terminate Session?', 'This action is final. No more votes can be cast and results will be calculated.', 'error', 'Yes, Close it!');
+                confirmAction(url, 'Close Election?', 'This action is final. No more votes can be cast.', 'error', 'Yes, Close', 'close');
             }
         });
     });

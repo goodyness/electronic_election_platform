@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import models
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 from .models import ElectionOrganizer, Election, Institution, Voter, AuditLog
 from .forms import InstitutionForm
 
+@login_required
 def grand_admin_dashboard(request):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -12,23 +14,63 @@ def grand_admin_dashboard(request):
         
     pending_organizers = ElectionOrganizer.objects.filter(status='PENDING_APPROVAL')
     active_institutions = Institution.objects.all()
-    all_elections = Election.objects.all().order_by('-created_at')
-    
     from .models import SystemConfig, PlanPricing, ElectionPayment
+    from django.utils import timezone
+    from datetime import timedelta
+    
     config = SystemConfig.get_config()
     plans = PlanPricing.get_all_plans()
-    payment_history = ElectionPayment.objects.filter(is_verified=True).order_by('-paid_at')[:5]
-    all_elections = Election.objects.all().order_by('-created_at')[:5]
     
+    # Anomaly Detection Logic
+    anomalies = []
+    ten_mins_ago = timezone.now() - timedelta(minutes=10)
+    
+    # 1. OTP Flooding (IP with many OTP requests for different users)
+    flooding_ips = AuditLog.objects.filter(
+        action__icontains='OTP Sent', 
+        timestamp__gte=ten_mins_ago
+    ).values('ip_address').annotate(count=models.Count('id')).filter(count__gt=5)
+    
+    for ip in flooding_ips:
+        anomalies.append({
+            'type': 'OTP_FLOOD',
+            'severity': 'ERROR',
+            'message': f"IP {ip['ip_address']} requested {ip['count']} OTPs in 10 mins.",
+            'ip': ip['ip_address']
+        })
+
+    # 2. Bulk Access Attempts (Unauthorized Admin access)
+    unauthorized_attempts = AuditLog.objects.filter(
+        action__icontains='Unauthorized',
+        timestamp__gte=ten_mins_ago
+    ).values('ip_address').annotate(count=models.Count('id')).filter(count__gt=3)
+
+    for ip in unauthorized_attempts:
+        anomalies.append({
+            'type': 'BRUTE_FORCE',
+            'severity': 'CRITICAL',
+            'message': f"Multiple unauthorized access attempts from {ip['ip_address']}",
+            'ip': ip['ip_address']
+        })
+
+    payment_history = ElectionPayment.objects.filter(is_verified=True).order_by('-paid_at')[:5]
+    total_revenue = ElectionPayment.objects.filter(is_verified=True).aggregate(total=models.Sum('amount'))['total'] or 0
+    all_elections_count = Election.objects.count()
+    
+    all_elections = Election.objects.all().order_by('-created_at')[:5]
     return render(request, 'election_core/grand_admin_dashboard.html', {
         'pending_organizers': pending_organizers,
         'institutions': active_institutions,
         'elections': all_elections,
+        'elections_count': all_elections_count,
         'config': config,
         'plans': plans,
-        'payment_history': payment_history
+        'payment_history': payment_history,
+        'total_revenue': total_revenue,
+        'anomalies': anomalies
     })
 
+@login_required
 def approve_organizer(request, organizer_id, action):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -58,6 +100,7 @@ def approve_organizer(request, organizer_id, action):
     organizer.save()
     return redirect('grand_admin_dashboard')
 
+@login_required
 def system_analytics(request):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -92,6 +135,7 @@ def system_analytics(request):
         'all_elections': all_elections
     })
 
+@login_required
 def election_analytics(request, short_id):
     from django.db.models import Count
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser or request.user.role == 'ORGANIZER'):
@@ -168,6 +212,7 @@ def election_analytics(request, short_id):
 
     return render(request, 'election_core/election_analytics.html', context)
 
+@login_required
 def audit_logs_view(request):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -180,6 +225,7 @@ def audit_logs_view(request):
     
     return render(request, 'election_core/audit_logs.html', {'page_obj': page_obj})
 
+@login_required
 def list_institutions(request):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -188,6 +234,7 @@ def list_institutions(request):
     institutions = Institution.objects.all().order_by('-created_at')
     return render(request, 'election_core/institutions.html', {'institutions': institutions})
 
+@login_required
 def manage_institution(request, pk=None):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -209,6 +256,7 @@ def manage_institution(request, pk=None):
         'is_edit': bool(pk)
     })
 
+@login_required
 def delete_institution(request, pk):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -219,6 +267,7 @@ def delete_institution(request, pk):
     messages.success(request, "Institution deleted successfully.")
     return redirect('list_institutions')
 
+@login_required
 def list_organizers(request):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -244,6 +293,7 @@ def list_organizers(request):
         'search_query': search_query
     })
 
+@login_required
 def unapprove_organizer(request, organizer_id):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -259,6 +309,7 @@ def unapprove_organizer(request, organizer_id):
     messages.warning(request, f"Approval revoked for {organizer.user.get_full_name()}. Status set to Pending.")
     return redirect('list_organizers')
 
+@login_required
 def delete_organizer(request, organizer_id):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -277,6 +328,7 @@ def delete_organizer(request, organizer_id):
     messages.success(request, f"Organizer account for {name} has been permanently deleted.")
     return redirect('list_organizers')
 
+@login_required
 def toggle_system_otp(request):
     from .models import SystemConfig
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
@@ -291,6 +343,7 @@ def toggle_system_otp(request):
     messages.info(request, f"System OTP emails have been {status}.")
     return redirect('grand_admin_dashboard')
 
+@login_required
 def toggle_system_receipts(request):
     from .models import SystemConfig
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
@@ -305,6 +358,7 @@ def toggle_system_receipts(request):
     messages.info(request, f"System voting receipts have been {status}.")
     return redirect('grand_admin_dashboard')
 
+@login_required
 def manage_plan_pricing(request):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -327,6 +381,7 @@ def manage_plan_pricing(request):
         
     return redirect('grand_admin_dashboard')
 
+@login_required
 def export_audit_pdf(request, short_id):
     from .models import Election, Voter
     from django.http import FileResponse
@@ -338,6 +393,10 @@ def export_audit_pdf(request, short_id):
         messages.error(request, "Access denied.")
         return redirect('home')
         
+    if election.status != 'CLOSED':
+        messages.warning(request, "Audit reports are only available after the election has been officially CLOSED.")
+        return redirect('election_analytics', short_id=election.short_id)
+
     if election.plan != 'PREMIUM':
         messages.error(request, "PDF Audit Reports are a Premium feature.")
         return redirect('election_analytics', short_id=election.short_id)
@@ -349,6 +408,7 @@ def export_audit_pdf(request, short_id):
     
     return FileResponse(buffer, as_attachment=True, filename=f'audit_report_{election.id}.pdf')
 
+@login_required
 def list_all_elections(request):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")
@@ -373,6 +433,7 @@ def list_all_elections(request):
         'search_query': search_query
     })
 
+@login_required
 def list_all_payments(request):
     if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
         messages.error(request, "Access denied.")

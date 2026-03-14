@@ -3,136 +3,62 @@
 {% block title %}Create New Election | FlashVote{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-12 lg:py-20 px-6">
-
-
-    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="space-y-1">
-            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
-                <a href="{% url 'organizer_dashboard' %}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
-                <span>/</span>
-                <span class="text-indigo-600">New Deployment</span>
-            </nav>
-            <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Initiate New
-                Election</h2>
-            <p class="text-slate-500 font-medium">Define the foundational parameters for your upcoming democratic event.
-            </p>
-        </div>
+<div class="max-w-3xl mx-auto py-12 px-6">
+    <div class="mb-8">
+        <nav class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2 text-slate-400">
+            <a href="{% url 'organizer_dashboard' %}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
+            <span>/</span>
+            <span class="text-indigo-600">New Election</span>
+        </nav>
+        <h2 class="text-3xl font-bold text-slate-900">Create Election</h2>
+        <p class="text-slate-500 mt-1">Define the parameters for your upcoming election.</p>
     </div>
 
-
-    <div
-        class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 p-8 lg:p-12 relative overflow-hidden">
-        <div
-            class="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-50">
-        </div>
-
-        <form method="post" class="space-y-10 relative z-10">
+    <div class="bg-white rounded-xl border border-slate-200 p-8">
+        <form method="post" class="space-y-8">
             {% csrf_token %}
 
-
             <div class="space-y-6">
-                <div class="flex items-center gap-4 text-indigo-900/50 pb-2 border-b border-indigo-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0c0 .85.69 1.5 1.5 1.5H13" />
-                    </svg>
-                    <h3 class="text-xs font-black uppercase tracking-widest">Event Identity</h3>
-                </div>
-
                 <div class="form-control">
-                    <label class="label"><span
-                            class="label-text font-black text-slate-700 uppercase tracking-widest text-[10px]">Election
-                            Title</span></label>
+                    <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">Election Title</span></label>
                     <input type="text" name="title" value="{{ form.title.value|default:'' }}"
                         placeholder="e.g., 2026 Student Union General Election"
-                        class="input input-lg w-full rounded-2xl bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-600 transition-all font-bold text-slate-900 placeholder:font-normal"
-                        required>
+                        class="input input-bordered w-full" required>
                     {% if form.title.errors %}
-                    <p class="text-[10px] font-black text-rose-500 mt-2 uppercase tracking-widest">{{
-                        form.title.errors.0 }}</p>
+                    <p class="text-xs text-red-500 mt-1">{{ form.title.errors.0 }}</p>
                     {% endif %}
                 </div>
-            </div>
 
-
-            <div class="space-y-6">
-                <div class="flex items-center gap-4 text-emerald-900/50 pb-2 border-b border-emerald-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h3 class="text-xs font-black uppercase tracking-widest">Voting Window</h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-control">
-                        <label class="label"><span
-                                class="label-text font-black text-slate-700 uppercase tracking-widest text-[10px]">Start
-                                Date & Time</span></label>
+                        <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">Start Time</span></label>
                         <input type="datetime-local" name="start_time"
                             value="{{ form.start_time.value|date:'Y-m-d\TH:i'|default:'' }}"
-                            class="input input-lg w-full rounded-2xl bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-600 transition-all font-mono text-sm font-bold text-slate-900"
-                            required>
+                            class="input input-bordered w-full" required>
                         {% if form.start_time.errors %}
-                        <p class="text-[10px] font-black text-rose-500 mt-2 uppercase tracking-widest">{{
-                            form.start_time.errors.0 }}</p>
+                        <p class="text-xs text-red-500 mt-1">{{ form.start_time.errors.0 }}</p>
                         {% endif %}
                     </div>
 
                     <div class="form-control">
-                        <label class="label"><span
-                                class="label-text font-black text-slate-700 uppercase tracking-widest text-[10px]">End
-                                Date & Time</span></label>
+                        <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">End Time</span></label>
                         <input type="datetime-local" name="end_time"
                             value="{{ form.end_time.value|date:'Y-m-d\TH:i'|default:'' }}"
-                            class="input input-lg w-full rounded-2xl bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-600 transition-all font-mono text-sm font-bold text-slate-900"
-                            required>
+                            class="input input-bordered w-full" required>
                         {% if form.end_time.errors %}
-                        <p class="text-[10px] font-black text-rose-500 mt-2 uppercase tracking-widest">{{
-                            form.end_time.errors.0 }}</p>
+                        <p class="text-xs text-red-500 mt-1">{{ form.end_time.errors.0 }}</p>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row gap-4 pt-10">
-                <button type="submit"
-                    class="btn btn-primary flex-grow rounded-2xl h-16 normal-case font-black text-lg border-none shadow-xl shadow-indigo-100 hover:shadow-indigo-200 hover:-translate-y-1 transition-all">
-                    Initialize Deployment
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-100">
+                <button type="submit" class="btn btn-primary flex-grow h-12">
+                    Create Election
                 </button>
-                <a href="{% url 'organizer_dashboard' %}"
-                    class="btn btn-ghost bg-slate-50 text-slate-500 rounded-2xl h-16 px-10 normal-case font-bold hover:bg-slate-100">Cancel
-                    Setup</a>
+                <a href="{% url 'organizer_dashboard' %}" class="btn btn-ghost px-10 h-12">Cancel</a>
             </div>
         </form>
     </div>
 </div>
-
-<style>
-    input[type="datetime-local"] {
-        position: relative;
-    }
-
-    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        opacity: 0.6;
-        transition: opacity 0.2s;
-    }
-
-    input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
-        opacity: 1;
-    }
-</style>
 {% endblock %}

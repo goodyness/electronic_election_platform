@@ -3,105 +3,64 @@
 {% block title %}Institutions | Admin Control Center{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto py-8">
-
-
+<div class="max-w-7xl mx-auto py-12 px-4">
+    <!-- Header -->
     <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="space-y-1">
-            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
+        <div>
+            <nav class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2 text-slate-400">
                 <a href="{% url 'home' %}" class="hover:text-indigo-600 transition-colors">Home</a>
                 <span>/</span>
-                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Admin
-                    Dashboard</a>
+                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Admin Dashboard</a>
                 <span>/</span>
                 <span class="text-indigo-600">Institutions</span>
             </nav>
-            <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Educational
-                Institutions</h2>
-            <p class="text-slate-500 font-medium">Manage participating universities, colleges, and organizations.</p>
+            <h2 class="text-3xl font-bold text-slate-900">Educational Institutions</h2>
+            <p class="text-slate-500 mt-1">Manage participating universities and organizational nodes.</p>
         </div>
-
-        <div>
-            <a href="{% url 'add_institution' %}"
-                class="btn btn-primary rounded-xl h-12 px-8 normal-case font-black shadow-lg shadow-indigo-100 border-none group">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 mr-2 transform group-hover:rotate-90 transition-transform" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Register New Institution
-            </a>
-        </div>
+        <a href="{% url 'add_institution' %}" class="btn btn-primary h-12 px-8 rounded-lg font-bold">Register Institution</a>
     </div>
 
-
-    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-        <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
-            <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">Institutional Registry</h3>
-            <span class="text-xs font-black text-slate-400">{{ institutions.count }} TOTAL PARTNERS</span>
+    <!-- Registry -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 uppercase">Institutional Registry</h3>
+            <span class="text-xs font-bold text-slate-400 uppercase">{{ institutions.count }} Total</span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="table table-lg w-full">
+            <table class="table w-full text-sm">
                 <thead>
-                    <tr class="text-slate-400 font-black uppercase tracking-widest text-[10px] bg-slate-50/50">
-                        <th class="py-6 pl-8">Institution Name</th>
-                        <th>Network Status</th>
-                        <th>Onboarding Date</th>
-                        <th class="pr-8 text-right">Rapid Action</th>
+                    <tr class="text-[10px] font-bold uppercase text-slate-400 bg-white border-slate-100">
+                        <th class="px-8 py-4">Institution Name</th>
+                        <th>Status</th>
+                        <th>Onboarded</th>
+                        <th class="text-right px-8">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody class="divide-y divide-slate-100">
                     {% for inst in institutions %}
-                    <tr class="hover:bg-slate-50/50 transition-colors group">
-                        <td class="py-6 pl-8">
-                            <h4
-                                class="font-extrabold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">
-                                {{ inst.name }}</h4>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-8 py-4">
+                            <h4 class="font-bold text-slate-900">{{ inst.name }}</h4>
                         </td>
                         <td>
                             <div class="flex items-center gap-2">
-                                <div
-                                    class="w-2 h-2 rounded-full {% if inst.is_active %}bg-emerald-500{% else %}bg-rose-500{% endif %}">
-                                </div>
-                                <span
-                                    class="text-xs font-black uppercase tracking-widest leading-none {% if inst.is_active %}text-emerald-600{% else %}text-rose-600{% endif %}">
-                                    {{ inst.is_active|yesno:"Active Service,Offline" }}
+                                <span class="w-1.5 h-1.5 rounded-full {% if inst.is_active %}bg-green-500{% else %}bg-rose-500{% endif %}"></span>
+                                <span class="text-[10px] font-bold uppercase {% if inst.is_active %}text-green-600{% else %}text-rose-600{% endif %}">
+                                    {{ inst.is_active|yesno:"Active,Offline" }}
                                 </span>
                             </div>
                         </td>
-                        <td>
-                            <span class="text-xs font-bold text-slate-500">{{ inst.created_at|date:"M d, Y" }}</span>
-                        </td>
-                        <td class="pr-8 text-right">
-                            <div class="flex justify-end gap-3">
-                                <a href="{% url 'edit_institution' inst.pk %}"
-                                    class="btn btn-sm btn-ghost hover:bg-slate-100 text-indigo-600 rounded-xl normal-case font-bold h-10 px-4">Edit
-                                    Profile</a>
-                                <a href="{% url 'delete_institution' inst.pk %}"
-                                    onclick="return confirm('PERMANENTLY remove this institution? High-risk action!')"
-                                    class="btn btn-sm btn-ghost hover:bg-rose-50 text-rose-500 rounded-xl normal-case font-bold h-10 px-4">Delete</a>
+                        <td class="text-slate-500">{{ inst.created_at|date:"M d, Y" }}</td>
+                        <td class="text-right px-8">
+                            <div class="flex justify-end gap-3 text-xs font-bold uppercase tracking-widest">
+                                <a href="{% url 'edit_institution' inst.pk %}" class="text-indigo-600 hover:underline">Edit</a>
+                                <a href="{% url 'delete_institution' inst.pk %}" onclick="return confirm('PERMANENTLY remove this institution?')" class="text-rose-500 hover:underline">Delete</a>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="4" class="py-32 text-center">
-                            <div
-                                class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-200" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <p class="text-slate-400 font-medium tracking-tight">No institutions found in the system
-                                registry.</p>
-                            <a href="{% url 'add_institution' %}"
-                                class="btn btn-link no-underline text-indigo-600 font-black uppercase tracking-widest text-[10px] mt-2">Deploy
-                                First Node →</a>
-                        </td>
-                    </tr>
+                    <tr><td colspan="4" class="p-20 text-center text-slate-400 italic">No institutions registered.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

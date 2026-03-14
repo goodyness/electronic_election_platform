@@ -1,22 +1,62 @@
+# Python dependencies
 __pycache__/
 *.py[cod]
+*$py.class
 *.pyo
 *.pyd
-*.egg-info/
-dist/
-build/
+*.db
+.pytest_cache/
+.coverage
+htmlcov/
 
+# Environments
 venv/
 env/
 .venv/
+ENV/
+bin/
+lib/
+include/
+setuptools*.zip
 
-*.log
+# Django
+local_settings.py
 db.sqlite3
+db.sqlite3-journal
+instance/
+.webapps/
 staticfiles/
 media/
+templates/admin/
 
+# Environment variables
 .env
 *.env
+.env.*
 
+# Specialized Project Documentation (Private)
+about_project.md
+how_to_use.md
+brain/
+.gemini/
+
+# Temporary Assets & Local Exports
+*.csv
+*.png
+*.jpg
+*.jpeg
+!**/static/**/*.png
+!**/static/**/*.jpg
+!**/static/**/*.jpeg
+
+# IDEs
 .vscode/
 .idea/
+*.swp
+*.bak
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

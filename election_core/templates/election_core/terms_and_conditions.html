@@ -1,0 +1,83 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}Terms & Conditions | FlashVote{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-20 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-900 px-8 py-12 text-center">
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">Terms of Engagement</h1>
+                <p class="text-slate-400 mt-2 font-medium uppercase tracking-[0.2em] text-xs">Standard Service Protocol v2.0</p>
+            </div>
+            
+            <div class="p-8 md:p-12 prose prose-slate max-w-none">
+                <div class="space-y-10">
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">01</span>
+                            Service Overview
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed mt-4">
+                            FlashVote provides a secure, digital election management platform for institutions. By utilizing this infrastructure, you agree to abide by these protocols and all applicable Nigerian laws.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">02</span>
+                            Organizer Responsibilities
+                        </h2>
+                        <div class="space-y-4 mt-6">
+                            <div class="p-6 rounded-2xl bg-amber-50 border border-amber-100">
+                                <h3 class="font-bold text-amber-900 text-sm mb-2 italic">Data Integrity Warning</h3>
+                                <p class="text-xs text-amber-700 leading-relaxed font-medium">
+                                    Organizers are solely responsible for the accuracy and legality of the voter data (emails) they upload. You must ensure you have the necessary institutional authority to utilize this data.
+                                </p>
+                            </div>
+                            <p class="text-sm text-slate-600 leading-relaxed font-medium">
+                                Organizers may not misrepresent their identity or institutional affiliation. Any attempt to manipulate results or bypass security protocols will lead to immediate account termination and legal referral to the NDPC.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">03</span>
+                            Voting Integrity
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed mt-4">
+                            Voters agree to cast their ballots personally and without coercion. One-Time Passwords (OTPs) sent to institutional emails are strictly personal and must not be shared. FlashVote reserves the right to invalidate votes originating from suspicious or breached endpoints.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">04</span>
+                            Limitation of Liability
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed mt-4 italic font-medium">
+                            While FlashVote employs state-of-the-art security, the platform is provided "as is." We are not liable for institutional election disputes, data entry errors by organizers, or issues arising from local terminal connectivity.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">05</span>
+                            Fees & Payments
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed mt-4">
+                            Premium features and tier-based deployments are subject to the published pricing schedule. All verified payments are non-refundable once the configured election has transitioned to an "Active" state.
+                        </p>
+                    </section>
+
+                    <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">&copy; 2026 FlashVote Solutions Ltd.</p>
+                        <a href="{% url 'privacy_policy' %}" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest">View Data Protocols</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

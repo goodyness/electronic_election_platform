@@ -1,86 +1,45 @@
-<!DOCTYPE html>
-<html>
+{% extends 'emails/base_email.html' %}
 
-<head>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
+{% block content %}
+<style>
+    .receipt-box {
+        border: 1px solid #e2e8f0;
+        padding: 32px;
+        background-color: #f8fafc;
+        text-align: center;
+        border-radius: 20px;
+        margin: 24px 0;
+    }
+    .receipt-id {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-top: 8px;
+        letter-spacing: 0.05em;
+    }
+</style>
 
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #eee;
-            border-radius: 10px;
-        }
+<h2 style="color: #0f172a; font-size: 24px; font-weight: 800; margin-bottom: 16px;">Ballot Confirmed</h2>
+<p style="color: #64748b;">Thank you for voting. Your participation ensures a fair and transparent election process. Below is your secure digital receipt.</p>
 
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #27ae60;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        .receipt-box {
-            border: 2px dashed #27ae60;
-            padding: 20px;
-            background-color: #f9fdfa;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .receipt-id {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 20px;
-            font-weight: bold;
-            color: #27ae60;
-            margin-top: 10px;
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 12px;
-            color: #777;
-            margin-top: 40px;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="header">
-            <h1 style="margin:0; color: #2c3e50;">E-Election System</h1>
-            <p style="margin:5px 0 0; color: #7f8c8d;">Vote Confirmation Receipt</p>
-        </div>
-
-        <h2 style="color: #2c3e50;">Thank you for voting!</h2>
-        <p>Your participation is vital to a fair and transparent election process. This email confirms that your vote
-            was successfully recorded.</p>
-
-        <div class="receipt-box">
-            <div style="font-size: 14px; color: #7f8c8d; text-transform: uppercase;">Digital Receipt ID</div>
-            <div class="receipt-id">{{ receipt_id }}</div>
-            <p style="font-size: 12px; margin-top: 15px; color: #666;">
-                <strong>Election:</strong> {{ election_title }}<br>
-                <strong>Timestamp:</strong> {{ timestamp }}
-            </p>
-        </div>
-
-        <p>You can use this ID to verify the inclusion of your vote in the final audit if needed. Please keep this email
-            for your records.</p>
-
-        <div class="footer">
-            <p>&copy; {{ current_year }} E-Election System. All rights reserved.</p>
-            <p>This is an automated message. Please do not reply.</p>
-        </div>
+<div class="receipt-box">
+    <div style="font-size: 11px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.1em;">Secure Receipt ID</div>
+    <div class="receipt-id">{{ receipt_id }}</div>
+    
+    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e2e8f0; text-align: left;">
+        <table style="width: 100%; font-size: 13px;">
+            <tr>
+                <td style="color: #94a3b8; padding: 4px 0;">ELECTION</td>
+                <td style="color: #1e293b; font-weight: 700; text-align: right;">{{ election_title }}</td>
+            </tr>
+            <tr>
+                <td style="color: #94a3b8; padding: 4px 0;">TIMESTAMP</td>
+                <td style="color: #1e293b; font-weight: 700; text-align: right;">{{ timestamp }}</td>
+            </tr>
+        </table>
     </div>
-</body>
+</div>
 
-</html>
+<p style="font-size: 14px; color: #64748b;">Keep this ID for your records. It can be used to mathematically verify your ballot's inclusion in the final audit.</p>
+{% endblock %}

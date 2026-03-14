@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Alpine.js cloak */
+[x-cloak] { display: none !important; }
+
+/* Base body styles */
+body {
+  background-color: #ffffff;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* DaisyUI button override */
+.btn {
+  text-transform: none;
+  letter-spacing: 0.025em;
+}

@@ -3,142 +3,85 @@
 {% block title %}Ballot Verification | FlashVote{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-12 lg:py-20 px-6">
-
-    <div class="text-center space-y-4 mb-12">
-        <div
-            class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto shadow-xl shadow-indigo-100/50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+<div class="max-w-3xl mx-auto py-20 px-4">
+    <div class="text-center mb-16">
+        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
         </div>
-        <h2 class="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-none">Ballot Integrity
-            Check</h2>
-        <p class="text-slate-500 font-medium max-w-xl mx-auto">Confirm your vote is securely recorded in the FlashVote
-            ledger using your unique Verification ID.</p>
+        <h2 class="text-3xl font-bold text-slate-900">Ballot Integrity Check</h2>
+        <p class="text-slate-500 mt-2">Confirm your vote is recorded in the immutable system ledger.</p>
     </div>
 
-    <div
-        class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 p-8 lg:p-12 mb-12 relative overflow-hidden">
-        <div
-            class="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-50">
-        </div>
-        <form method="GET" action="{% url 'ballot_verification' %}" class="space-y-6 relative z-10">
+    <!-- Search Box -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm mb-12">
+        <form method="GET" class="space-y-6">
             <div class="form-control">
-                <label class="label mb-2"><span
-                        class="label-text font-black text-slate-400 uppercase tracking-widest text-xs">Enter
-                        Verification Identifier</span></label>
-                <div class="relative">
-                    <input type="text" name="v_id" value="{{ v_id|default:'' }}" placeholder="VOTE-XXXX-XXXX-XXXX"
-                        class="input input-bordered w-full h-16 rounded-2xl bg-slate-50 border-slate-200 text-lg font-mono tracking-widest focus:bg-white focus:border-indigo-600 transition-all text-center uppercase"
-                        required>
-                    <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-300" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                </div>
+                <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verification Identifier</span></label>
+                <input type="text" name="v_id" value="{{ v_id|default:'' }}" placeholder="VOTE-XXXX-XXXX" class="input input-bordered h-16 rounded-xl w-full text-center font-mono text-lg font-bold tracking-widest focus:border-indigo-600 focus:bg-slate-50 transition-all uppercase" required>
             </div>
-            <button type="submit"
-                class="btn btn-primary btn-block rounded-2xl h-16 normal-case font-black text-lg border-none shadow-xl shadow-indigo-100">Verify
-                System Ledger</button>
+            <button type="submit" class="btn btn-primary btn-block h-14 rounded-xl font-bold uppercase tracking-widest text-xs">Verify Ledger Entry</button>
         </form>
     </div>
 
     {% if v_id %}
-    <div class="transition-all duration-700 animate-in fade-in slide-in-from-bottom-8">
+    <div class="transition-all duration-500">
         {% if result %}
-        <div
-            class="bg-white rounded-[2.5rem] shadow-2xl shadow-emerald-100/50 border border-emerald-100 p-8 lg:p-12 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-6">
-                <div class="badge badge-success gap-2 py-4 px-6 font-black rounded-xl border-none text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    OFFICIALLY RECORDED
-                </div>
+        <div class="bg-white rounded-3xl border border-green-100 p-10 relative overflow-hidden shadow-sm">
+            <div class="absolute top-6 right-6">
+                <span class="badge badge-success badge-sm font-bold uppercase text-[9px] tracking-widest py-3 px-4">Ledger Verified</span>
             </div>
 
-            <div class="space-y-8">
-                <div class="space-y-2">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Integrity Confirmation
-                    </h3>
-                    <h4 class="text-3xl font-black text-slate-900 tracking-tight">Ledger Entry Verified</h4>
+            <div class="space-y-10">
+                <div>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Integrity Confirmed</h3>
+                    <h4 class="text-2xl font-bold text-slate-900">Authentic Ballot Found</h4>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 py-8 border-y border-slate-100">
-                    <div class="space-y-1">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Election Event</p>
-                        <p class="text-lg font-bold text-slate-900 leading-tight">{{ result.election.title }}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 py-8 border-y border-slate-50">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Election</p>
+                        <p class="font-bold text-slate-900">{{ result.election.title }}</p>
                     </div>
-                    <div class="space-y-1">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification ID</p>
-                        <p class="text-lg font-mono font-bold text-indigo-600">{{ result.verification_id }}</p>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Verification ID</p>
+                        <p class="font-mono font-bold text-indigo-600">{{ result.verification_id }}</p>
                     </div>
-                    <div class="space-y-1">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entry Timestamp</p>
-                        <p class="text-lg font-bold text-slate-900">{{ result.timestamp|date:"M d, Y • H:i:s" }}</p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">IP Tracking Node</p>
-                        <p class="text-lg font-mono font-bold text-slate-400 uppercase">PROTECTED</p>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Recorded At</p>
+                        <p class="font-bold text-slate-700">{{ result.timestamp|date:"M d, Y • H:i:s" }}</p>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Cryptographic Digest
-                        (SHA-256 Signature)</p>
-                    <code
-                        class="text-[10px] font-mono font-bold text-slate-500 break-all leading-relaxed block">{{ result.signature }}</code>
+                <div class="bg-slate-900 rounded-2xl p-6">
+                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2">Cryptographic Digest (SHA-256)</p>
+                    <code class="text-[10px] font-mono font-bold text-indigo-400 break-all">{{ result.signature }}</code>
                 </div>
 
-                <div class="flex items-start gap-4 p-6 bg-indigo-50/50 rounded-2xl border border-indigo-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 shrink-0 mt-0.5" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-xs font-semibold text-color-900/60 leading-relaxed">To ensure absolute ballot
-                        secrecy, the system records your vote cryptographically but never stores your personal identity
-                        linked to specific choices in this ledger view.</p>
+                <div class="flex gap-4 p-4 bg-indigo-50/50 rounded-xl">
+                    <div class="text-indigo-400">ℹ️</div>
+                    <p class="text-xs text-indigo-900/60 leading-relaxed italic">Ballot secrecy is maintained. The ledger records your cryptographic signature but never link your identity to your specific choices in this view.</p>
                 </div>
             </div>
         </div>
         {% else %}
-        <div
-            class="bg-white rounded-[2.5rem] shadow-2xl shadow-rose-100/50 border border-rose-100 p-12 text-center space-y-6">
-            <div
-                class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-rose-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <div class="bg-white rounded-3xl border border-rose-100 p-12 text-center">
+            <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
-            <h3 class="text-2xl font-black text-rose-900">ID Verification Failed</h3>
-            <p class="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">No matching ballot was found for ID
-                <span class="font-mono font-bold text-rose-600 block bg-rose-50 py-2 rounded-lg mt-2">{{ v_id }}</span>
-            </p>
-            <div class="pt-4 flex flex-wrap justify-center gap-4">
-                <a href="{% url 'ballot_verification' %}"
-                    class="btn btn-ghost rounded-xl normal-case font-black text-rose-600 bg-rose-50">Retry Search</a>
-                <div class="w-full text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Manual
-                    assistance required? Contact Organizer</div>
-            </div>
+            <h3 class="text-xl font-bold text-rose-900">Verification Failed</h3>
+            <p class="text-slate-500 text-sm mt-2">No matching record found for <span class="font-mono font-bold text-rose-600">{{ v_id }}</span></p>
+            <a href="{% url 'ballot_verification' %}" class="mt-8 text-xs font-bold text-indigo-600 uppercase tracking-widest hover:underline">Clear Search</a>
         </div>
         {% endif %}
     </div>
     {% endif %}
 
     <div class="mt-12 text-center">
-        <a href="{% url 'home' %}"
-            class="btn btn-link no-underline text-slate-400 hover:text-indigo-600 font-black uppercase tracking-widest text-xs">Return
-            to Platform Home</a>
+        <a href="{% url 'home' %}" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-indigo-600">Return Home</a>
     </div>
 </div>
 {% endblock %}

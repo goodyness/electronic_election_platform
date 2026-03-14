@@ -1,0 +1,33 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}403 - Restricted Access{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+    <!-- Lock Icon -->
+    <div class="w-32 h-32 rounded-[2.5rem] bg-indigo-50 flex items-center justify-center text-indigo-600 mb-8 border border-indigo-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+    </div>
+    
+    <div class="max-w-md space-y-8">
+        <div>
+            <h1 class="text-5xl font-black text-slate-900 leading-none tracking-tight mb-4">403</h1>
+            <h2 class="text-xl font-bold text-slate-900 uppercase tracking-tight mb-2">Privileged Zone</h2>
+            <p class="text-sm font-medium text-slate-400 leading-relaxed uppercase tracking-wider">
+                Your credentials do not possess the required clearance level to access this sector of the grid.
+            </p>
+        </div>
+
+        <div class="h-px bg-slate-100 w-24 mx-auto"></div>
+
+        <div class="flex flex-col gap-4">
+            <a href="{% url 'home' %}" class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none h-14 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-xl shadow-indigo-100">
+                Back to Safety
+            </a>
+            <p class="text-[9px] font-bold text-slate-300 uppercase tracking-[0.3em]">Code: ERR_FORBIDDEN_ENTRY</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

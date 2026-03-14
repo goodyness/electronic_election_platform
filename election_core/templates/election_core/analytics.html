@@ -3,118 +3,71 @@
 {% block title %}System Intelligence | FlashVote{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto py-8">
-
-
+<div class="max-w-7xl mx-auto py-12 px-4">
+    <!-- Header -->
     <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div class="space-y-1">
-            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
-                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Admin
-                    Dashboard</a>
-                <span>/</span>
-                <span class="text-indigo-600">Global Intel</span>
-            </nav>
-            <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">System
-                Intelligence</h2>
-            <p class="text-slate-500 font-medium">Aggregate participation metrics across the entire FlashVote ecosystem.
-            </p>
-        </div>
-
         <div>
-            <a href="{% url 'grand_admin_dashboard' %}"
-                class="btn btn-outline border-slate-200 hover:bg-slate-50 rounded-xl normal-case font-bold h-12 px-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to Command Center
-            </a>
+            <nav class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2 text-slate-400">
+                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Admin Dashboard</a>
+                <span>/</span>
+                <span class="text-indigo-600">Global Intelligence</span>
+            </nav>
+            <h2 class="text-3xl font-bold text-slate-900">System Intelligence</h2>
+            <p class="text-slate-500 mt-1">Aggregate metrics across the entire platform.</p>
+        </div>
+        <a href="{% url 'grand_admin_dashboard' %}" class="btn btn-sm btn-outline px-6 h-10">Back to Dashboard</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div class="bg-white p-6 rounded-xl border border-slate-200">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Elections</div>
+            <div class="text-3xl font-bold text-slate-900">{{ total_elections }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-slate-200">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Users</div>
+            <div class="text-3xl font-bold text-slate-900">{{ total_voters }}</div>
+        </div>
+        <div class="bg-slate-900 p-6 rounded-xl text-white">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Ballots Cast</div>
+            <div class="text-3xl font-bold text-indigo-400">{{ total_votes_cast }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-slate-200">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Accredited</div>
+            <div class="text-3xl font-bold text-slate-900">{{ total_accredited }}</div>
         </div>
     </div>
 
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-        <div class="card bg-white shadow-xl shadow-slate-100 border border-slate-100 rounded-3xl p-8">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Total Deployments</p>
-            <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-black text-slate-900 leading-none tracking-tighter">{{ total_elections
-                    }}</span>
-                <span class="text-[10px] font-bold text-indigo-500 uppercase">EVENTS</span>
-            </div>
-        </div>
-        <div
-            class="card bg-white shadow-xl shadow-slate-100 border border-slate-100 rounded-3xl p-8 border-l-4 border-l-cyan-500">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Eligible Nodes</p>
-            <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-black text-slate-900 leading-none tracking-tighter">{{ total_voters }}</span>
-                <span class="text-[10px] font-bold text-cyan-500 uppercase">ACCOUNTS</span>
-            </div>
-        </div>
-        <div class="card bg-slate-900 shadow-xl shadow-slate-200 border-none rounded-3xl p-8 text-white">
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Participation Capacity</p>
-            <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-black leading-none tracking-tighter text-indigo-400">{{ total_votes_cast
-                    }}</span>
-                <span class="text-[10px] font-bold text-slate-500 uppercase">BALLOTS</span>
-            </div>
-        </div>
-        <div
-            class="card bg-white shadow-xl shadow-slate-100 border border-slate-100 rounded-3xl p-8 border-l-4 border-l-emerald-500">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Accreditation Rate</p>
-            <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-black text-slate-900 leading-none tracking-tighter">{{ total_accredited
-                    }}</span>
-                <span class="text-[10px] font-bold text-emerald-500 uppercase">VERIFIED</span>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-12">
-        <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
-            <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">Ecosystem Deployment Registry</h3>
-            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">LIVE STATUS FEED</span>
+    <!-- Registry -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-12">
+        <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 uppercase">Deployment Registry</h3>
         </div>
         <div class="overflow-x-auto">
-            <table class="table table-lg w-full">
-                <thead>
-                    <tr class="text-slate-400 font-black uppercase tracking-widest text-[9px] bg-slate-50/20">
-                        <th class="py-6 pl-8">Event Header</th>
+            <table class="table w-full">
+                <thead class="bg-white">
+                    <tr class="text-[10px] font-bold uppercase text-slate-400">
+                        <th class="px-8 py-4">Election</th>
                         <th>Institution</th>
                         <th>Status</th>
-                        <th>Participation</th>
-                        <th class="pr-8 text-right">Administrative Link</th>
+                        <th>Votes</th>
+                        <th class="text-right px-8">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     {% for election in all_elections %}
-                    <tr class="group hover:bg-slate-50/50 transition-colors">
-                        <td class="py-6 pl-8">
-                            <h4 class="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">
-                                {{ election.title }}</h4>
-                        </td>
-                        <td>
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{
-                                election.institution.name }}</span>
-                        </td>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-8 py-4 font-bold text-slate-900">{{ election.title }}</td>
+                        <td class="text-slate-500">{{ election.institution.name }}</td>
                         <td>
                             <div class="flex items-center gap-2">
-                                <div class="w-1.5 h-1.5 rounded-full 
-                                    {% if election.status == 'ACTIVE' %}bg-emerald-500
-                                    {% elif election.status == 'DRAFT' %}bg-amber-500
-                                    {% else %}bg-slate-300{% endif %}"></div>
-                                <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">{{ election.get_status_display }}</span>
+                                <span class="w-1.5 h-1.5 rounded-full {% if election.status == 'ACTIVE' %}bg-green-500{% elif election.status == 'DRAFT' %}bg-amber-500{% else %}bg-slate-300{% endif %}"></span>
+                                <span class="text-[10px] font-bold uppercase">{{ election.get_status_display }}</span>
                             </div>
                         </td>
-                        <td>
-                            <span class="text-xs font-black text-indigo-600">{{ election.vote_set.count }} <span
-                                    class="text-[9px] text-slate-400 ml-1">VOTES</span></span>
-                        </td>
-                        <td class="pr-8 text-right">
-                            <a href="{% url 'election_analytics' short_id=election.short_id %}"
-                                class="btn btn-xs btn-ghost rounded-lg font-black text-[9px] uppercase tracking-widest h-10 px-4">Detailed
-                                Intel →</a>
+                        <td class="font-bold text-indigo-600">{{ election.vote_set.count }}</td>
+                        <td class="text-right px-8">
+                            <a href="{% url 'election_analytics' short_id=election.short_id %}" class="text-indigo-600 hover:underline font-bold text-xs">Details</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -123,75 +76,58 @@
         </div>
     </div>
 
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-
-        <div class="card bg-white shadow-xl shadow-slate-100 border border-slate-100 rounded-[2.5rem] overflow-hidden">
-            <div class="p-8 border-b border-slate-50 bg-slate-50/30">
-                <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">Turnout by Faculty (Global)</h3>
+    <!-- Breakdowns -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50">
+                <h3 class="font-bold text-slate-900 uppercase">Faculty Turnout</h3>
             </div>
-            <div class="overflow-x-auto">
-                <table class="table table-md w-full">
-                    <thead>
-                        <tr class="text-slate-400 font-black uppercase tracking-widest text-[9px] bg-slate-50/50">
-                            <th class="py-4 pl-8">Faculty Group</th>
-                            <th>Reg</th>
-                            <th>Votes</th>
-                            <th class="pr-8 text-right">Turnout %</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        {% for item in faculty_turnout %}
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="py-4 pl-8 font-bold text-slate-700">{{ item.faculty }}</td>
-                            <td class="text-xs font-medium text-slate-400">{{ item.total }}</td>
-                            <td class="text-xs font-bold text-indigo-500">{{ item.voted }}</td>
-                            <td class="pr-8 text-right">
-                                <span class="text-xs font-black text-slate-900">
-                                    {% if item.total > 0 %}{% widthratio item.voted item.total 100 %}{% else %}0{% endif
-                                    %}%
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <table class="table w-full text-sm">
+                <thead>
+                    <tr class="text-[10px] font-bold uppercase text-slate-400 bg-white">
+                        <th class="px-8 py-4">Faculty</th>
+                        <th>Reg</th>
+                        <th class="text-right px-8">Turnout %</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in faculty_turnout %}
+                    <tr>
+                        <td class="px-8 py-4 font-medium">{{ item.faculty }}</td>
+                        <td class="text-slate-400">{{ item.total }}</td>
+                        <td class="text-right px-8 font-bold text-slate-900">
+                            {% if item.total > 0 %}{% widthratio item.voted item.total 100 %}{% else %}0{% endif %}%
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
-
-        <div class="card bg-white shadow-xl shadow-slate-100 border border-slate-100 rounded-[2.5rem] overflow-hidden">
-            <div class="p-8 border-b border-slate-50 bg-slate-50/30">
-                <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">Turnout by Department (Global)
-                </h3>
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50">
+                <h3 class="font-bold text-slate-900 uppercase">Departmental Turnout</h3>
             </div>
-            <div class="overflow-x-auto">
-                <table class="table table-md w-full">
-                    <thead>
-                        <tr class="text-slate-400 font-black uppercase tracking-widest text-[9px] bg-slate-50/50">
-                            <th class="py-4 pl-8">Departmental Node</th>
-                            <th>Reg</th>
-                            <th>Votes</th>
-                            <th class="pr-8 text-right">Turnout %</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        {% for item in dept_turnout %}
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="py-4 pl-8 font-bold text-slate-700">{{ item.department }}</td>
-                            <td class="text-xs font-medium text-slate-400">{{ item.total }}</td>
-                            <td class="text-xs font-bold text-indigo-500">{{ item.voted }}</td>
-                            <td class="pr-8 text-right">
-                                <span class="text-xs font-black text-slate-900">
-                                    {% if item.total > 0 %}{% widthratio item.voted item.total 100 %}{% else %}0{% endif
-                                    %}%
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <table class="table w-full text-sm">
+                <thead>
+                    <tr class="text-[10px] font-bold uppercase text-slate-400 bg-white">
+                        <th class="px-8 py-4">Department</th>
+                        <th>Reg</th>
+                        <th class="text-right px-8">Turnout %</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in dept_turnout %}
+                    <tr>
+                        <td class="px-8 py-4 font-medium">{{ item.department }}</td>
+                        <td class="text-slate-400">{{ item.total }}</td>
+                        <td class="text-right px-8 font-bold text-slate-900">
+                            {% if item.total > 0 %}{% widthratio item.voted item.total 100 %}{% else %}0{% endif %}%
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

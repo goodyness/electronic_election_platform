@@ -123,11 +123,12 @@ def process_bulk_voter_upload_task(election_id, file_path, max_to_add=None):
         return f"Error: {str(e)}"
 
 @shared_task
-def send_voter_nudge_task(email, election_title):
+def send_voter_nudge_task(email, election_title, site_url):
     subject = f'Reminder: Vote in {election_title}'
     
     context = {
         'election_title': election_title,
+        'site_url': site_url,
         'current_year': timezone.now().year,
     }
     

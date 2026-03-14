@@ -1,0 +1,16 @@
+{
+  "name": "election",
+  "version": "1.0.0",
+  "description": "",
+  "main": "serviceworker.js",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./election_core/static/css/input.css -o ./election_core/static/css/output.css --minify",
+    "watch:css": "npx tailwindcss -i ./election_core/static/css/input.css -o ./election_core/static/css/output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}

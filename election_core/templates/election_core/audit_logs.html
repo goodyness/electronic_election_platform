@@ -1,124 +1,79 @@
 {% extends 'election_core/base.html' %}
 
-{% block title %}System Audit Logs | Admin Control{% endblock %}
+{% block title %}System Audit Ledger | Admin{% endblock %}
 
 {% block content %}
-<div class="max-w-[1600px] mx-auto py-8">
-
-
+<div class="max-w-7xl mx-auto py-12 px-4">
+    <!-- Header -->
     <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="space-y-1">
-            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
-                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Admin
-                    Dashboard</a>
+        <div>
+            <nav class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2 text-slate-400">
+                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Admin Dashboard</a>
                 <span>/</span>
                 <span class="text-indigo-600">Audit Ledger</span>
             </nav>
-            <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Global Audit
-                Ledger</h2>
-            <p class="text-slate-500 font-medium">Immutable record of all sensitive system events and administrative
-                actions.</p>
+            <h2 class="text-3xl font-bold text-slate-900">Audit Ledger</h2>
+            <p class="text-slate-500 mt-1">Immutable record of system events and administrative actions.</p>
         </div>
-
-        <div>
-            <a href="{% url 'grand_admin_dashboard' %}"
-                class="btn btn-outline border-slate-200 hover:bg-slate-50 rounded-xl normal-case font-bold h-12 px-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Exit Ledger
-            </a>
-        </div>
+        <a href="{% url 'grand_admin_dashboard' %}" class="btn btn-sm btn-outline px-6 h-10">Exit Ledger</a>
     </div>
 
-
-    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-        <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
-            <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">System Events Ledger</h3>
-            <span class="badge badge-sm bg-rose-100 text-rose-700 border-none font-bold py-3 px-4">READ-ONLY
-                ACCESS</span>
+    <!-- Ledger Table -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 uppercase">System Events</h3>
+            <span class="text-[10px] font-bold text-rose-500 uppercase">Administrative Read-Only</span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="table table-lg w-full">
+            <table class="table w-full text-sm">
                 <thead>
-                    <tr class="text-slate-400 font-black uppercase tracking-widest text-[10px] bg-slate-50/50">
-                        <th class="py-6 pl-8">Event Timestamp</th>
-                        <th>Actor Identity</th>
-                        <th>Protocol Action</th>
-                        <th class="pr-8 text-right">Node Entry / IP</th>
+                    <tr class="text-[10px] font-bold uppercase text-slate-400 bg-white">
+                        <th class="px-8 py-4">Timestamp</th>
+                        <th>Actor</th>
+                        <th>Action</th>
+                        <th class="text-right px-8">IP Address</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody class="divide-y divide-slate-100">
                     {% for log in page_obj %}
-                    <tr class="hover:bg-slate-50/50 transition-colors group">
-                        <td class="py-6 pl-8">
-                            <div class="space-y-1">
-                                <span
-                                    class="text-sm font-bold text-slate-700 leading-none group-hover:text-indigo-600 transition-colors">{{
-                                    log.timestamp|date:"M d, Y" }}</span>
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{
-                                    log.timestamp|date:"H:i:s" }}</p>
-                            </div>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-8 py-4">
+                            <div class="font-bold text-slate-700 leading-none">{{ log.timestamp|date:"M d, Y" }}</div>
+                            <div class="text-[10px] text-slate-400 mt-1 uppercase">{{ log.timestamp|date:"H:i:s" }}</div>
                         </td>
                         <td>
                             {% if log.user %}
-                            <div class="space-y-1">
-                                <span class="text-xs font-black text-slate-900">{{ log.user.username }}</span>
-                                <p class="text-[9px] font-bold text-indigo-500 uppercase tracking-tighter">{{
-                                    log.user.role }}</p>
-                            </div>
+                            <div class="font-bold text-slate-900 text-xs">{{ log.user.username }}</div>
+                            <div class="text-[9px] text-indigo-500 uppercase font-bold">{{ log.user.role }}</div>
                             {% else %}
-                            <span class="text-xs font-black text-slate-300 italic">SYSTEM NODER</span>
+                            <span class="text-slate-300 italic text-xs">System</span>
                             {% endif %}
                         </td>
                         <td>
-                            <div class="max-w-md">
-                                <span class="text-xs font-bold text-slate-600 leading-relaxed">{{ log.action }}</span>
-                            </div>
+                            <div class="max-w-md text-slate-600 leading-snug">{{ log.action }}</div>
                         </td>
-                        <td class="pr-8 text-right">
-                            <span
-                                class="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest bg-slate-100 py-1.5 px-3 rounded-lg">{{
-                                log.ip_address }}</span>
+                        <td class="text-right px-8 font-mono text-[10px] text-slate-400">
+                            {{ log.ip_address }}
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="4" class="py-32 text-center">
-                            <div
-                                class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-200" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
-                            </div>
-                            <p class="text-slate-400 font-medium tracking-tight">Ecosystem ledger is currently empty.
-                            </p>
-                        </td>
-                    </tr>
+                    <tr><td colspan="4" class="p-32 text-center text-slate-400 italic">Ecosystem ledger is empty.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
+        <!-- Pagination -->
         {% if page_obj.paginator.num_pages > 1 %}
-        <div class="p-8 border-t border-slate-50 bg-slate-50/30 flex justify-between items-center px-12">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Shard {{ page_obj.number }} of {{
-                page_obj.paginator.num_pages }}</p>
+        <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center text-[10px] font-bold uppercase text-slate-400">
+            <span>Shard {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
             <div class="flex gap-2">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}"
-                    class="btn btn-sm btn-outline rounded-xl font-bold border-slate-200 h-10 px-6 normal-case">Prev
-                    Log</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-xs rounded-lg px-4 h-8">Previous</a>
                 {% endif %}
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}"
-                    class="btn btn-sm btn-outline rounded-xl font-bold border-slate-200 h-10 px-6 normal-case">Next
-                    Log</a>
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-xs rounded-lg px-4 h-8">Next</a>
                 {% endif %}
             </div>
         </div>

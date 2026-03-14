@@ -3,282 +3,197 @@
 {% block title %}Election Analytics - {{ election.title }}{% endblock %}
 
 {% block content %}
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="hero" style="padding: 1rem 0; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h1>Analytics: {{ election.title }}</h1>
-        <p>Detailed turnout breakdown and voter insights for this election.</p>
-    </div>
-    <div style="display: flex; gap: 0.5rem;">
-        {% if plan == 'PREMIUM' %}
-        <a href="{% url 'export_audit_pdf' short_id=election.short_id %}" class="btn"
-            style="background-color: var(--accent-color); font-size: 0.85rem;">Download Audit
-            PDF</a>
-        <a href="{% url 'result_war_room' short_id=election.short_id %}" class="btn"
-            style="background-color: #4a148c; font-size: 0.85rem;">Result War-Room</a>
-        {% endif %}
-
-        {% if plan in 'STANDARD,PREMIUM' %}
-        <a href="{% url 'nudge_voters' short_id=election.short_id %}" class="btn"
-            style="background-color: var(--secondary-color); font-size: 0.85rem;">Nudge Pending
-            Voters</a>
-        {% endif %}
-    </div>
-</div>
-
-<div
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-    <div class="card" style="text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: bold; color: var(--secondary-color);">{{ total_voters }}</div>
-        <div style="color: #666;">Eligible Voters</div>
-    </div>
-    <div class="card" style="text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-color);">{{ accredited_count }}</div>
-        <div style="color: #666;">Total Accredited</div>
-    </div>
-    <div class="card" style="text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: bold; color: var(--success);">{{ voted_count }}</div>
-        <div style="color: #666;">Total Voted</div>
-    </div>
-    <div class="card" style="text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-color);">
-            {% if accredited_count > 0 %}
-            {% widthratio voted_count accredited_count 100 %}
-            {% else %}
-            0
-            {% endif %}%
+<div class="max-w-7xl mx-auto py-12 px-4">
+    <!-- Header -->
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+            <h2 class="text-3xl font-bold text-slate-900">Analytics: {{ election.title }}</h2>
+            <p class="text-slate-500 mt-1">Detailed turnout breakdown and voter insights.</p>
         </div>
-        <div style="color: #666;">Turnout (of Accredited)</div>
-    </div>
-</div>
-
-
-{% if plan in 'STANDARD,PREMIUM' %}
-<div class="card" style="margin-bottom: 2rem;">
-    <h3>Participation Timeline (Hourly)</h3>
-    <div style="height: 300px;">
-        <canvas id="participationChart"></canvas>
-    </div>
-</div>
-<script>
-    const ctx = document.getElementById('participationChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ hourly_labels| safe }},
-        datasets: [{
-            label: 'Votes Cast',
-            data: {{ hourly_counts| safe }},
-        borderColor: '#2ecc71',
-        backgroundColor: 'rgba(46, 204, 113, 0.1)',
-        fill: true,
-        tension: 0.4
-            }]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
-        }
-    }
-    });
-</script>
-{% else %}
-<div class="card" style="margin-bottom: 2rem; position: relative; opacity: 0.7;">
-    <h3>Participation Timeline</h3>
-    <div
-        style="height: 150px; display: flex; align-items: center; justify-content: center; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 8px;">
-        <div style="text-align: center;">
-            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔒 Feature Locked</div>
-            <p style="font-size: 0.85rem; color: #666;">Upgrade to <strong>Standard</strong> to see hourly participation
-                trends.</p>
-            <a href="{% url 'select_plan' short_id=election.short_id %}" class="btn"
-                style="margin-top: 0.5rem; font-size: 0.75rem;">Upgrade Now</a>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-
-    <div class="card" style="position: relative;">
-        {% if plan == 'FREE' %}
-        <div
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 8px;">
-            <div>
-                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">📊 Data Locked</div>
-                <p style="font-size: 0.8rem; color: #666; padding: 0 1rem;">Faculty breakdown is available on
-                    <strong>Basic</strong> plans and above.
-                </p>
-                <a href="{% url 'select_plan' short_id=election.short_id %}" class="btn"
-                    style="margin-top: 0.5rem; font-size: 0.75rem;">Upgrade</a>
-            </div>
-        </div>
-        {% endif %}
-        <h3>Turnout by Faculty</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-            <thead>
-                <tr style="text-align: left; background-color: #f8f9fa;">
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Faculty</th>
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Registered</th>
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Votes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in faculty_turnout %}
-                <tr>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">{{ item.faculty }}</td>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">{{ item.total }}</td>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">{{ item.voted }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" style="padding: 1rem; color: #999;">No data available</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-
-    <div class="card" style="position: relative;">
-        {% if plan == 'FREE' %}
-        <div
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 8px;">
-            <div>
-                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">📊 Data Locked</div>
-                <p style="font-size: 0.8rem; color: #666; padding: 0 1rem;">Department breakdown is available on
-                    <strong>Basic</strong> plans and above.
-                </p>
-                <a href="{% url 'select_plan' short_id=election.short_id %}" class="btn"
-                    style="margin-top: 0.5rem; font-size: 0.75rem;">Upgrade</a>
-            </div>
-        </div>
-        {% endif %}
-        <h3>Turnout by Department</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-            <thead>
-                <tr style="text-align: left; background-color: #f8f9fa;">
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Department</th>
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Registered</th>
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Votes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in dept_turnout %}
-                <tr>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">{{ item.department }}</td>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">{{ item.total }}</td>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">{{ item.voted }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" style="padding: 1rem; color: #999;">No data available</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3>Voter Audit Trail</h3>
-        <form method="GET" style="display: flex; gap: 0.5rem;">
-            <input type="text" name="q" placeholder="Search by name, email, matric..."
-                value="{{ search_query|default:'' }}"
-                style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
-            <button type="submit" class="btn" style="padding: 0.5rem 1rem;">Search</button>
-            {% if search_query %}
-            <a href="{% url 'election_analytics' short_id=election.short_id %}" class="btn"
-                style="padding: 0.5rem 1rem; background-color: #6c757d;">Clear</a>
+        <div class="flex flex-wrap gap-2">
+            {% if election.status == 'CLOSED' and plan == 'PREMIUM' %}
+            <a href="{% url 'export_audit_pdf' short_id=election.short_id %}" class="btn btn-sm btn-outline px-4">Audit PDF</a>
             {% endif %}
-        </form>
+            {% if plan == 'PREMIUM' %}
+            <a href="{% url 'result_war_room' short_id=election.short_id %}" class="btn btn-sm btn-primary px-4">War Room</a>
+            {% endif %}
+            {% if plan in 'STANDARD,PREMIUM' %}
+            <a href="{% url 'nudge_voters' short_id=election.short_id %}" class="btn btn-sm btn-secondary px-4">Nudge Voters</a>
+            {% endif %}
+        </div>
     </div>
 
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="text-align: left; background-color: #f8f9fa;">
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Voter</th>
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Matric / ID</th>
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Acreditation</th>
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Vote Status</th>
-                    {% if plan in 'STANDARD,PREMIUM' %}
-                    <th style="padding: 1rem; border-bottom: 2px solid #dee2e6;">Action</th>
-                    {% endif %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for voter in page_obj %}
-                <tr>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">
-                        <strong>{{ voter.user.get_full_name }}</strong><br>
-                        <small style="color: #666;">{{ voter.user.email }}</small>
-                    </td>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">{{ voter.matric_number }}</td>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">
-                        {% if voter.is_accredited %}
-                        <span style="color: var(--success);">Accredited ✓</span>
-                        {% else %}
-                        <span style="color: var(--error);">Not Accredited</span>
-                        {% endif %}
-                    </td>
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">
-                        {% if voter.has_voted %}
-                        <span style="color: var(--success); font-weight: bold;">Vote Successful ✓</span>
-                        {% else %}
-                        <span style="color: #999;">Pending Vote</span>
-                        {% endif %}
-                    </td>
-                    {% if plan in 'STANDARD,PREMIUM' %}
-                    <td style="padding: 1rem; border-bottom: 1px solid #dee2e6;">
-                        {% if not voter.has_voted and voter.is_accredited %}
-                        <a href="{% url 'nudge_voters' short_id=election.short_id %}?v_email={{ voter.user.email }}"
-                            class="btn"
-                            style="padding: 0.2rem 0.6rem; font-size: 0.7rem; background-color: var(--secondary-color); text-decoration: none;">Remind</a>
-                        {% endif %}
-                    </td>
-                    {% endif %}
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="{% if plan in 'STANDARD,PREMIUM' %}5{% else %}4{% endif %}"
-                        style="padding: 2rem; text-align: center; color: #666;">No voters found matching
-                        criteria.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col items-center text-center">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Eligible</div>
+            <div class="text-3xl font-bold text-slate-900">{{ total_voters }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col items-center text-center">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Accredited</div>
+            <div class="text-3xl font-bold text-slate-900">{{ accredited_count }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col items-center text-center">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Voted</div>
+            <div class="text-3xl font-bold text-green-600">{{ voted_count }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col items-center text-center">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Turnout</div>
+            <div class="text-3xl font-bold text-indigo-600">
+                {% if accredited_count > 0 %}{% widthratio voted_count accredited_count 100 %}{% else %}0{% endif %}%
+            </div>
+        </div>
     </div>
 
-
-    <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 0.5rem;">
-        {% if page_obj.has_previous %}
-        <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}" class="btn"
-            style="background-color: #f8f9fa; color: #333; border: 1px solid #ddd;">&laquo; First</a>
-        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
-            class="btn" style="background-color: #f8f9fa; color: #333; border: 1px solid #ddd;">Previous</a>
-        {% endif %}
-
-        <span style="padding: 0.5rem 1rem;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-
-        {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn"
-            style="background-color: #f8f9fa; color: #333; border: 1px solid #ddd;">Next</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}"
-            class="btn" style="background-color: #f8f9fa; color: #333; border: 1px solid #ddd;">Last &raquo;</a>
-        {% endif %}
+    <!-- Timeline -->
+    {% if plan in 'STANDARD,PREMIUM' %}
+    <div class="bg-white rounded-xl border border-slate-200 p-8 mb-10">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-6">Participation Timeline</h3>
+        <div class="h-64">
+            <canvas id="participationChart"></canvas>
+        </div>
     </div>
-</div>
-
-<div style="text-align: center; margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
-    {% if request.user.role == 'ORGANIZER' %}
-    <a href="{% url 'manage_election' short_id=election.short_id %}" class="btn">Back to Election</a>
+    <script>
+        new Chart(document.getElementById('participationChart'), {
+            type: 'line',
+            data: {
+                labels: {{ hourly_labels|safe }},
+                datasets: [{
+                    label: 'Votes Cast',
+                    data: {{ hourly_counts|safe }},
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    </script>
     {% endif %}
-    <a href="{% url 'analytics' %}" class="btn" style="background-color: #6c757d;">Back to System Analytics</a>
+
+    <!-- Breakdowns -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-900 uppercase">Faculty Breakdown</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="text-[10px] font-bold uppercase text-slate-400">
+                            <th class="px-6 py-4">Faculty</th>
+                            <th class="text-right px-6">Voters / Reg</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for item in faculty_turnout %}
+                        <tr>
+                            <td class="px-6 py-4 font-medium">{{ item.faculty }}</td>
+                            <td class="text-right px-6 font-bold text-slate-700">{{ item.voted }} / {{ item.total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="p-8 text-center text-slate-400">No data available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-900 uppercase">Departmental Breakdown</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="text-[10px] font-bold uppercase text-slate-400">
+                            <th class="px-6 py-4">Department</th>
+                            <th class="text-right px-6">Voters / Reg</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for item in dept_turnout %}
+                        <tr>
+                            <td class="px-6 py-4 font-medium">{{ item.department }}</td>
+                            <td class="text-right px-6 font-bold text-slate-700">{{ item.voted }} / {{ item.total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="p-8 text-center text-slate-400">No data available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Trail -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 bg-slate-100/50 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-slate-900 uppercase">Voter Audit Trail</h3>
+            <form method="GET" class="flex gap-2 w-full md:w-auto">
+                <input type="text" name="q" placeholder="Search voters..." value="{{ search_query|default:'' }}" class="input input-bordered input-sm h-10 px-4 flex-grow md:w-64">
+                <button type="submit" class="btn btn-sm h-10 px-6">Search</button>
+                {% if search_query %}
+                <a href="{% url 'election_analytics' short_id=election.short_id %}" class="btn btn-sm btn-ghost h-10 px-4">✕</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="table w-full text-sm">
+                <thead>
+                    <tr class="text-[10px] font-bold uppercase text-slate-400">
+                        <th class="px-6 py-4">Voter</th>
+                        <th>ID / Matric</th>
+                        <th>Accredited</th>
+                        <th>Status</th>
+                        {% if plan in 'STANDARD,PREMIUM' %}
+                        <th class="text-right px-6">Action</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for voter in page_obj %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-900 leading-none">{{ voter.user.get_full_name }}</div>
+                            <div class="text-[10px] text-slate-500 mt-1">{{ voter.user.email }}</div>
+                        </td>
+                        <td class="text-slate-500 font-mono text-xs">{{ voter.matric_number }}</td>
+                        <td>
+                            <span class="{% if voter.is_accredited %}text-green-600{% else %}text-slate-300{% endif %} font-bold">
+                                {{ voter.is_accredited|yesno:"Yes,No" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if voter.has_voted %}
+                            <span class="badge badge-success badge-sm font-bold text-xs">Voted</span>
+                            {% else %}
+                            <span class="text-slate-400 italic text-xs">Pending</span>
+                            {% endif %}
+                        </td>
+                        {% if plan in 'STANDARD,PREMIUM' %}
+                        <td class="text-right px-6">
+                            {% if not voter.has_voted and voter.is_accredited %}
+                            <a href="{% url 'nudge_voters' short_id=election.short_id %}?v_email={{ voter.user.email }}" class="text-[10px] font-bold text-indigo-600 uppercase hover:underline">Nudge</a>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="p-20 text-center text-slate-400">No matching voters found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

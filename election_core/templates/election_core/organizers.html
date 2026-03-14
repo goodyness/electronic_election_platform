@@ -3,156 +3,93 @@
 {% block title %}Manage Organizers | Admin Control{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto py-8">
-
-
+<div class="max-w-7xl mx-auto py-12 px-4">
+    <!-- Header -->
     <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="space-y-1">
-            <nav class="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-2 text-slate-400">
-                <a href="{% url 'home' %}" class="hover:text-indigo-600 transition-colors">Home</a>
-                <span>/</span>
-                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Admin
-                    Dashboard</a>
+        <div>
+            <nav class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2 text-slate-400">
+                <a href="{% url 'grand_admin_dashboard' %}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
                 <span>/</span>
                 <span class="text-indigo-600">Organizers</span>
             </nav>
-            <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Organizer
-                Management</h2>
-            <p class="text-slate-500 font-medium">Verify credentials and manage platform hosting privileges.</p>
+            <h2 class="text-3xl font-bold text-slate-900">Organizer Management</h2>
+            <p class="text-slate-500 mt-1">Verify and manage platform hosting privileges.</p>
         </div>
-
-        <div>
-            <a href="{% url 'grand_admin_dashboard' %}"
-                class="btn btn-outline border-slate-200 hover:bg-slate-50 rounded-xl normal-case font-bold h-12 px-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to Dashboard
-            </a>
-        </div>
+        <a href="{% url 'grand_admin_dashboard' %}" class="btn btn-sm btn-outline h-10 px-6 rounded-lg font-bold">Back</a>
     </div>
 
-
-    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8 mb-10">
+    <!-- Search -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-10 shadow-sm">
         <form method="GET" class="flex flex-col md:flex-row gap-4">
-            <div class="relative flex-grow">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                <input type="text" name="q" placeholder="Search by name, email, or institution name..."
-                    value="{{ search_query|default:'' }}"
-                    class="input input-bordered w-full pl-12 rounded-2xl bg-slate-50 border-slate-100 text-sm focus:bg-white focus:border-indigo-600 transition-all h-14">
-            </div>
-            <button type="submit"
-                class="btn btn-primary rounded-2xl h-14 px-10 normal-case font-black shadow-lg shadow-indigo-100 border-none">Search
-                Directory</button>
+            <input type="text" name="q" placeholder="Search by name, email, or institution..." value="{{ search_query|default:'' }}" class="input input-bordered flex-grow h-12 px-6 rounded-lg text-sm">
+            <button type="submit" class="btn btn-primary h-12 px-8 rounded-lg font-bold">Search</button>
             {% if search_query %}
-            <a href="{% url 'list_organizers' %}"
-                class="btn btn-ghost bg-slate-100 rounded-2xl h-14 px-6 text-slate-500 normal-case font-bold">Clear
-                Filters</a>
+            <a href="{% url 'list_organizers' %}" class="btn btn-ghost h-12 px-4 text-slate-400 uppercase font-bold text-[10px] tracking-widest">Clear</a>
             {% endif %}
         </form>
     </div>
 
-
-    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-        <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
-            <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">System Organizer Registry</h3>
-            <span class="badge badge-sm bg-indigo-100 text-indigo-700 border-none font-bold py-3 px-4">{{
-                page_obj.paginator.count }} TOTAL RECORDS</span>
+    <!-- Table -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 uppercase">Organizer Registry</h3>
+            <span class="text-xs font-bold text-slate-400 uppercase">{{ page_obj.paginator.count }} Records</span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="table table-lg w-full">
+            <table class="table w-full text-sm">
                 <thead>
-                    <tr class="text-slate-400 font-black uppercase tracking-widest text-[10px] bg-slate-50/50">
-                        <th class="py-6 pl-8">Organizer Details</th>
+                    <tr class="text-[10px] font-bold uppercase text-slate-400 bg-white border-slate-100">
+                        <th class="px-8 py-4">Organizer</th>
                         <th>Institution</th>
                         <th>Status</th>
-                        <th class="pr-8 text-right">Administrative Actions</th>
+                        <th class="text-right px-8">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody class="divide-y divide-slate-100">
                     {% for org in page_obj %}
-                    <tr class="group hover:bg-slate-50/50 transition-colors">
-                        <td class="py-6 pl-8">
-                            <div class="space-y-1">
-                                <h4
-                                    class="font-bold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">
-                                    {{ org.user.get_full_name }}</h4>
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{
-                                    org.user.email }}</p>
-                            </div>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-8 py-4">
+                            <div class="font-bold text-slate-900">{{ org.user.get_full_name }}</div>
+                            <div class="text-[10px] text-slate-400 mt-1 uppercase">{{ org.user.email }}</div>
                         </td>
                         <td>
-                            <span class="text-xs font-bold text-slate-600">{{
-                                org.user.institution.name|default:"UNASSIGNED" }}</span>
+                            <div class="text-xs font-bold text-slate-600">{{ org.user.institution.name|default:"UNASSIGNED" }}</div>
                         </td>
                         <td>
                             <div class="flex items-center gap-2">
-                                <div class="w-2 h-2 rounded-full 
-                                    {% if org.status == 'APPROVED' %}bg-emerald-500
-                                    {% elif org.status == 'PENDING_APPROVAL' %}bg-amber-500 animate-pulse
-                                    {% else %}bg-rose-500{% endif %}"></div>
-                                <span class="text-xs font-black text-slate-700 tracking-tight">{{ org.get_status_display
-                                    }}</span>
+                                <span class="w-1.5 h-1.5 rounded-full {% if org.status == 'APPROVED' %}bg-green-500{% elif org.status == 'PENDING_APPROVAL' %}bg-amber-500{% else %}bg-rose-500{% endif %}"></span>
+                                <span class="text-[10px] font-bold uppercase tracking-tight text-slate-500">{{ org.get_status_display }}</span>
                             </div>
                         </td>
-                        <td class="pr-8 text-right">
-                            <div class="flex justify-end gap-3">
+                        <td class="text-right px-8">
+                            <div class="flex justify-end gap-3 text-[10px] font-bold uppercase tracking-widest">
                                 {% if org.status == 'APPROVED' %}
-                                <a href="{% url 'unapprove_organizer' org.id %}"
-                                    onclick="return confirm('Revoke approval for {{ org.user.get_full_name }}?')"
-                                    class="btn btn-sm btn-ghost hover:bg-amber-50 text-amber-600 rounded-xl normal-case font-bold">Unapprove</a>
+                                <a href="{% url 'unapprove_organizer' org.id %}" onclick="return confirm('Revoke approval?')" class="text-amber-600 hover:underline">Revoke</a>
                                 {% else %}
-                                <a href="{% url 'approve_organizer' org.id 'approve' %}"
-                                    class="btn btn-sm btn-success bg-emerald-100 hover:bg-emerald-200 border-none text-emerald-700 rounded-xl normal-case font-bold px-4">Approve</a>
+                                <a href="{% url 'approve_organizer' org.id 'approve' %}" class="text-green-600 hover:underline">Approve</a>
                                 {% endif %}
-
-                                <a href="{% url 'delete_organizer' org.id %}"
-                                    onclick="return confirm('PERMANENTLY delete account? This cannot be undone.')"
-                                    class="btn btn-sm btn-ghost hover:bg-rose-50 text-rose-600 rounded-xl normal-case font-bold">Delete
-                                    Account</a>
+                                <a href="{% url 'delete_organizer' org.id %}" onclick="return confirm('PERMANENTLY delete account?')" class="text-rose-600 hover:underline">Delete</a>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="4" class="py-32 text-center">
-                            <div
-                                class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-200" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            </div>
-                            <p class="text-slate-400 font-medium">No organizers match the search criteria.</p>
-                        </td>
-                    </tr>
+                    <tr><td colspan="4" class="p-20 text-center text-slate-400 italic">No organizers matching criteria.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
+        <!-- Pagination -->
         {% if page_obj.paginator.num_pages > 1 %}
-        <div class="p-8 border-t border-slate-50 bg-slate-50/30 flex justify-between items-center">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page {{ page_obj.number }} of {{
-                page_obj.paginator.num_pages }}</p>
+        <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
             <div class="flex gap-2">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
-                    class="btn btn-sm btn-outline rounded-xl font-bold border-slate-200">Prev</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-xs rounded-lg px-4 h-8">Prev</a>
                 {% endif %}
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
-                    class="btn btn-sm btn-outline rounded-xl font-bold border-slate-200">Next</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-xs rounded-lg px-4 h-8">Next</a>
                 {% endif %}
             </div>
         </div>

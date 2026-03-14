@@ -3,143 +3,47 @@
 {% block title %}Payment Successful{% endblock %}
 
 {% block content %}
-<style>
-    .success-container {
-        max-width: 600px;
-        margin: 2rem auto;
-        text-align: center;
-    }
+<div class="max-w-2xl mx-auto py-20 px-4 text-center">
+    <!-- Success Icon -->
+    <div class="w-20 h-20 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+    </div>
 
-    .success-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #2ecc71, #27ae60);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        font-size: 3rem;
-        animation: popIn 0.5s ease;
-    }
+    <h1 class="text-3xl font-bold text-slate-900">Payment Successful</h1>
+    <p class="text-slate-500 mt-2">Your election plan has been activated successfully.</p>
 
-    @keyframes popIn {
-        0% {
-            transform: scale(0);
-        }
-
-        70% {
-            transform: scale(1.2);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    .success-container h1 {
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .success-container p {
-        color: #666;
-        margin-bottom: 2rem;
-    }
-
-    .receipt-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        text-align: left;
-        margin-bottom: 2rem;
-    }
-
-    .receipt-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-    .receipt-row:last-child {
-        border-bottom: none;
-    }
-
-    .receipt-row .label {
-        color: #888;
-        font-size: 0.9rem;
-    }
-
-    .receipt-row .value {
-        font-weight: 600;
-        color: var(--primary-color);
-    }
-
-    .receipt-row.total .value {
-        font-size: 1.3rem;
-        color: #27ae60;
-    }
-
-    .plan-badge {
-        display: inline-block;
-        padding: 4px 14px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .plan-badge.BASIC {
-        background: #ebf5fb;
-        color: #2980b9;
-    }
-
-    .plan-badge.STANDARD {
-        background: #fef9e7;
-        color: #e67e22;
-    }
-
-    .plan-badge.PREMIUM {
-        background: #1a1a2e;
-        color: #f39c12;
-    }
-</style>
-
-<div class="success-container">
-    <div class="success-icon">✓</div>
-    <h1>Payment Successful!</h1>
-    <p>Your election plan has been activated. You can now manage your election.</p>
-
-    <div class="receipt-card">
-        <h3 style="margin-top: 0; color: var(--primary-color);">Payment Receipt</h3>
-        <div class="receipt-row">
-            <span class="label">Election</span>
-            <span class="value">{{ election.title }}</span>
-        </div>
-        <div class="receipt-row">
-            <span class="label">Plan</span>
-            <span><span class="plan-badge {{ payment.plan }}">{{ payment.get_plan_display }}</span></span>
-        </div>
-        <div class="receipt-row">
-            <span class="label">Voter Emails</span>
-            <span class="value">{{ payment.email_count|floatformat:0 }}</span>
-        </div>
-        <div class="receipt-row">
-            <span class="label">Reference</span>
-            <span class="value" style="font-size: 0.85rem;">{{ payment.paystack_reference }}</span>
-        </div>
-        <div class="receipt-row total">
-            <span class="label">Amount Paid</span>
-            <span class="value">₦{{ payment.amount|floatformat:0 }}</span>
+    <!-- Receipt -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-8 mt-12 text-left shadow-sm">
+        <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Transaction Receipt</h3>
+        
+        <div class="space-y-4">
+            <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                <span class="text-xs font-medium text-slate-500">Election</span>
+                <span class="text-xs font-bold text-slate-900">{{ election.title }}</span>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                <span class="text-xs font-medium text-slate-500">Plan Tier</span>
+                <span class="badge badge-primary badge-sm font-bold uppercase text-[10px]">{{ payment.get_plan_display }}</span>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                <span class="text-xs font-medium text-slate-500">Voter Capacity</span>
+                <span class="text-xs font-bold text-slate-900">{{ payment.email_count|floatformat:0 }} Slots</span>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                <span class="text-xs font-medium text-slate-500">Reference</span>
+                <span class="text-[10px] font-mono font-bold text-slate-400 uppercase">{{ payment.paystack_reference }}</span>
+            </div>
+            <div class="flex justify-between items-center pt-6">
+                <span class="font-bold text-slate-900">Amount Paid</span>
+                <span class="text-2xl font-bold text-indigo-600">₦{{ payment.amount|floatformat:0 }}</span>
+            </div>
         </div>
     </div>
 
-    <a href="{% url 'manage_election' short_id=election.short_id %}" class="btn"
-        style="padding: 14px 40px; border-radius: 10px; font-size: 1.1rem;">
-        Start Managing Your Election →
-    </a>
+    <div class="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{% url 'manage_election' short_id=election.short_id %}" class="btn btn-primary h-14 rounded-xl px-10 font-bold uppercase tracking-widest text-xs">Manage Election</a>
+    </div>
 </div>
 {% endblock %}

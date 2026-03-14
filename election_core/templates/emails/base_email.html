@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject|default:"FlashVote Update" }}</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f8fafc;
+            padding-bottom: 40px;
+        }
+        .main {
+            background-color: #ffffff;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            border-spacing: 0;
+            color: #1e293b;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .content {
+            padding: 48px;
+        }
+        .header {
+            padding: 32px 48px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .footer {
+            padding: 32px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+        .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.025em;
+            text-decoration: none;
+        }
+        .brand-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #4f46e5;
+            border-radius: 6px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4f46e5;
+            color: #ffffff !important;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 24px 0;
+        }
+        @media screen and (max-width: 600px) {
+            .content { padding: 32px 24px !important; }
+            .header { padding: 24px !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <center>
+            <table class="main" role="presentation">
+                <tr>
+                    <td class="header">
+                        <div class="brand">
+                            <span class="brand-icon"></span>FlashVote
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="content">
+                        {% block content %}{% endblock %}
+                    </td>
+                </tr>
+            </table>
+            <div class="footer">
+                <p>&copy; {{ current_year|default:"2026" }} FlashVote. Built for Institutional Integrity.</p>
+                <p>This is an automated security message. Please do not reply.</p>
+            </div>
+        </center>
+    </div>
+</body>
+</html>

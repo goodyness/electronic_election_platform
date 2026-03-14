@@ -1,341 +1,120 @@
 {% extends 'election_core/base.html' %}
 {% load static %}
 
-{% block title %}Results Analytics | {{ election.title }}{% endblock %}
+{% block title %}Results | {{ election.title }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-slate-50 py-12 lg:py-20 px-4 relative overflow-hidden">
-    <!-- Sophisticated Background Decor -->
-    <div class="absolute top-0 right-0 w-full h-[500px] bg-slate-900 -skew-y-3 origin-top-right -z-10 shadow-2xl"></div>
-
-    <div class="max-w-7xl mx-auto space-y-16">
-        <!-- Analytics Header -->
-        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
-            <div class="space-y-4">
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 font-black text-[10px] uppercase tracking-[0.2em] backdrop-blur-md">
-                    Analytical Intelligence Feed
-                </div>
-                <h2 class="text-4xl lg:text-6xl font-black text-white tracking-tighter leading-none">
-                    {{ election.title }} <span class="text-indigo-400">Analytics</span>
-                </h2>
-                <p class="text-slate-400 font-medium text-lg max-w-2xl">
-                    Comprehensive participation metrics and cryptographic tally verification for institutional
-                    transparency.
-                </p>
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-6xl mx-auto space-y-10">
+        
+        <!-- Header -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-900">{{ election.title }} Results</h2>
+                <p class="text-slate-500 mt-1">Live participation metrics and tally verification.</p>
             </div>
 
-            <div class="flex flex-wrap gap-4">
-                {% if election.plan != 'FREE' or request.user.role == 'GRAND_ADMIN' or request.user.is_superuser %}
-                <a href="{% url 'export_results_csv' short_id=election.short_id %}"
-                    class="btn bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl px-6 h-14 font-black text-xs uppercase tracking-widest transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-emerald-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Export CSV
-                </a>
-                <a href="{% url 'export_results_pdf' short_id=election.short_id %}"
-                    class="btn btn-primary h-14 px-8 rounded-2xl border-none font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-500/20 transition-all hover:scale-[1.02]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    PDF Audit Trial
-                </a>
+            <div class="flex gap-3">
+                {% if election.status == 'CLOSED' %}
+                    {% if not election.is_sealed and election.organizer.user == request.user or request.user.is_superuser %}
+                    <a href="{% url 'seal_results' short_id=election.short_id %}" class="btn btn-sm btn-outline btn-error px-4">Seal Results</a>
+                    {% endif %}
+                    
+                    {% if election.plan != 'FREE' or request.user.role == 'GRAND_ADMIN' or request.user.is_superuser %}
+                    <a href="{% url 'export_results_csv' short_id=election.short_id %}" class="btn btn-sm btn-outline px-4">CSV</a>
+                    <a href="{% url 'export_results_pdf' short_id=election.short_id %}" class="btn btn-sm btn-primary px-4">PDF Audit</a>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
 
-        <!-- High-Level Metrics -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Participation Doughnut -->
-            <div
-                class="lg:col-span-2 card bg-white/5 backdrop-blur-xl border border-white/10 p-10 flex flex-col md:flex-row items-center gap-10 shadow-2xl">
-                <div class="w-48 h-48 shrink-0 relative">
-                    <canvas id="participationChart"></canvas>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span class="text-3xl font-black text-white leading-none">
-                            {% if accredited_count > 0 %}{% widthratio voted_count accredited_count 100 %}{% else %}0{%
-                            endif %}%
-                        </span>
-                        <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Turnout</span>
-                    </div>
+        {% if election.is_sealed %}
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                 </div>
-                <div class="space-y-6 flex-grow">
-                    <div>
-                        <h3 class="text-xl font-black text-white tracking-tight leading-none mb-1">Participation Hub
-                        </h3>
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Real-time Turnout
-                            Intelligence</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
-                            <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Valid
-                                Ballots</div>
-                            <div class="text-2xl font-black text-emerald-400">{{ voted_count }}</div>
-                        </div>
-                        <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
-                            <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Accredited
-                            </div>
-                            <div class="text-2xl font-black text-indigo-400">{{ accredited_count }}</div>
-                        </div>
-                    </div>
+                <div>
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Mathematically Sealed</div>
+                    <div class="text-[11px] font-mono text-emerald-500 font-bold break-all">{{ election.result_hash }}</div>
                 </div>
             </div>
+            <div class="px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-full text-[10px] font-bold border border-emerald-500/20">SHA-256 VERIFIED</div>
+        </div>
+        {% endif %}
 
-            <!-- Total Eligible -->
-            <div class="card bg-white p-8 group hover:-translate-y-1 transition-all shadow-xl shadow-slate-200">
-                <div class="flex flex-col h-full justify-between">
-                    <div
-                        class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Eligible
-                            Population</div>
-                        <div class="text-4xl font-black text-slate-900 tracking-tighter">{{ eligible_count }}</div>
-                        <p class="text-[10px] text-slate-400 font-bold mt-2 uppercase">Institutional Total</p>
-                    </div>
+        <!-- Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Turnout</div>
+                <div class="text-3xl font-bold text-indigo-600">
+                    {% if accredited_count > 0 %}{% widthratio voted_count accredited_count 100 %}{% else %}0{% endif %}%
                 </div>
             </div>
-
-            <!-- Remaining to Vote -->
-            <div class="card bg-indigo-600 p-8 group hover:-translate-y-1 transition-all shadow-xl shadow-indigo-100">
-                <div class="flex flex-col h-full justify-between text-white">
-                    <div
-                        class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em] mb-1">Awaiting
-                            Ballots</div>
-                        <div class="text-4xl font-black tracking-tighter">{{ accredited_count|add:voted_count|default:"0" }}</div>
-                        <p class="text-[10px] text-indigo-200 font-bold mt-2 uppercase">Pending Session Closure</p>
-                    </div>
-                </div>
+            <div class="bg-white p-6 rounded-xl border border-slate-200">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valid Ballots</div>
+                <div class="text-3xl font-bold text-slate-900">{{ voted_count }}</div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border border-slate-200">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Accredited Voters</div>
+                <div class="text-3xl font-bold text-slate-900">{{ accredited_count }}</div>
             </div>
         </div>
 
-        <!-- Position Results Breakdown -->
-        <div class="space-y-10">
-            <div class="flex items-center gap-6">
-                <h3
-                    class="text-xl font-black text-white uppercase tracking-widest bg-slate-900 px-6 py-3 rounded-2xl shadow-xl leading-none italic">
-                    Ballot Tally Distribution</h3>
-                <div class="h-px bg-slate-200 flex-grow"></div>
-            </div>
+        <!-- Results Breakdown -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {% for result in results %}
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-900 uppercase tracking-tight">{{ result.position.title }}</h3>
+                    <div class="text-xs font-bold text-slate-400">{{ result.total_votes }} Votes</div>
+                </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {% for result in results %}
-                <div
-                    class="card bg-white p-0 overflow-hidden shadow-2xl shadow-slate-200 group hover:border-indigo-600 transition-all duration-500">
-                    <div
-                        class="p-8 lg:p-10 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center relative">
-                        <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-600"></div>
-                        <div>
-                            <h4 class="text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">{{
-                                result.position.title }}</h4>
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2 italic">
-                                Official Sector Count</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-black text-indigo-600 tabular-nums leading-none">{{
-                                result.total_votes }}</div>
-                            <div class="text-[10px] font-black text-slate-400 uppercase mt-1">Total Pulses</div>
-                        </div>
-                    </div>
-
-                    <div class="p-8 lg:p-10 space-y-12">
-                        {% for candidate in result.candidates %}
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between gap-6">
-                                <div class="flex items-center gap-5">
-                                    <div class="relative shrink-0">
-                                        {% if candidate.photo %}
-                                        <div
-                                            class="w-14 h-14 rounded-2xl p-0.5 bg-slate-100 group-hover:scale-110 transition-transform duration-500 shadow-sm overflow-hidden">
-                                            <img src="{{ candidate.photo.url }}"
-                                                class="w-full h-full rounded-[0.85rem] object-cover" alt="">
-                                        </div>
-                                        {% else %}
-                                        <div
-                                            class="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 font-black text-xl border border-slate-100 group-hover:bg-indigo-50 transition-colors">
-                                            {{ candidate.full_name|slice:":1" }}
-                                        </div>
-                                        {% endif %}
-
-                                        {% if forloop.first and result.total_votes > 0 %}
-                                        <div
-                                            class="absolute -top-2 -right-2 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg shadow-emerald-200 border-2 border-white">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path border-width="2.5" d="M5 13l4 4L19 7" />
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    <div>
-                                        <h5
-                                            class="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight leading-none mb-1">
-                                            {{ candidate.full_name }}</h5>
-                                        <div class="flex items-center gap-2">
-                                            <span
-                                                class="text-[9px] font-black text-slate-400 uppercase tracking-widest">{{
-                                                candidate.aka|default:"REGULATED" }}</span>
-                                            <div class="w-1 h-1 rounded-full bg-slate-200"></div>
-                                            <span
-                                                class="text-[9px] font-black text-indigo-500 uppercase tracking-widest">{{
-                                                candidate.faculty|default:"Universal" }}</span>
-                                        </div>
-                                    </div>
+                <div class="p-6 space-y-6">
+                    {% for candidate in result.candidates %}
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                {% if candidate.photo %}
+                                <img src="{{ candidate.photo.url }}" class="w-10 h-10 rounded-lg object-cover">
+                                {% else %}
+                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300 font-bold">
+                                    {{ candidate.full_name|slice:":1" }}
                                 </div>
-                                <div class="text-right">
-                                    <div class="text-3xl font-black text-slate-900 tabular-nums leading-none mb-1">{{
-                                        candidate.vote_count }}</div>
-                                    <div
-                                        class="inline-flex px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-black tabular-nums">
-                                        {% if result.total_votes > 0 %}{% widthratio candidate.vote_count
-                                        result.total_votes 100 %}{% else %}0{% endif %}%
-                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="font-bold text-slate-900 text-sm">{{ candidate.full_name }}</div>
+                                    <div class="text-[10px] text-slate-500 uppercase">{{ candidate.faculty|default:"Independent" }}</div>
                                 </div>
                             </div>
-
-                            <!-- Animated Visual Bar -->
-                            <div
-                                class="relative w-full h-4 bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-0.5">
-                                <div class="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full transition-all duration-1000 ease-out shadow-inner"
-                                    style="width: {% if result.total_votes > 0 %}{% widthratio candidate.vote_count result.total_votes 100 %}{% else %}0{% endif %}%;">
+                            <div class="text-right">
+                                <div class="font-bold text-slate-900">{{ candidate.vote_count }}</div>
+                                <div class="text-[10px] font-bold text-indigo-600">
+                                    {% if result.total_votes > 0 %}{% widthratio candidate.vote_count result.total_votes 100 %}{% else %}0{% endif %}%
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
+                        <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-600 rounded-full" style="width: {% if result.total_votes > 0 %}{% widthratio candidate.vote_count result.total_votes 100 %}{% else %}0{% endif %}%;"></div>
+                        </div>
                     </div>
-
-                    <div
-                        class="mt-auto p-6 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                        <span>Protocol: Majority Consensus</span>
-                        <span class="text-indigo-500">Security Verified</span>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <div class="col-span-2 card p-24 text-center border-dashed border-2 border-slate-200">
-                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-200" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <h4 class="text-xl font-black text-slate-900">Historical Silence</h4>
-                    <p class="text-slate-500 font-medium">No votes have been synchronized for this event node yet.</p>
-                </div>
-                {% endfor %}
             </div>
+            {% empty %}
+            <div class="col-span-full py-20 text-center bg-white rounded-xl border border-dashed border-slate-200">
+                <p class="text-slate-500">No results recorded yet.</p>
+            </div>
+            {% endfor %}
         </div>
 
         {% if election.plan == 'FREE' and request.user.role == 'ORGANIZER' %}
-        <div
-            class="mt-24 p-12 lg:p-20 bg-white rounded-[4rem] border-2 border-dashed border-indigo-100 text-center max-w-4xl mx-auto shadow-2xl relative overflow-hidden group">
-            <div
-                class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-50 group-hover:scale-125 transition-transform duration-700">
-            </div>
-            <div
-                class="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-inner group-hover:rotate-12 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <h4 class="text-3xl lg:text-5xl font-black text-slate-900 mb-6 tracking-tighter">Unlock Pro Intelligence
-            </h4>
-            <p class="text-slate-500 mb-12 text-lg font-medium max-w-xl mx-auto leading-relaxed">
-                Official CSV and PDF audit reports are professional compliance features.
-                Upgrade your institutional session to access enterprise-grade reporting protocols.
-            </p>
-            <a href="{% url 'select_plan' short_id=election.short_id %}"
-                class="btn btn-primary btn-lg rounded-3xl px-16 h-20 font-black text-xl normal-case shadow-2xl shadow-indigo-200 tracking-tight transition-all hover:scale-[1.05] active:scale-95">
-                Optimize Deployment
-            </a>
+        <div class="p-10 bg-indigo-50 rounded-2xl border border-indigo-100 text-center">
+            <h4 class="text-xl font-bold text-indigo-900 mb-2">Upgrade for Audit Trials</h4>
+            <p class="text-indigo-700/70 text-sm mb-6">Official CSV and PDF reports are available on premium plans.</p>
+            <a href="{% url 'select_plan' short_id=election.short_id %}" class="btn btn-primary h-12 px-8">Upgrade Now</a>
         </div>
         {% endif %}
     </div>
 </div>
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Participation Chart Initialization
-        const ctx = document.getElementById('participationChart').getContext('2d');
-        const voted = {{ voted_count|default: 0
-    }};
-    const pending = {{ accredited_count|default: 0 }} - voted;
-
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Voted', 'Accredited Pending'],
-            datasets: [{
-                data: [voted, Math.max(0, pending)],
-                backgroundColor: ['#4f46e5', '#1e293b'],
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            cutout: '80%',
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#0f172a',
-                    titleFont: { weight: 'bold', family: 'Inter' },
-                    padding: 12,
-                    cornerRadius: 12,
-                    displayColors: false
-                }
-            },
-            animation: {
-                duration: 2000,
-                easing: 'easeOutQuart'
-            }
-        }
-    });
-
-    // Background update every minute
-    setInterval(function () {
-        fetch(window.location.href)
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                // Simple logic to check if results changed - if so, reload
-                // This is better than partial updates when charts are involved unless using a reactive framework
-                const currentTotal = document.querySelector('.text-4xl.font-black.text-slate-900.tracking-tighter')?.textContent;
-                const newTotal = doc.querySelector('.text-4xl.font-black.text-slate-900.tracking-tighter')?.textContent;
-
-                if (currentTotal && newTotal && currentTotal !== newTotal) {
-                    window.location.reload();
-                }
-            })
-            .catch(err => console.error('Pulse update error:', err));
-    }, 60000);
-    });
-</script>
-{% endblock %}
 {% endblock %}

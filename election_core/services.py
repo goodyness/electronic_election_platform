@@ -33,6 +33,11 @@ def register_organizer(first_name, last_name, email, contact, institution_id, pa
             status='PENDING_APPROVAL'
         )
         
+        # Limit resend to 2 total OTPs
+        otp_count = OTP.objects.filter(user=user, purpose='ORGANIZER_VERIFICATION').count()
+        if otp_count >= 2:
+            raise Exception("OTP limit reached. Please contact admin at support@flashvote.ng for manual verification.")
+            
         # Generate OTP
         otp_code = generate_otp(user, 'ORGANIZER_VERIFICATION')
         
@@ -100,6 +105,11 @@ def register_voter(full_name, email, matric_number, faculty, department, institu
         )
         
         if not skip_otp:
+            # Limit resend to 2 total OTPs
+            otp_count = OTP.objects.filter(user=user, purpose='VOTER_ACCREDITATION').count()
+            if otp_count >= 2:
+                raise Exception("OTP limit reached. Please contact admin for assistance.")
+                
             # OTP for accreditation
             otp_code = generate_otp(user, 'VOTER_ACCREDITATION')
             
@@ -147,6 +157,12 @@ def initiate_password_reset(email):
     """
     try:
         user = User.objects.get(email=email)
+        
+        # Limit resend to 2 total OTPs
+        otp_count = OTP.objects.filter(user=user, purpose='PASSWORD_RESET').count()
+        if otp_count >= 2:
+            return False, "OTP limit reached. Please contact admin for assistance."
+            
         otp_code = generate_otp(user, 'PASSWORD_RESET')
         
         from .tasks import send_otp_email_task

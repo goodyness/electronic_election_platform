@@ -1,99 +1,119 @@
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+<!-- Core Stats Banner -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-indigo-600 p-6 rounded-[2rem] shadow-2xl flex flex-col justify-center border border-indigo-500">
+        <div class="text-[9px] font-bold text-indigo-200 uppercase tracking-widest mb-1">Current Turnout</div>
+        <div class="flex items-baseline gap-2">
+            <span class="text-4xl font-black text-white tabular-nums">{{ turnout_percentage|stringformat:".1f" }}%</span>
+            <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Captured</span>
+        </div>
+    </div>
+
+    <div class="bg-slate-900 p-6 rounded-[2rem] shadow-2xl border border-slate-800 flex flex-col justify-center">
+        <div class="flex items-center gap-2 mb-1">
+            <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></div>
+            <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Smart Prediction</div>
+        </div>
+        <div class="flex items-baseline gap-2">
+            <span class="text-4xl font-black text-white tabular-nums">{{ predicted_turnout }}</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Est. Final</span>
+        </div>
+        <p class="text-[8px] text-slate-600 mt-1 uppercase font-bold tracking-tighter">Based on current acquisition velocity</p>
+    </div>
+
+    <div class="bg-slate-900/50 p-6 rounded-[2rem] border border-slate-800/50 flex flex-col justify-center backdrop-blur-sm">
+        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Target Feed</div>
+        <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-black text-slate-400 tabular-nums">{{ total_eligible }}</span>
+            <span class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Total Voters</span>
+        </div>
+    </div>
+</div>
+
+<!-- Turnout Heatmap / Timeline -->
+<div class="col-span-full bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-2xl mb-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h3 class="text-xl font-bold text-white uppercase tracking-tight">Turnout Velocity</h3>
+            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Real-time participation flow (24H)</p>
+        </div>
+        <div class="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-[9px] font-bold uppercase tracking-widest">
+            High Fidelity Analytics
+        </div>
+    </div>
+    
+    <div class="h-[250px] w-full">
+        <canvas id="turnoutChart"></canvas>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
     {% for pos in results_data %}
-    <article class="glass-panel rounded-[3rem] overflow-hidden flex flex-col data-stream-item"
-        style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
-        <div class="p-8 lg:p-10 border-b border-white/5 bg-white/5 flex justify-between items-center relative gap-6">
-            <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-600"></div>
+    <div class="bg-slate-900 shadow-xl rounded-3xl border border-slate-800 overflow-hidden flex flex-col group transition-all hover:border-slate-700">
+        <!-- Position Header -->
+        <div class="p-6 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
             <div>
-                <h3 class="text-2xl font-black text-white uppercase tracking-tighter italic font-war">{{ pos.position }}
-                </h3>
-                <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Tactical Position
-                    Sector</div>
+                <h3 class="text-xl font-bold text-white uppercase tracking-tight">{{ pos.position }}</h3>
+                <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Sector Results</div>
             </div>
             <div class="text-right">
-                <div class="text-2xl font-black text-indigo-400 font-war tabular-nums">{{ pos.total_votes }}</div>
-                <div class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Aggregated Votes</div>
+                <div class="text-2xl font-bold text-indigo-400 tabular-nums">{{ pos.total_votes }}</div>
+                <div class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Total Feed</div>
             </div>
         </div>
 
-        <div class="p-8 lg:p-10 space-y-12">
+        <!-- Candidates List -->
+        <div class="p-8 space-y-10 flex-grow">
             {% for cand in pos.candidates %}
-            <div class="space-y-6 group">
-                <div class="flex items-center justify-between gap-6">
-                    <div class="flex items-center gap-6">
-                        <div class="relative shrink-0">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
                             {% if cand.photo %}
-                            <div
-                                class="w-16 h-16 rounded-2xl p-0.5 bg-white/10 group-hover:scale-110 transition-transform duration-500">
-                                <img src="{{ cand.photo }}"
-                                    class="w-full h-full rounded-[0.85rem] object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
-                                    alt="">
+                            <div class="w-12 h-12 rounded-xl border border-slate-800 p-0.5">
+                                <img src="{{ cand.photo }}" class="w-full h-full rounded-[10px] object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300">
                             </div>
                             {% else %}
-                            <div
-                                class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-slate-700 font-black text-xl border border-white/5 group-hover:text-indigo-500 transition-colors">
+                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-500 font-bold text-lg">
                                 {{ cand.name|slice:":1" }}
                             </div>
                             {% endif %}
-
+                            
                             {% if forloop.first and pos.total_votes > 0 %}
-                            <div
-                                class="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-dark text-[10px] font-black shadow-lg shadow-emerald-500/20 animate-bounce">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
+                            <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-slate-900" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                 </svg>
                             </div>
                             {% endif %}
                         </div>
                         <div>
-                            <h4
-                                class="text-xl font-black text-white group-hover:text-indigo-400 transition-colors tracking-tight leading-none italic">
-                                {{ cand.name|upper }}</h4>
-                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2">{{
-                                cand.aka|default:"REGULATED BID" }}</p>
+                            <h4 class="text-sm font-bold text-white uppercase tracking-tight">{{ cand.name }}</h4>
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">{{ cand.aka|default:"REGULATED" }}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <div
-                            class="text-4xl font-black text-white tabular-nums tracking-tighter font-war leading-none mb-1">
-                            {{ cand.votes }}</div>
-                        <div
-                            class="inline-flex px-2 py-0.5 rounded bg-indigo-600/10 text-indigo-400 text-[10px] font-black tabular-nums">
-                            {% if pos.total_votes > 0 %}{% widthratio cand.votes pos.total_votes 100 %}{% else %}0{%
-                            endif %}%
+                        <div class="text-2xl font-bold text-white tabular-nums tracking-tighter leading-none">{{ cand.votes }}</div>
+                        <div class="text-[9px] font-bold text-indigo-400 tabular-nums uppercase mt-1">
+                            {% if pos.total_votes > 0 %}{% widthratio cand.votes pos.total_votes 100 %}{% else %}0{% endif %}%
                         </div>
                     </div>
                 </div>
 
-                <!-- Live Progress Bar -->
-                <div
-                    class="relative w-full h-5 bg-white/5 rounded-full overflow-hidden border border-white/5 p-1 group-hover:border-indigo-500/30 transition-colors">
-                    <div class="h-full bg-gradient-to-r from-indigo-700 via-indigo-500 to-cyan-400 rounded-full transition-all duration-1000 ease-out relative"
-                        style="width: {% if pos.total_votes > 0 %}{% widthratio cand.votes pos.total_votes 100 %}{% else %}0{% endif %}%;">
-
-                        <!-- Reflection effect -->
-                        <div class="absolute inset-0 bg-white/20 blur-sm opacity-50"></div>
-
-                        <!-- Percentage label only if enough space -->
-                        <div class="absolute inset-0 flex items-center justify-end pr-3">
-                            <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_white]"></div>
-                        </div>
+                <!-- Progress Bar -->
+                <div class="relative w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-indigo-600 rounded-full transition-all duration-700 ease-out" 
+                         style="width: {% if pos.total_votes > 0 %}{% widthratio cand.votes pos.total_votes 100 %}{% else %}0{% endif %}%;">
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        <div class="mt-auto p-8 bg-black/20 border-t border-white/5">
-            <div
-                class="flex items-center justify-between text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">
-                <span>Integrity Hash: {{ pos.voter_hashes|default:"8f2b...x90" }}</span>
-                <span class="text-emerald-500/50">Node Verified</span>
-            </div>
+        <!-- Footer Info -->
+        <div class="p-4 bg-black/30 border-t border-slate-800 flex justify-between items-center px-8">
+            <span class="text-[8px] font-bold text-slate-600 uppercase tracking-[0.2em] font-mono">HASH: {{ pos.voter_hashes|slice:":20"|default:"SECURE-V-77" }}...</span>
+            <span class="text-[8px] font-bold text-green-500 uppercase tracking-widest">Live Node Verified</span>
         </div>
-    </article>
+    </div>
     {% endfor %}
 </div>

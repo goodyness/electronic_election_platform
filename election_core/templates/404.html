@@ -1,0 +1,31 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}404 - Terminal Not Found{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+    <!-- Glitchy Error Number -->
+    <div class="relative group">
+        <h1 class="text-[12rem] font-black text-slate-900 leading-none select-none tracking-tighter">404</h1>
+        <div class="absolute inset-0 bg-indigo-600 mix-blend-screen opacity-0 group-hover:opacity-10 transition-opacity blur-2xl"></div>
+    </div>
+    
+    <div class="max-w-md space-y-8 -mt-8">
+        <div>
+            <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Transmission Lost</h2>
+            <p class="text-sm font-medium text-slate-400 leading-relaxed uppercase tracking-wider">
+                The requested terminal node does not exist or has been decommissioned from the tactical grid.
+            </p>
+        </div>
+
+        <div class="h-px bg-slate-100 w-24 mx-auto"></div>
+
+        <div class="flex flex-col gap-4">
+            <a href="{% url 'home' %}" class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none h-14 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-xl shadow-indigo-100">
+                Return to Command Center
+            </a>
+            <p class="text-[9px] font-bold text-slate-300 uppercase tracking-[0.3em]">Code: ERR_NODE_NOT_FOUND</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

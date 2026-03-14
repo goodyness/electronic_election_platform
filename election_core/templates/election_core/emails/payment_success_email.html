@@ -1,72 +1,45 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>Payment Receipt</title>
 </head>
-
-<body
-    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 672px; margin: 0 auto; padding: 0; background-color: #f8fafc;">
-    <div
-        style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-
-        <div style="background: #4f46e5; padding: 40px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">FlashVote
-                Receipt</h1>
+<body style="font-family: 'Inter', sans-serif; line-height: 1.6; color: #1e293b; background-color: #ffffff; margin: 0; padding: 40px 20px;">
+    <div style="max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 32px; padding: 48px;">
+        <div style="margin-bottom: 32px;">
+            <div style="width: 32px; height: 32px; background: #4f46e5; border-radius: 8px; display: inline-block;"></div>
+            <span style="font-size: 18px; font-weight: 800; color: #0f172a; vertical-align: middle; margin-left: 8px; letter-spacing: -0.025em;">FlashVote</span>
         </div>
 
+        <h1 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.05em;">Payment Confirmed</h1>
+        <p style="font-size: 16px; color: #64748b; margin-bottom: 32px;">Your election plan has been successfully upgraded. Your new limits are active.</p>
 
-        <div style="padding: 40px;">
-            <h2 style="margin-top: 0; font-size: 20px; color: #1e293b;">Payment Successful!</h2>
-            <p style="color: #64748b; margin-bottom: 24px;">
-                Hi {{ user_name }},<br>
-                Thank you for your purchase. Your election plan has been upgraded successfully.
-            </p>
-
-
-            <div
-                style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Election</td>
-                        <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #0f172a;">{{
-                            election_title }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Plan</td>
-                        <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #4f46e5;">{{ plan_name }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Emails Added</td>
-                        <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #0f172a;">+{{ email_count
-                            }}</td>
-                    </tr>
-                    <tr style="border-top: 1px solid #e2e8f0;">
-                        <td style="padding: 12px 0 0; font-weight: 700; color: #0f172a;">Total Paid</td>
-                        <td
-                            style="padding: 12px 0 0; text-align: right; font-weight: 700; color: #0f172a; font-size: 18px;">
-                            {{ amount }}</td>
-                    </tr>
-                </table>
-            </div>
-
-            <p style="color: #64748b; margin-bottom: 30px;">
-                Your account limits have been updated instantly. You can now proceed with adding more voters or
-                launching your election.
-            </p>
-
-            <a href="{{ dashboard_url }}"
-                style="display: block; background: #4f46e5; color: white; text-decoration: none; text-align: center; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 16px;">Go
-                to Dashboard</a>
+        <div style="border: 1px solid #f1f5f9; border-radius: 24px; padding: 32px; margin-bottom: 32px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 12px 0; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Election</td>
+                    <td style="padding: 12px 0; text-align: right; font-size: 14px; font-weight: 700; color: #0f172a;">{{ election_title }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 0; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Tier</td>
+                    <td style="padding: 12px 0; text-align: right; font-size: 14px; font-weight: 700; color: #4f46e5;">{{ plan_name }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 0; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Capacity</td>
+                    <td style="padding: 12px 0; text-align: right; font-size: 14px; font-weight: 700; color: #0f172a;">+{{ email_count }} SLOTS</td>
+                </tr>
+                <tr style="border-top: 1px solid #f1f5f9;">
+                    <td style="padding: 20px 0 0 0; font-size: 14px; font-weight: 800; color: #0f172a;">TOTAL PAID</td>
+                    <td style="padding: 20px 0 0 0; text-align: right; font-size: 20px; font-weight: 800; color: #0f172a;">{{ amount }}</td>
+                </tr>
+            </table>
         </div>
 
+        <a href="{{ dashboard_url }}" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 16px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Go to Organizer Dashboard →</a>
 
-        <div style="background: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
-            <p style="margin: 0;">&copy; {% now "Y" %} FlashVote. All rights reserved.</p>
+        <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid #f1f5f9; color: #94a3b8; font-size: 12px;">
+            <p>&copy; {% now "Y" %} FlashVote. Built for Institutional Integrity.</p>
         </div>
     </div>
 </body>
-
 </html>

@@ -3,470 +3,104 @@
 {% block title %}Choose Your Plan - {{ election.title }}{% endblock %}
 
 {% block content %}
-<style>
-    .plan-header {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
-
-    .plan-header h1 {
-        font-size: 2.2rem;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .plan-header p {
-        color: #666;
-        font-size: 1.1rem;
-    }
-
-    .plan-header .election-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #3498db, #2c3e50);
-        color: white;
-        padding: 6px 18px;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-    }
-
-    .plans-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 1.5rem;
-        max-width: 1100px;
-        margin: 0 auto;
-    }
-
-    .plan-card {
-        background: var(--white);
-        border-radius: 16px;
-        padding: 2rem 1.5rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        position: relative;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 2px solid transparent;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .plan-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    .plan-card.recommended {
-        border-color: #3498db;
-    }
-
-    .plan-card.recommended::before {
-        content: "POPULAR";
-        position: absolute;
-        top: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        padding: 4px 16px;
-        border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
-
-    .plan-card.premium-card {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        color: white;
-    }
-
-    .plan-card.premium-card .plan-features li {
-        color: rgba(255, 255, 255, 0.85);
-    }
-
-    .plan-card.premium-card .plan-features li::before {
-        color: #f39c12 !important;
-    }
-
-    .plan-card.premium-card .plan-price-label {
-        color: rgba(255, 255, 255, 0.6);
-    }
-
-    .plan-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .plan-icon.free {
-        background: #eafaf1;
-    }
-
-    .plan-icon.basic {
-        background: #ebf5fb;
-    }
-
-    .plan-icon.standard {
-        background: #fef9e7;
-    }
-
-    .plan-icon.premium {
-        background: rgba(243, 156, 18, 0.2);
-    }
-
-    .plan-name {
-        font-size: 1.3rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .plan-price {
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: 0.2rem;
-    }
-
-    .plan-price span {
-        font-size: 0.9rem;
-        font-weight: 400;
-    }
-
-    .plan-price-label {
-        color: #888;
-        font-size: 0.8rem;
-        margin-bottom: 1rem;
-    }
-
-    .plan-features {
-        list-style: none;
-        padding: 0;
-        margin: 1rem 0;
-        flex: 1;
-    }
-
-    .plan-features li {
-        padding: 6px 0;
-        font-size: 0.85rem;
-        color: #555;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .plan-features li::before {
-        content: "✓";
-        color: var(--success);
-        font-weight: bold;
-        font-size: 1rem;
-    }
-
-    .plan-features li.disabled {
-        text-decoration: line-through;
-        opacity: 0.4;
-    }
-
-    .plan-features li.disabled::before {
-        content: "✕";
-        color: var(--error);
-    }
-
-    .plan-btn {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 10px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-align: center;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        box-sizing: border-box;
-    }
-
-    .plan-btn.free-btn {
-        background: #eafaf1;
-        color: #27ae60;
-        border: 2px solid #27ae60;
-    }
-
-    .plan-btn.free-btn:hover {
-        background: #27ae60;
-        color: white;
-    }
-
-    .plan-btn.basic-btn {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-    }
-
-    .plan-btn.basic-btn:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-    }
-
-    .plan-btn.standard-btn {
-        background: linear-gradient(135deg, #f39c12, #e67e22);
-        color: white;
-    }
-
-    .plan-btn.standard-btn:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
-    }
-
-    .plan-btn.premium-btn {
-        background: linear-gradient(135deg, #f39c12, #e74c3c);
-        color: white;
-    }
-
-    .plan-btn.premium-btn:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-    }
-
-
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-overlay.active {
-        display: flex;
-    }
-
-    .modal-content {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem;
-        max-width: 480px;
-        width: 90%;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-        from {
-            transform: translateY(30px);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .modal-content h2 {
-        margin-top: 0;
-        color: var(--primary-color);
-    }
-
-    .modal-content .price-calculator {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 1.2rem;
-        margin: 1rem 0;
-    }
-
-    .modal-content .price-calculator .total {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: var(--primary-color);
-    }
-
-    .modal-content input[type="number"],
-    .modal-content input[type="text"] {
-        width: 100%;
-        padding: 12px;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
-        font-size: 1rem;
-        box-sizing: border-box;
-        transition: border-color 0.3s;
-        background-color: #ffffff !important;
-        color: #1f2937 !important;
-        -webkit-appearance: none;
-    }
-
-    .modal-content input:focus {
-        border-color: var(--accent-color);
-        outline: none;
-    }
-
-    .modal-content label {
-        font-size: 0.85rem;
-        color: #666;
-        margin-bottom: 4px;
-    }
-
-    .modal-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .modal-actions button {
-        flex: 1;
-        border-radius: 10px;
-    }
-
-    .btn-cancel {
-        background: #e0e0e0 !important;
-        color: #333 !important;
-    }
-
-    .custom-slug-field {
-        display: none;
-        margin-top: 1rem;
-    }
-
-    @media (max-width: 768px) {
-        .plans-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .plan-header h1 {
-            font-size: 1.6rem;
-        }
-    }
-</style>
-
-<div class="plan-header">
-    <h1>Choose Your Plan</h1>
-    <p>Select the perfect plan for your election</p>
-    <div class="election-badge">{{ election.title }}</div>
-</div>
-
-<div class="plans-grid">
-    {% for plan in plans %}
-    <div class="plan-card 
-        {% if plan.plan_name == 'BASIC' %}recommended{% endif %}
-        {% if plan.plan_name == 'PREMIUM' %}premium-card{% endif %}
-        {% if election.plan == plan.plan_name %}active-plan{% endif %}">
-
-        {% if election.plan == plan.plan_name %}
-        <div
-            style="position: absolute; top: 10px; right: 10px; background: var(--success); color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: bold;">
-            CURRENT PLAN
-        </div>
-        {% endif %}
-
-        <div class="plan-icon {{ plan.plan_name|lower }}">
-            {% if plan.plan_name == 'FREE' %}🆓
-            {% elif plan.plan_name == 'BASIC' %}⚡
-            {% elif plan.plan_name == 'STANDARD' %}🏆
-            {% elif plan.plan_name == 'PREMIUM' %}👑
-            {% endif %}
-        </div>
-
-        <div class="plan-name">{{ plan.get_plan_name_display }}</div>
-
-        {% if plan.plan_name == 'FREE' %}
-        <div class="plan-price">₦0</div>
-        <div class="plan-price-label">Free forever</div>
-        {% else %}
-        <div class="plan-price">₦{{ plan.price_per_email|floatformat:0 }}<span>/email</span></div>
-        <div class="plan-price-label">Up to {{ plan.max_emails|default:"Unlimited" }} emails</div>
-        {% endif %}
-
-        <ul class="plan-features">
-            {% if plan.plan_name == 'FREE' %}
-            <li>Up to 50 voter emails</li>
-            <li class="disabled">No OTP verification</li>
-            <li>Direct accreditation</li>
-            <li class="disabled">No result export</li>
-            <li class="disabled">No analytics</li>
-            {% elif plan.plan_name == 'BASIC' %}
-            <li>Up to 1,000 voter emails</li>
-            <li>OTP email verification</li>
-            <li>Basic analytics</li>
-            <li>CSV export</li>
-            <li>7-day support</li>
-            {% elif plan.plan_name == 'STANDARD' %}
-            <li>Up to 5,000 voter emails</li>
-            <li>OTP email verification</li>
-            <li>Full analytics + audit logs</li>
-            <li>CSV + PDF export</li>
-            <li>Priority support</li>
-            {% elif plan.plan_name == 'PREMIUM' %}
-            <li>Unlimited voter emails</li>
-            <li>OTP email verification</li>
-            <li>Full analytics + audit logs</li>
-            <li>All exports + emailed results</li>
-            <li>Custom election URL</li>
-            <li>Data backup guarantee</li>
-            <li>Dedicated support</li>
-            {% endif %}
-        </ul>
-
-        {% if plan.plan_name == 'FREE' %}
-        {% if election.plan == 'FREE' %}
-        <button class="plan-btn free-btn" disabled style="opacity: 0.6; cursor: default;">Current Plan</button>
-        {% else %}
-        <a href="{% url 'activate_free_plan' short_id=election.short_id %}" class="plan-btn free-btn">Switch to Free</a>
-        {% endif %}
-        {% else %}
-        <button class="plan-btn {{ plan.plan_name|lower }}-btn"
-            onclick="openPaymentModal('{{ plan.plan_name }}', '{{ plan.get_plan_name_display }}', {{ plan.price_per_email }}, {{ plan.max_emails }})">
-            {% if election.plan == plan.plan_name %}Top-up / Change{% else %}Upgrade to {{ plan.get_plan_name_display
-            }}{% endif %}
-        </button>
-        {% endif %}
+<div class="max-w-6xl mx-auto py-12 px-4">
+    <!-- Header -->
+    <div class="text-center mb-16">
+        <h1 class="text-4xl font-bold text-slate-900 tracking-tight">Select a Plan</h1>
+        <p class="text-slate-500 mt-2">Scale your election with the right features for your needs.</p>
+        <div class="mt-4 inline-block bg-indigo-50 text-indigo-600 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">{{ election.title }}</div>
     </div>
-    {% endfor %}
+
+    <!-- Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for plan in plans %}
+        <div class="bg-white border {% if plan.plan_name == 'BASIC' %}border-indigo-600 shadow-xl shadow-indigo-50{% else %}border-slate-200{% endif %} rounded-3xl p-8 flex flex-col relative">
+            {% if election.plan == plan.plan_name %}
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Current Plan</div>
+            {% elif plan.plan_name == 'BASIC' %}
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Recommended</div>
+            {% endif %}
+
+            <div class="mb-6">
+                <div class="text-2xl mb-4">
+                    {% if plan.plan_name == 'FREE' %}🆓{% elif plan.plan_name == 'BASIC' %}⚡{% elif plan.plan_name == 'STANDARD' %}🏆{% elif plan.plan_name == 'PREMIUM' %}👑{% endif %}
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 uppercase tracking-tight">{{ plan.get_plan_name_display }}</h3>
+                <div class="mt-2">
+                    <span class="text-3xl font-bold text-slate-900">₦{{ plan.price_per_email|floatformat:0 }}</span>
+                    <span class="text-slate-400 text-sm">/email</span>
+                </div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Up to {{ plan.max_emails|default:"Unlimited" }} voters</div>
+            </div>
+
+            <ul class="flex-grow space-y-3 mb-8">
+                {% if plan.plan_name == 'FREE' %}
+                <li class="text-xs text-slate-600 flex items-center gap-2">✓ Up to 50 voters</li>
+                <li class="text-xs text-slate-300 flex items-center gap-2 line-through">✕ No OTP verification</li>
+                <li class="text-xs text-slate-600 flex items-center gap-2">✓ Direct accreditation</li>
+                <li class="text-xs text-slate-300 flex items-center gap-2 line-through">✕ No result export</li>
+                {% elif plan.plan_name == 'BASIC' %}
+                <li class="text-xs text-slate-600 flex items-center gap-2 font-bold">✓ Up to 1,000 voters</li>
+                <li class="text-xs text-slate-600 flex items-center gap-2">✓ OTP Verification</li>
+                <li class="text-xs text-slate-600 flex items-center gap-2">✓ Basic Analytics</li>
+                <li class="text-xs text-slate-600 flex items-center gap-2">✓ CSV Export</li>
+                {% elif plan.plan_name == 'STANDARD' %}
+                <li class="text-xs text-slate-600 flex items-center gap-2">✓ Up to 5,000 voters</li>
+                <li class="text-xs text-slate-600 flex items-center gap-2">✓ Audit Logs</li>
+                <li class="text-xs text-slate-600 flex items-center gap-2">✓ PDF Audit Report</li>
+                <li class="text-xs text-slate-600 flex items-center gap-2 font-bold">✓ Priority Support</li>
+                {% elif plan.plan_name == 'PREMIUM' %}
+                <li class="text-xs text-slate-900 flex items-center gap-2 font-bold">✓ Unlimited Voters</li>
+                <li class="text-xs text-slate-900 flex items-center gap-2 font-bold">✓ Custom Election URL</li>
+                <li class="text-xs text-slate-900 flex items-center gap-2">✓ All Exports</li>
+                <li class="text-xs text-slate-900 flex items-center gap-2">✓ Dedicated Manager</li>
+                {% endif %}
+            </ul>
+
+            {% if plan.plan_name == 'FREE' %}
+            <a href="{% url 'activate_free_plan' short_id=election.short_id %}" class="btn {% if election.plan == 'FREE' %}btn-disabled{% else %}btn-outline{% endif %} btn-block rounded-xl h-12 font-bold uppercase tracking-widest text-xs">Switch to Free</a>
+            {% else %}
+            <button onclick="openPaymentModal('{{ plan.plan_name }}', '{{ plan.get_plan_name_display }}', {{ plan.price_per_email }}, {{ plan.max_emails }})" class="btn {% if plan.plan_name == 'BASIC' %}btn-primary{% else %}btn-outline{% endif %} btn-block rounded-xl h-12 font-bold uppercase tracking-widest text-xs">Select Plan</button>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
+<!-- Modal -->
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" id="paymentModal">
+    <div class="bg-white rounded-3xl w-full max-w-md p-10 shadow-2xl">
+        <h2 class="text-2xl font-bold text-slate-900 mb-2" id="modalTitle">Activate Plan</h2>
+        <p class="text-slate-500 text-sm mb-8">Enter the number of voter slots you need for this election.</p>
 
-<div class="modal-overlay" id="paymentModal">
-    <div class="modal-content">
-        <h2 id="modalTitle">Choose Plan</h2>
-        <form method="post" action="{% url 'initialize_payment' short_id=election.short_id %}" id="paymentForm">
+        <form method="post" action="{% url 'initialize_payment' short_id=election.short_id %}" id="paymentForm" class="space-y-6">
             {% csrf_token %}
             <input type="hidden" name="plan" id="selectedPlan">
 
-            <div>
-                <label for="emailCount">Number of Voter Emails</label>
-                <input type="number" id="emailCount" name="email_count" min="1" placeholder="Enter number of emails"
-                    oninput="calculateTotal()" required>
-                <small id="emailLimit" style="color: #888; font-size: 0.8rem;"></small>
-            </div>
-
-            <div class="price-calculator">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #666;">Total Cost</span>
-                    <div class="total" id="totalAmount">₦0</div>
-                </div>
-                <div style="font-size: 0.8rem; color: #888; margin-top: 4px;">
-                    <span id="priceBreakdown"></span>
+            <div class="form-control">
+                <label class="label p-0 mb-2"><span class="label-text font-bold text-slate-400 uppercase text-[10px] tracking-widest">Number of Voters</span></label>
+                <input type="number" id="emailCount" name="email_count" min="1" class="input input-bordered h-14 rounded-xl w-full font-bold text-lg" placeholder="e.g. 500" oninput="calculateTotal()" required>
+                <div class="flex justify-between mt-2">
+                    <small id="emailLimit" class="text-[10px] font-bold text-slate-400 uppercase"></small>
                 </div>
             </div>
 
-            <div class="custom-slug-field" id="customSlugField">
-                <label for="customSlug">Custom Election URL</label>
-                <input type="text" id="customSlug" name="custom_slug" placeholder="e.g. FEC-election-2026"
-                    pattern="[a-zA-Z0-9\-]+" title="Only letters, numbers and hyphens">
-                <small style="color: #888;">Your election will be accessible at a custom URL</small>
+            <div class="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-100 flex justify-between items-center">
+                <div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Investment</div>
+                    <div class="text-xs text-slate-400 mt-1" id="priceBreakdown"></div>
+                </div>
+                <div class="text-2xl font-bold text-indigo-600" id="totalAmount">₦0</div>
             </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                <button type="submit" id="payBtn" class="btn" style="border-radius:10px;">
-                    Pay with Paystack 💳
-                </button>
+            <div class="form-control hidden" id="customSlugField">
+                <label class="label p-0 mb-2"><span class="label-text font-bold text-slate-400 uppercase text-[10px] tracking-widest">Custom URL Slug</span></label>
+                <input type="text" id="customSlug" name="custom_slug" class="input input-bordered h-14 rounded-xl w-full" placeholder="e.g. dep-vote-2026">
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" class="btn btn-ghost flex-1 h-12 font-bold uppercase tracking-widest text-xs" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary flex-1 h-12 font-bold uppercase tracking-widest text-xs shadow-lg shadow-indigo-100">Proceed to Pay</button>
             </div>
         </form>
     </div>
@@ -488,38 +122,29 @@
         const emailInput = document.getElementById('emailCount');
         if (max > 0) {
             emailInput.max = max;
-            document.getElementById('emailLimit').textContent = 'Maximum: ' + max.toLocaleString() + ' emails';
+            document.getElementById('emailLimit').textContent = 'Limit: ' + max.toLocaleString();
         } else {
             emailInput.removeAttribute('max');
-            document.getElementById('emailLimit').textContent = 'Unlimited emails';
+            document.getElementById('emailLimit').textContent = 'No Limit';
         }
 
-        // Show custom slug field for Premium
         document.getElementById('customSlugField').style.display = plan === 'PREMIUM' ? 'block' : 'none';
-
-        document.getElementById('paymentModal').classList.add('active');
+        document.getElementById('paymentModal').classList.remove('hidden');
     }
 
     function closeModal() {
-        document.getElementById('paymentModal').classList.remove('active');
+        document.getElementById('paymentModal').classList.add('hidden');
     }
 
     function calculateTotal() {
         const count = parseInt(document.getElementById('emailCount').value) || 0;
         const total = count * currentPrice;
         document.getElementById('totalAmount').textContent = '₦' + total.toLocaleString();
-        document.getElementById('priceBreakdown').textContent =
-            count.toLocaleString() + ' emails × ₦' + currentPrice + '/email';
+        document.getElementById('priceBreakdown').textContent = count.toLocaleString() + ' × ₦' + currentPrice;
     }
 
-
-    document.getElementById('paymentModal').addEventListener('click', function (e) {
-        if (e.target === this) closeModal();
-    });
-
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeModal();
-    });
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('paymentModal')) closeModal();
+    }
 </script>
 {% endblock %}

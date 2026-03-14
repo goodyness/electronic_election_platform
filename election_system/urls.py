@@ -21,3 +21,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('election_core.urls')),
 ]
+
+handler400 = 'election_core.views.handler400'
+handler403 = 'election_core.views.handler403'
+handler404 = 'election_core.views.handler404'
+handler500 = 'election_core.views.handler500'

@@ -5,9 +5,56 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 
-DEBUG = config('DEBUG', default=False, cast=bool)
+IS_PRODUCTION = config('IS_PRODUCTION', default=False, cast=bool)
+DEBUG = not IS_PRODUCTION if IS_PRODUCTION else config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost,0.0.0.0', cast=Csv())
+
+IP_ADDRESS = '192.168.1.203'
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8000',
+    f'http://{IP_ADDRESS}',
+    f'http://[IP_ADDRESS]',
+    "http://192.168.1.203:8000",
+]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
+
+CORS_ALLOW_CREDENTIALS = True
+
+
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = False  
+
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    f'http://{IP_ADDRESS}',
+    f'http://[IP_ADDRESS]',
+    "http://192.168.1.203:8000",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -95,12 +142,12 @@ SECURE_BROWSER_XSS_FILTER = True
 
 X_FRAME_OPTIONS = 'DENY'
 
-SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = IS_PRODUCTION
 SESSION_COOKIE_HTTPONLY = True   
 SESSION_COOKIE_SAMESITE = 'Lax' 
 SESSION_COOKIE_AGE = 3600       
 
-CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = IS_PRODUCTION
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 
