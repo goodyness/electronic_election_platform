@@ -7,14 +7,14 @@ from .utils import generate_otp
 
 User = get_user_model()
 
-def register_organizer(first_name, last_name, email, contact, institution_id, password):
+def register_organizer(first_name, last_name, email, contact, password, institution_id=None):
     """
     Registers a new Election Organizer.
     Creates a User and an ElectionOrganizer profile.
     Triggers OTP for email verification.
     """
     with transaction.atomic():
-        institution = Institution.objects.get(id=institution_id)
+        institution = Institution.objects.get(id=institution_id) if institution_id else None
         
         user = User.objects.create_user(
             username=email,
@@ -47,7 +47,7 @@ def register_organizer(first_name, last_name, email, contact, institution_id, pa
         
         return user, organizer
 
-def register_voter(full_name, email, matric_number, faculty, department, institution_id, election_id, password, skip_otp=False):
+def register_voter(full_name, email, matric_number, faculty, department, election_id, password, institution_id=None, skip_otp=False):
     """
     Registers a new Voter for a specific election.
     Reuses an existing User if one exists with this email (for multi-election support).
@@ -57,11 +57,15 @@ def register_voter(full_name, email, matric_number, faculty, department, institu
     from .models import Election
     with transaction.atomic():
         election = Election.objects.get(id=election_id)
-        institution = Institution.objects.get(id=institution_id)
+        institution = Institution.objects.get(id=institution_id) if institution_id else None
         
-        # Institution matching: voter's school must match election's institution
-        if institution.id != election.institution_id:
-            raise Exception(f"You must belong to {election.institution.name} to participate in this election.")
+        # Institution matching: voter's school must match election's institution (if one is set)
+        if election.institution_id:
+            if not institution:
+                # If voter doesn't have an institution set, we can assign the election's institution
+                institution = election.institution
+            elif institution.id != election.institution_id:
+                raise Exception(f"You must belong to {election.institution.name} to participate in this election.")
         
         # Check if email is allowed
         if not AllowedEmail.objects.filter(election_id=election_id, email=email).exists():

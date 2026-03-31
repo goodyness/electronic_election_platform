@@ -17,6 +17,16 @@
             <a href="{% url 'home' %}" class="btn btn-sm btn-outline h-11 px-8 rounded-lg uppercase font-bold tracking-widest">Back</a>
         </div>
 
+        <!-- Tabs -->
+        <div class="flex items-center gap-2 mb-10 overflow-x-auto pb-2 scrollbar-hide">
+            <a href="?type=POLITICAL" class="btn btn-sm h-12 px-8 rounded-2xl border-none {% if election_type == 'POLITICAL' %}bg-indigo-600 text-white shadow-lg shadow-indigo-100{% else %}bg-white text-slate-500 hover:bg-slate-100{% endif %} font-bold uppercase tracking-widest text-[10px] whitespace-nowrap transition-all">
+                Political Elections
+            </a>
+            <a href="?type=CONTESTANT" class="btn btn-sm h-12 px-8 rounded-2xl border-none {% if election_type == 'CONTESTANT' %}bg-indigo-600 text-white shadow-lg shadow-indigo-100{% else %}bg-white text-slate-500 hover:bg-slate-100{% endif %} font-bold uppercase tracking-widest text-[10px] whitespace-nowrap transition-all">
+                Contestant Elections
+            </a>
+        </div>
+
         <!-- Grid -->
         {% if elections %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

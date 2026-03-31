@@ -20,8 +20,7 @@ def grand_admin_dashboard(request):
     
     config = SystemConfig.get_config()
     plans = PlanPricing.get_all_plans()
-    
-    # Anomaly Detection Logic
+
     anomalies = []
     ten_mins_ago = timezone.now() - timedelta(minutes=10)
     
@@ -57,6 +56,9 @@ def grand_admin_dashboard(request):
     total_revenue = ElectionPayment.objects.filter(is_verified=True).aggregate(total=models.Sum('amount'))['total'] or 0
     all_elections_count = Election.objects.count()
     
+    from .models import Withdrawal
+    pending_payout_amount = Withdrawal.objects.filter(status='PENDING').aggregate(total=models.Sum('amount'))['total'] or 0
+    
     all_elections = Election.objects.all().order_by('-created_at')[:5]
     return render(request, 'election_core/grand_admin_dashboard.html', {
         'pending_organizers': pending_organizers,
@@ -67,6 +69,7 @@ def grand_admin_dashboard(request):
         'plans': plans,
         'payment_history': payment_history,
         'total_revenue': total_revenue,
+        'pending_payout_amount': pending_payout_amount,
         'anomalies': anomalies
     })
 
@@ -457,4 +460,115 @@ def list_all_payments(request):
     return render(request, 'election_core/admin_payments_list.html', {
         'page_obj': page_obj,
         'search_query': search_query
+    })
+
+@login_required
+def toggle_election_clearance(request, short_id):
+    if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+    
+    from .models import Election
+    election = get_object_or_404(Election, short_id=short_id)
+    election.is_cleared = not election.is_cleared
+    election.save()
+    
+    from .utils import log_action
+    status = "CLEARED" if election.is_cleared else "UNCLEARED"
+    log_action(request.user, f"Toggled Election Clearance: {election.title} -> {status}", request)
+    messages.success(request, f"Election '{election.title}' is now {status}.")
+    return redirect('list_all_elections')
+
+@login_required
+def toggle_election_auth_type(request, short_id):
+    if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+    
+    from .models import Election
+    election = get_object_or_404(Election, short_id=short_id)
+    if election.accreditation_type == 'OTP':
+        election.accreditation_type = 'TOKEN'
+    else:
+        election.accreditation_type = 'OTP'
+    election.save()
+    
+    from .utils import log_action
+    log_action(request.user, f"Changed Election Auth: {election.title} -> {election.accreditation_type}", request)
+    messages.success(request, f"Election '{election.title}' accreditation type changed to {election.accreditation_type}.")
+    return redirect('list_all_elections')
+
+@login_required
+def admin_withdrawals(request):
+    if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+    
+    from .models import Withdrawal
+    status_filter = request.GET.get('status', 'PENDING')
+    withdrawals = Withdrawal.objects.filter(status=status_filter).order_by('-created_at')
+    
+    return render(request, 'election_core/admin_withdrawals.html', {
+        'withdrawals': withdrawals,
+        'current_status': status_filter
+    })
+
+@login_required
+def approve_withdrawal(request, withdrawal_id, action):
+    if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+    
+    from .models import Withdrawal
+    withdrawal = get_object_or_404(Withdrawal, id=withdrawal_id)
+    
+    if action == 'approve':
+        withdrawal.status = 'APPROVED'
+        messages.success(request, f"Withdrawal of ₦{withdrawal.amount} approved.")
+    elif action == 'reject':
+        # Refund the wallet
+        wallet = withdrawal.wallet
+        # The amount in withdrawal is what they get, charge_amount is what we took.
+        # Total to refund is amount + charge_amount
+        wallet.balance += (withdrawal.amount + withdrawal.charge_amount)
+        wallet.save()
+        withdrawal.status = 'REJECTED'
+        messages.warning(request, f"Withdrawal of ₦{withdrawal.amount} rejected and funds refunded.")
+    
+    withdrawal.save()
+    
+    # Trigger notification
+    from .tasks import send_withdrawal_status_notification_task
+    send_withdrawal_status_notification_task.delay(withdrawal.id)
+    
+    return redirect('admin_withdrawals')
+
+@login_required
+def manage_contest_charges(request):
+    if not (request.user.role == 'GRAND_ADMIN' or request.user.is_superuser):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+    
+    from .models import SystemConfig
+    config = SystemConfig.get_config()
+    
+    if request.method == 'POST':
+        import json
+        try:
+            charges_json = request.POST.get('charges_json')
+            charges_data = json.loads(charges_json)
+            # Basic validation
+            for item in charges_data:
+                # max can be None
+                if 'min' not in item or 'percent' not in item:
+                    raise ValueError("Invalid format: min and percent are required")
+            
+            config.contest_charge_config = charges_data
+            config.save()
+            messages.success(request, "Contest charge configuration updated.")
+        except Exception as e:
+            messages.error(request, f"Error updating config: {str(e)}")
+            
+    return render(request, 'election_core/manage_charges.html', {
+        'config': config
     })

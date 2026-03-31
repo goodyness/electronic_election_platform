@@ -32,6 +32,7 @@
                         <th class="px-8 py-4">Election</th>
                         <th>Organizer</th>
                         <th>Tier</th>
+                        <th>Auth & Clearance</th>
                         <th>Status</th>
                         <th class="text-right px-8">Actions</th>
                     </tr>
@@ -53,6 +54,16 @@
                         </td>
                         <td>
                             <span class="text-[10px] font-bold uppercase tracking-tight text-slate-400">{{ election.get_plan_display }}</span>
+                        </td>
+                        <td>
+                            <div class="flex flex-col gap-2 items-start">
+                                <a href="{% url 'toggle_election_auth_type' election.short_id %}" class="btn min-h-0 h-6 px-3 rounded text-[9px] {% if election.accreditation_type == 'TOKEN' %}bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-none{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 border-none{% endif %}" onclick="return confirm('Switch authentication mechanism for this election?')">
+                                    {{ election.get_accreditation_type_display|default:election.accreditation_type }}
+                                </a>
+                                <a href="{% url 'toggle_election_clearance' election.short_id %}" class="btn min-h-0 h-6 px-3 rounded text-[9px] {% if election.is_cleared %}bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none{% else %}bg-amber-100 text-amber-700 hover:bg-amber-200 border-none{% endif %}" onclick="return confirm('Toggle clearance status? Un-cleared elections cannot go LIVE.')">
+                                    {% if election.is_cleared %}CLEARED{% else %}PENDING CLR{% endif %}
+                                </a>
+                            </div>
                         </td>
                         <td>
                             <div class="flex items-center gap-1.5">

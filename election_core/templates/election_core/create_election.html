@@ -10,24 +10,75 @@
             <span>/</span>
             <span class="text-indigo-600">New Election</span>
         </nav>
-        <h2 class="text-3xl font-bold text-slate-900">Create Election</h2>
-        <p class="text-slate-500 mt-1">Define the parameters for your upcoming election.</p>
+        <h2 class="text-3xl font-bold text-slate-900">
+            {% if election_type == 'CONTESTANT' %}Create Contest{% else %}Create Political Election{% endif %}
+        </h2>
+        <p class="text-slate-500 mt-1">
+            {% if election_type == 'CONTESTANT' %}Define your paid voting contest parameters.{% else %}Define the parameters for your upcoming institutional election.{% endif %}
+        </p>
     </div>
 
     <div class="bg-white rounded-xl border border-slate-200 p-8">
-        <form method="post" class="space-y-8">
+        <form method="post" enctype="multipart/form-data" class="space-y-8">
             {% csrf_token %}
 
             <div class="space-y-6">
                 <div class="form-control">
-                    <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">Election Title</span></label>
+                    <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">{% if election_type == 'CONTESTANT' %}Contest Title{% else %}Election Title{% endif %}</span></label>
                     <input type="text" name="title" value="{{ form.title.value|default:'' }}"
-                        placeholder="e.g., 2026 Student Union General Election"
+                        placeholder="e.g., {% if election_type == 'CONTESTANT' %}Most Beautiful Girl 2024{% else %}2026 Student Union General Election{% endif %}"
                         class="input input-bordered w-full" required>
                     {% if form.title.errors %}
                     <p class="text-xs text-red-500 mt-1">{{ form.title.errors.0 }}</p>
                     {% endif %}
                 </div>
+
+                {% if election_type == 'POLITICAL' %}
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">Target Institution</span></label>
+                    <div class="select-wrapper bg-slate-50 border border-slate-200 rounded-lg px-4 h-12 flex items-center">
+                        <div class="w-full h-full [&_select]:bg-transparent [&_select]:border-none [&_select]:w-full [&_select]:h-full [&_select]:text-sm [&_select]:font-bold [&_select]:text-slate-600 [&_select]:outline-none">
+                            {{ form.institution }}
+                        </div>
+                    </div>
+                    {% if form.institution.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.institution.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-[10px] text-slate-400 mt-1 italic">Select the university or organization for this political election.</p>
+                </div>
+                {% endif %}
+
+                {% if election_type == 'CONTESTANT' %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">Voting Fee (₦)</span></label>
+                        <input type="number" name="voting_fee" step="0.01" value="{{ form.voting_fee.value|default:'100.00' }}"
+                            class="input input-bordered w-full" required>
+                        <p class="text-[10px] text-slate-400 mt-1 italic">Base fee per vote. We add a small surcharge for processing.</p>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">Custom Link Name</span></label>
+                        <div class="flex items-center">
+                            <span class="bg-slate-100 border-y border-l border-slate-200 px-3 py-3 rounded-l-lg text-xs text-slate-500">flashvote.com/c/</span>
+                            <input type="text" name="custom_slug" value="{{ form.custom_slug.value|default:'' }}"
+                                placeholder="my-contest"
+                                class="input input-bordered w-full rounded-l-none" required>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1 italic">The public link to your contest.</p>
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">Contest Image</span></label>
+                    <input type="file" name="contest_image" class="file-input file-input-bordered w-full">
+                    <p class="text-[10px] text-slate-400 mt-1">General banner image for the contest landing page.</p>
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold text-slate-700 uppercase tracking-widest text-xs">Description</span></label>
+                    <textarea name="description" class="textarea textarea-bordered h-24" placeholder="Tell voters about this contest...">{{ form.description.value|default:'' }}</textarea>
+                </div>
+                {% endif %}
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-control">
@@ -35,9 +86,6 @@
                         <input type="datetime-local" name="start_time"
                             value="{{ form.start_time.value|date:'Y-m-d\TH:i'|default:'' }}"
                             class="input input-bordered w-full" required>
-                        {% if form.start_time.errors %}
-                        <p class="text-xs text-red-500 mt-1">{{ form.start_time.errors.0 }}</p>
-                        {% endif %}
                     </div>
 
                     <div class="form-control">
@@ -45,16 +93,13 @@
                         <input type="datetime-local" name="end_time"
                             value="{{ form.end_time.value|date:'Y-m-d\TH:i'|default:'' }}"
                             class="input input-bordered w-full" required>
-                        {% if form.end_time.errors %}
-                        <p class="text-xs text-red-500 mt-1">{{ form.end_time.errors.0 }}</p>
-                        {% endif %}
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-100">
                 <button type="submit" class="btn btn-primary flex-grow h-12">
-                    Create Election
+                    {% if election_type == 'CONTESTANT' %}Create Contest{% else %}Create Election{% endif %}
                 </button>
                 <a href="{% url 'organizer_dashboard' %}" class="btn btn-ghost px-10 h-12">Cancel</a>
             </div>

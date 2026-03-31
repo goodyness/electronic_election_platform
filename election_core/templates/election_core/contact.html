@@ -1,0 +1,75 @@
+{% extends "election_core/base.html" %}
+
+{% block title %}Contact Us | FlashVote{% endblock %}
+
+{% block navbar %}
+<nav class="navbar bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-[100] px-6 lg:px-16 py-4">
+    <div class="navbar-start">
+        <a href="{% url 'home' %}" class="flex items-center gap-3 group transition-transform hover:scale-105">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">V</div>
+            <span class="text-2xl font-black tracking-tighter text-slate-900">Flash<span class="text-indigo-600">Vote</span></span>
+        </a>
+    </div>
+    <div class="navbar-end">
+        <a href="{% url 'home' %}" class="btn btn-ghost btn-sm font-black uppercase tracking-widest text-xs text-slate-500">Back to Home</a>
+    </div>
+</nav>
+{% endblock navbar %}
+
+{% block content %}
+<div class="bg-slate-50 min-h-screen py-24 px-6">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
+        <!-- Info Column -->
+        <div>
+            <h1 class="text-6xl font-black tracking-tighter text-slate-900 mb-8">Get in <span class="text-indigo-600">Touch</span></h1>
+            <p class="text-xl text-slate-500 font-medium leading-relaxed mb-12">Have questions about institutional deployment or security? Our team is ready to help you transition to modern voting.</p>
+            
+            <div class="space-y-10">
+                <div class="flex items-start gap-6">
+                    <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-indigo-600 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    </div>
+                    <div>
+                        <div class="font-black text-slate-900 uppercase tracking-widest text-xs mb-1">Email Us</div>
+                        <a href="mailto:support@flashvote.io" class="text-slate-500 font-bold hover:text-indigo-600 transition-colors">support@flashvote.io</a>
+                    </div>
+                </div>
+                <div class="flex items-start gap-6">
+                    <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-indigo-600 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>
+                    <div>
+                        <div class="font-black text-slate-900 uppercase tracking-widest text-xs mb-1">Office</div>
+                        <p class="text-slate-500 font-bold">123 Integrity Tower, Fintech District<br/>Global Center, HQ 9001</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Column -->
+        <div class="bg-white p-12 rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-indigo-100/20">
+            <form class="space-y-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text font-black uppercase tracking-widest text-[10px] text-slate-400">First Name</span></label>
+                        <input type="text" placeholder="John" class="input input-bordered bg-slate-50 rounded-xl font-medium border-slate-100 focus:outline-indigo-600" />
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text font-black uppercase tracking-widest text-[10px] text-slate-400">Last Name</span></label>
+                        <input type="text" placeholder="Doe" class="input input-bordered bg-slate-50 rounded-xl font-medium border-slate-100 focus:outline-indigo-600" />
+                    </div>
+                </div>
+                <div class="form-control w-full">
+                    <label class="label"><span class="label-text font-black uppercase tracking-widest text-[10px] text-slate-400">Email Address</span></label>
+                    <input type="email" placeholder="john@example.com" class="input input-bordered bg-slate-50 rounded-xl font-medium border-slate-100 focus:outline-indigo-600" />
+                </div>
+                <div class="form-control w-full">
+                    <label class="label"><span class="label-text font-black uppercase tracking-widest text-[10px] text-slate-400">Message</span></label>
+                    <textarea class="textarea textarea-bordered bg-slate-50 rounded-xl font-medium border-slate-100 focus:outline-indigo-600 h-32" placeholder="Tell us how we can help..."></textarea>
+                </div>
+                <button type="button" class="btn btn-primary w-full h-14 rounded-xl text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-indigo-100 mt-4">Send Message</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

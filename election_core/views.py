@@ -1,4 +1,7 @@
 import csv
+import uuid
+import requests
+from decimal import Decimal
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
@@ -9,7 +12,9 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse, JsonResponse
 from .forms import OrganizerRegistrationForm, OTPVerificationForm, LoginForm, VoterAccreditationForm, VoterDetailsForm, ForgotPasswordForm, PasswordResetForm
 from .services import register_organizer, verify_organizer_email, initiate_password_reset, complete_password_reset
-from .models import User, OTP, Institution, Election, Position, Candidate, Voter, AuditLog, Vote, ElectionOrganizer
+from django.conf import settings
+from django.db.models import Sum, Q, Count
+
 
 User = get_user_model()
 
@@ -20,8 +25,12 @@ def home(request):
 
 def active_elections_list(request):
     from .models import Election
-    active_elections = Election.objects.filter(status='ACTIVE').order_by('-start_time')
-    return render(request, 'election_core/active_elections.html', {'elections': active_elections})
+    election_type = request.GET.get('type', 'POLITICAL')
+    active_elections = Election.objects.filter(status='ACTIVE', election_type=election_type).order_by('-start_time')
+    return render(request, 'election_core/active_elections.html', {
+        'elections': active_elections,
+        'election_type': election_type
+    })
 
 def terms_and_conditions(request):
     return render(request, 'election_core/terms_and_conditions.html')
@@ -31,6 +40,18 @@ def privacy_policy(request):
 
 def system_documentation(request):
     return render(request, 'election_core/documentation.html')
+
+def compliance_view(request):
+    return render(request, 'election_core/compliance.html')
+
+def trust_center_view(request):
+    return render(request, 'election_core/trust_center.html')
+
+def contact_view(request):
+    return render(request, 'election_core/contact.html')
+
+def about_us_view(request):
+    return render(request, 'election_core/about_us.html')
 
 def organizer_signup(request):
     if request.method == 'POST':
@@ -42,7 +63,6 @@ def organizer_signup(request):
                     last_name=form.cleaned_data['last_name'],
                     email=form.cleaned_data['email'],
                     contact=form.cleaned_data['contact'],
-                    institution_id=form.cleaned_data['institution'].id,
                     password=form.cleaned_data['password']
                 )
                 from .utils import log_action
@@ -92,7 +112,7 @@ def voter_accreditation(request, short_id):
             messages.error(request, "Too many accreditation attempts. Please try again later.")
             return redirect('home')
         
-        form = VoterAccreditationForm(request.POST)
+        form = VoterAccreditationForm(request.POST, election=election)
         details_form = VoterDetailsForm(request.POST)
         if form.is_valid() and details_form.is_valid():
             email = form.cleaned_data['email']
@@ -101,9 +121,10 @@ def voter_accreditation(request, short_id):
 
             try:
                 from .services import register_voter
-                skip_otp = (election.plan == 'FREE')
+                skip_otp = (election.plan == 'FREE' or election.accreditation_type == 'TOKEN')
                 
                 password = form.cleaned_data.get('password')
+                institution_id = form.cleaned_data.get('institution').id if form.cleaned_data.get('institution') else None
                 
                 register_voter(
                     full_name=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
@@ -111,9 +132,9 @@ def voter_accreditation(request, short_id):
                     matric_number=details_form.cleaned_data['matric_number'],
                     faculty=details_form.cleaned_data['faculty'],
                     department=details_form.cleaned_data['department'],
-                    institution_id=form.cleaned_data['institution'].id,
                     election_id=election.id,
                     password=password,
+                    institution_id=institution_id,
                     skip_otp=skip_otp
                 )
                 if skip_otp:
@@ -234,6 +255,48 @@ def resend_otp(request):
             return JsonResponse({'success': False, 'message': str(e)})
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
+def resend_token(request, short_id):
+    if not request.user.is_authenticated or request.user.role != 'VOTER':
+        return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+    
+    from .models import Election, Voter, ElectionToken
+    election = get_object_or_404(Election, short_id=short_id)
+    voter = get_object_or_404(Voter, user=request.user, election=election)
+    
+    if election.accreditation_type != 'TOKEN':
+        return JsonResponse({'success': False, 'message': 'This election does not use tokens.'}, status=400)
+        
+    token = ElectionToken.objects.filter(election=election, allowed_email__email=request.user.email).first()
+    if not token:
+        return JsonResponse({'success': False, 'message': 'No token found for your email. Please ensure you are accredited.'}, status=404)
+    
+    if token.is_used:
+         return JsonResponse({'success': False, 'message': 'Token has already been used and cannot be resent.'}, status=400)
+
+    if token.resend_count >= 2:
+        return JsonResponse({'success': False, 'message': 'Token resend limit reached. Please check your spam folder.'}, status=400)
+    
+    now = timezone.now()
+    if token.last_resend_at:
+        # Check cooldown (30s first, 120s second)
+        cooldown = 30 if token.resend_count == 1 else 120
+        elapsed = (now - token.last_resend_at).total_seconds()
+        if elapsed < cooldown:
+            return JsonResponse({
+                'success': False, 
+                'message': f'Please wait {int(cooldown - elapsed)}s before requesting again.'
+            }, status=429)
+
+    from .tasks import send_single_token_task
+    login_url = request.build_absolute_uri(reverse('login'))
+    send_single_token_task.delay(token.id, login_url)
+    
+    token.resend_count += 1
+    token.last_resend_at = now
+    token.save()
+    
+    return JsonResponse({'success': True, 'message': 'Accreditation token has been resent to your email.'})
+
 def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -286,19 +349,68 @@ def organizer_dashboard(request):
         messages.error(request, "Organizer profile not found.")
         return redirect('home')
         
-    elections = Election.objects.filter(organizer=organizer)
-    from .models import ElectionPayment
+    elections = Election.objects.filter(organizer=organizer).order_by('-created_at')
+    from .models import ElectionPayment, Wallet
     payment_history = ElectionPayment.objects.filter(election__organizer=organizer, is_verified=True).order_by('-paid_at')
     
+    # Get or create wallet
+    wallet, _ = Wallet.objects.get_or_create(user=request.user)
+    
     return render(request, 'election_core/organizer_dashboard.html', {
-        'elections': elections,
+        'elections': elections[:4],  # Only show recent     4 on dashboard
         'organizer': organizer,
-        'payment_history': payment_history
+        'payment_history': payment_history,
+        'wallet': wallet
     })
 
 @login_required
+def organizer_all_elections(request):
+    from .models import Election, ElectionOrganizer
+    if request.user.role != 'ORGANIZER' and not request.user.is_superuser:
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    organizer = get_object_or_404(ElectionOrganizer, user=request.user)
+    
+    q = request.GET.get('q', '')
+    election_type = request.GET.get('type', 'CONTESTANT')
+    
+    elections = Election.objects.filter(organizer=organizer, election_type=election_type)
+    if q:
+        elections = elections.filter(Q(title__icontains=q) | Q(short_id__icontains=q))
+    
+    elections = elections.order_by('-created_at')
+    
+    return render(request, 'election_core/organizer_all_elections.html', {
+        'elections': elections,
+        'q': q,
+        'election_type': election_type
+    })
+
+@login_required
+def delete_election(request, short_id):
+    from .models import Election
+    election = get_object_or_404(Election, short_id=short_id)
+    
+    if election.organizer.user != request.user and not request.user.is_superuser:
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    election_type = election.election_type
+    
+    # Validation: Only delete if DRAFT or CLOSED
+    if election.status in ['DRAFT', 'CLOSED']:
+        title = election.title
+        election.delete()
+        messages.success(request, f"Election '{title}' has been deleted.")
+    else:
+        messages.error(request, "Active or Frozen elections cannot be deleted while they are in progress.")
+        
+    return redirect(f"{reverse('organizer_all_elections')}?type={election_type}")
+
+@login_required
 def view_election_results(request, short_id):
-    from .models import Election, Position, Vote, AllowedEmail
+    from .models import Election, Position, Vote, AllowedEmail, Voter
     from django.db.models import Count
     
     election = get_object_or_404(Election, short_id=short_id)
@@ -346,6 +458,83 @@ def voter_dashboard(request):
     elections = [vp.election for vp in voter_profiles]
     return render(request, 'election_core/voter_dashboard.html', {'elections': elections})
 
+@login_required
+def manage_tokens(request, short_id):
+    from .models import Election, AllowedEmail, ElectionToken
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.urls import reverse
+    
+    election = get_object_or_404(Election, short_id=short_id)
+    if not (election.organizer.user == request.user or request.user.is_superuser):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+
+    if election.accreditation_type != 'TOKEN':
+        messages.error(request, "This election is not using Token-based accreditation.")
+        return redirect('manage_election', short_id=election.short_id)
+        
+    total_allowed = AllowedEmail.objects.filter(election=election).count()
+    total_sent = ElectionToken.objects.filter(election=election).count()
+    pending = total_allowed - total_sent
+    used_tokens = ElectionToken.objects.filter(election=election, is_used=True).count()
+    
+    can_send = True
+    time_remaining = None
+    if election.last_token_send_time:
+        next_send_time = election.last_token_send_time + timedelta(hours=1)
+        if timezone.now() < next_send_time:
+            can_send = False
+            time_remaining = next_send_time - timezone.now()
+            
+    if request.method == 'POST' and 'send_tokens' in request.POST:
+        if not can_send:
+            messages.error(request, "You must wait 1 hour between batch token sends.")
+        elif pending == 0:
+            messages.info(request, "All tokens have already been sent.")
+        else:
+            limit = min(300, pending)
+            from .tasks import send_batch_tokens_task
+            login_url = request.build_absolute_uri(reverse('login'))
+            send_batch_tokens_task.delay(election.id, limit, login_url)
+            
+            election.last_token_send_time = timezone.now()
+            election.save()
+            
+            messages.success(request, f"Batch of {limit} tokens is being sent in the background.")
+        return redirect('manage_tokens', short_id=election.short_id)
+        return redirect('manage_tokens', short_id=election.short_id)
+        
+    dispatched_qs = ElectionToken.objects.filter(election=election).select_related('allowed_email').order_by('-created_at')
+    dispatched_ids = dispatched_qs.values_list('allowed_email_id', flat=True)
+    pending_qs = AllowedEmail.objects.filter(election=election).exclude(id__in=dispatched_ids).order_by('email')
+    
+    from django.core.paginator import Paginator
+    
+    dispatch_paginator = Paginator(dispatched_qs, 10)
+    dispatched_page = dispatch_paginator.get_page(request.GET.get('page_dispatch', 1))
+    
+    pending_paginator = Paginator(pending_qs, 10)
+    pending_page = pending_paginator.get_page(request.GET.get('page_pending', 1))
+    
+    if request.headers.get('HX-Request'):
+        if 'page_dispatch' in request.GET:
+            return render(request, 'election_core/tokens_dispatched_partial.html', {'dispatched_page': dispatched_page})
+        if 'page_pending' in request.GET:
+            return render(request, 'election_core/tokens_pending_partial.html', {'pending_page': pending_page})
+
+    return render(request, 'election_core/tokens_management.html', {
+        'election': election,
+        'total_allowed': total_allowed,
+        'total_sent': total_sent,
+        'pending': pending,
+        'used_tokens': used_tokens,
+        'can_send': can_send,
+        'time_remaining': time_remaining,
+        'dispatched_page': dispatched_page,
+        'pending_page': pending_page
+    })
+
 def cast_vote_view(request, short_id):
     from .models import Election, Position, Voter
     from .voting_logic import cast_vote
@@ -360,6 +549,42 @@ def cast_vote_view(request, short_id):
     if voter.has_voted:
         messages.warning(request, "You have already cast your vote.")
         return redirect('voter_dashboard')
+
+    if election.accreditation_type == 'TOKEN' and not voter.is_token_verified:
+        if request.method == 'POST' and 'verify_token' in request.POST:
+            from .models import ElectionToken
+            from django.utils import timezone
+            import uuid
+            
+            token_code = request.POST.get('token', '').strip()
+            if not token_code:
+                messages.error(request, "Please enter your token.")
+            else:
+                try:
+                    token_uuid = uuid.UUID(token_code)
+                    from django.db import transaction
+                    with transaction.atomic():
+                        token_obj = ElectionToken.objects.select_for_update().filter(token=token_uuid, election=election).first()
+                        
+                        if not token_obj:
+                            messages.error(request, "Invalid token for this election.")
+                        elif token_obj.allowed_email.email != request.user.email:
+                            messages.error(request, "Token is assigned to a different email address.")
+                        elif not token_obj.is_valid():
+                            messages.error(request, "Token has expired or was already used.")
+                        else:
+                            token_obj.is_used = True
+                            token_obj.save()
+                            voter.is_token_verified = True
+                            voter.save()
+                            messages.success(request, "Token verified! You may now cast your ballot.")
+                            return redirect('cast_vote', short_id=election.short_id)
+                except ValueError:
+                    messages.error(request, "Invalid token format.")
+                except Exception as e:
+                    messages.error(request, f"Verification failed: {str(e)}")
+                    
+        return render(request, 'election_core/verify_token.html', {'election': election})
 
     positions = election.positions.all().prefetch_related('candidates')
     
@@ -418,21 +643,53 @@ def create_election(request):
         messages.error(request, "Your account must be approved before you can create elections.")
         return redirect('organizer_dashboard')
         
+    election_type = request.GET.get('type', 'POLITICAL')
+    if election_type not in ['POLITICAL', 'CONTESTANT']:
+        election_type = 'POLITICAL'
+
     if request.method == 'POST':
-        from .forms import ElectionForm
-        form = ElectionForm(request.POST)
+        from .forms import ElectionForm, ContestantElectionForm
+        if election_type == 'CONTESTANT':
+            form = ContestantElectionForm(request.POST, request.FILES)
+        else:
+            form = ElectionForm(request.POST)
+
         if form.is_valid():
             election = form.save(commit=False)
-            election.institution = organizer.user.institution
+            if election_type == 'POLITICAL':
+                election.institution = form.cleaned_data.get('institution')
+            else:
+                election.institution = None # Or leave it if already None
             election.organizer = organizer
+            election.election_type = election_type
+            
+            # If contestant, ensure short_id/slug is handled if not in form
+            if election_type == 'CONTESTANT':
+                election.is_cleared = True
+                
             election.save()
-            messages.success(request, f"Election '{election.title}' created! Please select a plan to proceed.")
-            return redirect('select_plan', short_id=election.short_id)
+            
+            from .tasks import notify_superadmin_election_created_task
+            dashboard_url = request.build_absolute_uri('/admin/')
+            notify_superadmin_election_created_task.delay(election.id, dashboard_url)
+            
+            if election_type == 'CONTESTANT':
+                messages.success(request, f"Contest '{election.title}' created! You can now add contestants and manage your contest.")
+                return redirect('manage_contest', short_id=election.short_id)
+            else:
+                messages.success(request, f"Election '{election.title}' created! Please select a plan to proceed. A clearance request has been sent to the Superadmin.")
+                return redirect('select_plan', short_id=election.short_id)
     else:
-        from .forms import ElectionForm
-        form = ElectionForm()
+        from .forms import ElectionForm, ContestantElectionForm
+        if election_type == 'CONTESTANT':
+            form = ContestantElectionForm()
+        else:
+            form = ElectionForm()
         
-    return render(request, 'election_core/create_election.html', {'form': form})
+    return render(request, 'election_core/create_election.html', {
+        'form': form,
+        'election_type': election_type
+    })
 
 @login_required
 def manage_election(request, short_id):
@@ -449,6 +706,9 @@ def manage_election(request, short_id):
     
     from .payment_views import election_is_paid
     is_paid = election_is_paid(election)
+    
+    if election.election_type == 'CONTESTANT':
+        return redirect('manage_contest', short_id=election.short_id)
     
     if request.method == 'POST' and 'update_slug' in request.POST:
         if election.plan != 'PREMIUM':
@@ -656,10 +916,17 @@ def update_status(request, short_id, action):
         
     from .utils import log_action
     
-    reason = request.POST.get('reason', 'No reason provided')
+    # For CONTESTANT elections, we don't strictly require a reason
+    if election.election_type == 'CONTESTANT':
+        reason = 'Automated change for Contest'
+    else:
+        reason = request.POST.get('reason', 'No reason provided')
     
     if action == 'activate':
-        if not election.positions.exists():
+        if not election.is_cleared:
+            messages.error(request, "Election must be cleared by a Grand Admin before it can go LIVE. Please contact support.")
+            return redirect('manage_election', short_id=election.short_id)
+        if election.election_type == 'POLITICAL' and not election.positions.exists():
             messages.error(request, "Election must have at least one position before going live.")
         else:
             election.status = 'ACTIVE'
@@ -678,8 +945,7 @@ def update_status(request, short_id, action):
         election.save()
         log_action(request.user, f"Election CLOSED: {election.title}", request, extra_data={'election_id': election.id, 'reason': reason})
         
-        from django.db.models import Count
-        
+        from .models import Election, Voter
         election_voters = Voter.objects.filter(election=election)
         
         deleted_count = 0
@@ -694,7 +960,297 @@ def update_status(request, short_id, action):
                 
         messages.info(request, f"Election closed. {deleted_count} temporary voter accounts cleaned up.")
         
+    if election.election_type == 'CONTESTANT':
+        return redirect('manage_contest', short_id=election.short_id)
     return redirect('manage_election', short_id=election.short_id)
+
+@login_required
+def manage_contest(request, short_id):
+    from .models import Election, Vote, Candidate
+    from django.core.paginator import Paginator
+    election = get_object_or_404(Election, short_id=short_id, election_type='CONTESTANT')
+    
+    if election.organizer.user != request.user and not request.user.is_superuser:
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    # Pagination for Contestants
+    from django.db.models import Sum, Q
+    contestants_list = Candidate.objects.filter(position__election=election).annotate(
+        total_votes=Sum('vote__quantity', filter=Q(vote__is_paid=True))
+    ).order_by('full_name')
+    paginator_contestants = Paginator(contestants_list, 15)
+    page_contestants = request.GET.get('page_contestants')
+    contestants = paginator_contestants.get_page(page_contestants)
+    
+    # Revenue data: successful paid votes
+    revenue_list = Vote.objects.filter(election=election, is_paid=True).order_by('-timestamp')
+    total_revenue = sum(v.amount_paid for v in revenue_list)
+    
+    paginator_revenue = Paginator(revenue_list, 20)
+    page_revenue = request.GET.get('page_revenue')
+    revenue_votes = paginator_revenue.get_page(page_revenue)
+    
+    from django.db.models import Sum, Q
+    results = Candidate.objects.filter(position__election=election).annotate(
+        total_votes=Sum('vote__quantity', filter=Q(vote__is_paid=True))
+    ).order_by('-total_votes')
+    
+    total_votes_count = results.aggregate(total=Sum('total_votes'))['total'] or 0
+    
+    # Annotate each candidate with their percentage for the leaderboard bar
+    for cand in results:
+        tv = cand.total_votes or 0
+        cand.pct = round((tv / total_votes_count * 100), 1) if total_votes_count else 0
+    
+    active_tab = request.GET.get('tab', 'contestants')
+    
+    return render(request, 'election_core/manage_contest.html', {
+        'election': election,
+        'contestants': contestants,
+        'revenue_votes': revenue_votes,
+        'total_revenue': total_revenue,
+        'results': results,
+        'total_votes_count': total_votes_count,
+        'active_tab': active_tab
+    })
+
+@login_required
+def add_contestant(request, short_id):
+    from .models import Election, Position, Candidate
+    from .forms import ContestantForm
+    election = get_object_or_404(Election, short_id=short_id, election_type='CONTESTANT')
+    
+    if not (election.organizer.user == request.user or request.user.is_superuser):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    # For Contestant elections, we auto-ensure a "General" position
+    position, created = Position.objects.get_or_create(
+        election=election, 
+        defaults={'title': 'General', 'order': 0}
+    )
+    
+    if request.method == 'POST':
+        form = ContestantForm(request.POST, request.FILES)
+        if form.is_valid():
+            candidate = form.save(commit=False)
+            candidate.position = position
+            candidate.save()
+            messages.success(request, f"Contestant '{candidate.full_name}' added successfully.")
+            return redirect('manage_contest', short_id=election.short_id)
+    else:
+        form = ContestantForm()
+        
+    return render(request, 'election_core/add_contestant.html', {
+        'form': form,
+        'election': election
+    })
+
+@login_required
+def wallet_dashboard(request):
+    from .models import Wallet, Withdrawal
+    wallet, _ = Wallet.objects.get_or_create(user=request.user)
+    withdrawals = Withdrawal.objects.filter(wallet=wallet).order_by('-created_at')
+    
+    return render(request, 'election_core/wallet.html', {
+        'wallet': wallet,
+        'withdrawals': withdrawals
+    })
+
+@login_required
+def request_withdrawal(request):
+    from .models import Wallet, Withdrawal
+    wallet, _ = Wallet.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        amount = Decimal(request.POST.get('amount', 0))
+        account_name = request.POST.get('account_name')
+        account_number = request.POST.get('account_number')
+        bank_name = request.POST.get('bank_name')
+        
+        fixed_charge = Decimal(500)
+        total_debit = amount + fixed_charge
+        
+        # Guard: Only one pending withdrawal at a time
+        if Withdrawal.objects.filter(wallet=wallet, status='PENDING').exists():
+            messages.error(request, "You already have a pending withdrawal request. Please wait for it to be processed.")
+        elif amount < 5000:
+            messages.error(request, "Minimum withdrawal is ₦5,000.")
+        elif wallet.balance < total_debit:
+            messages.error(request, f"Insufficient balance. You need ₦{total_debit} (including ₦500 charge).")
+        elif not all([account_name, account_number, bank_name]):
+            messages.error(request, "Please fill in all account details.")
+        else:
+            withdrawal = Withdrawal.objects.create(
+                wallet=wallet,
+                amount=amount,
+                charge_amount=fixed_charge,
+                account_name=account_name,
+                account_number=account_number,
+                bank_name=bank_name
+            )
+            wallet.balance -= total_debit
+            wallet.save()
+            
+            # Send notifications via Celery
+            from .tasks import send_withdrawal_request_notification_task
+            send_withdrawal_request_notification_task.delay(withdrawal.id)
+            
+            messages.success(request, f"Withdrawal request for ₦{amount} submitted! (₦{fixed_charge} charge applied)")
+            return redirect('wallet_dashboard')
+            
+    return redirect('wallet_dashboard')
+
+def contest_public_view(request, slug=None, short_id=None):
+    from .models import Election
+    if slug:
+        election = get_object_or_404(Election, custom_slug=slug, election_type='CONTESTANT')
+    else:
+        election = get_object_or_404(Election, short_id=short_id, election_type='CONTESTANT')
+        
+    if election.status != 'ACTIVE' and not request.user.is_superuser:
+        return render(request, 'election_core/contest_not_active.html', {'election': election})
+        
+    positions = election.positions.all().prefetch_related('candidates')
+    
+    # Calculate total votes per candidate for display
+    from django.db.models import Sum
+    for position in positions:
+        for candidate in position.candidates.all():
+            candidate.total_votes = candidate.vote_set.filter(is_paid=True).aggregate(total=Sum('quantity'))['total'] or 0
+            
+    return render(request, 'election_core/public_contest.html', {
+        'election': election,
+        'positions': positions,
+        'paystack_public_key': settings.PAYSTACK_PUBLIC_KEY
+    })
+
+def initiate_contest_vote_payment(request, short_id, candidate_id):
+    from .models import Election, Candidate, SystemConfig, Vote
+    election = get_object_or_404(Election, short_id=short_id, election_type='CONTESTANT')
+    candidate = get_object_or_404(Candidate, id=candidate_id)
+    
+    if request.method == 'POST':
+        voter_name = request.POST.get('voter_name')
+        voter_email = request.POST.get('voter_email')
+        try:
+            quantity = int(request.POST.get('quantity', 1))
+            if quantity < 1: quantity = 1
+        except (ValueError, TypeError):
+            quantity = 1
+        
+        if not voter_name or not voter_email:
+            messages.error(request, "Name and Email are required.")
+            return redirect('contest_public_id', short_id=short_id)
+            
+        base_fee = election.voting_fee
+        config = SystemConfig.get_config()
+        
+        # Calculate surcharge
+        surcharge_percent = 0.10 # default 10%
+        for range_item in config.contest_charge_config:
+            min_val = range_item.get('min', 0)
+            max_val = range_item.get('max')
+            if base_fee >= min_val and (max_val is None or base_fee <= max_val):
+                surcharge_percent = range_item.get('percent', 0.10)
+                break
+        
+        total_base_fee = base_fee * quantity
+        surcharge = total_base_fee * Decimal(str(surcharge_percent))
+        total_amount = total_base_fee + surcharge
+        amount_kobo = int(total_amount * 100)
+        
+        reference = f"VOTE-{uuid.uuid4().hex[:10].upper()}"
+        
+        # Create a pending vote record
+        Vote.objects.create(
+            election=election,
+            position=candidate.position,
+            candidate=candidate,
+            quantity=quantity,
+            voter_name=voter_name,
+            voter_email=voter_email,
+            amount_paid=total_base_fee,
+            paystack_reference=reference,
+            is_paid=False
+        )
+        
+        from django.conf import settings
+        headers = {
+            'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}',
+            'Content-Type': 'application/json',
+        }
+        
+        payload = {
+            'email': voter_email,
+            'amount': amount_kobo,
+            'reference': reference,
+            'callback_url': request.build_absolute_uri(reverse('verify_contest_vote_payment')),
+            'metadata': {
+                'vote_reference': reference,
+                'election_id': election.id,
+                'candidate_id': candidate.id,
+                'quantity': quantity
+            }
+        }
+        
+        try:
+            response = requests.post(
+                'https://api.paystack.co/transaction/initialize',
+                json=payload,
+                headers=headers,
+                timeout=30
+            )
+            data = response.json()
+            if data.get('status'):
+                return redirect(data['data']['authorization_url'])
+            else:
+                messages.error(request, f"Payment failed: {data.get('message')}")
+        except Exception as e:
+            messages.error(request, f"Connection error: {str(e)}")
+            
+    return redirect('contest_public_id', short_id=short_id)
+
+def verify_contest_vote_payment(request):
+    from django.conf import settings
+    reference = request.GET.get('reference') or request.GET.get('trxref')
+    if not reference:
+        messages.error(request, "Invalid reference.")
+        return redirect('home')
+        
+    headers = {'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}'}
+    try:
+        response = requests.get(f'https://api.paystack.co/transaction/verify/{reference}', headers=headers, timeout=30)
+        data = response.json()
+        
+        if data.get('status') and data['data']['status'] == 'success':
+            from .models import Vote, Wallet
+            vote = get_object_or_404(Vote, paystack_reference=reference)
+            if not vote.is_paid:
+                vote.is_paid = True
+                vote.save()
+                
+                # Credit organizer wallet
+                wallet, _ = Wallet.objects.get_or_create(user=vote.election.organizer.user)
+                wallet.balance += vote.amount_paid
+                wallet.save()
+                
+                # Send receipt via celery (to be implemented in tasks.py)
+                try:
+                    from .tasks import send_vote_receipt_task
+                    send_vote_receipt_task.delay(vote.id)
+                except Exception as e:
+                    print(f"Failed to queue vote receipt: {e}")
+                
+                messages.success(request, f"Vote cast successfully for {vote.candidate.full_name}!")
+                return render(request, 'election_core/vote_success.html', {'vote': vote})
+        else:
+            messages.error(request, "Payment verification failed.")
+    except Exception as e:
+        messages.error(request, f"Error: {str(e)}")
+        
+    return redirect('home')
 
 @login_required
 def toggle_voting(request, short_id):
@@ -765,11 +1321,19 @@ def manage_voter_list(request, short_id):
         messages.error(request, "Access denied.")
         return redirect('home')
         
-    allowed_emails = AllowedEmail.objects.filter(election=election).order_by('email')
+    allowed_emails_qs = AllowedEmail.objects.filter(election=election).order_by('email')
     
+    from django.core.paginator import Paginator
+    paginator = Paginator(allowed_emails_qs, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    from .payment_views import get_email_limit
     from .payment_views import get_email_limit
     limit = get_email_limit(election)
-    current_count = allowed_emails.count()
+    current_count = allowed_emails_qs.count()
+    
+    form = AllowedEmailForm()
+    bulk_form = BulkUploadForm()
     
     if request.method == 'POST':
         if 'email' in request.POST:
@@ -778,7 +1342,6 @@ def manage_voter_list(request, short_id):
                 return redirect('manage_voter_list', short_id=election.short_id)
                 
             form = AllowedEmailForm(request.POST)
-            bulk_form = BulkUploadForm()
             if form.is_valid():
                 allowed_email = form.save(commit=False)
                 allowed_email.election = election
@@ -794,7 +1357,6 @@ def manage_voter_list(request, short_id):
                 return redirect('manage_voter_list', short_id=election.short_id)
                 
             bulk_form = BulkUploadForm(request.POST, request.FILES)
-            form = AllowedEmailForm()
             if bulk_form.is_valid():
                 csv_file = request.FILES['csv_file']
                 try:
@@ -817,13 +1379,16 @@ def manage_voter_list(request, short_id):
                 except Exception as e:
                     messages.error(request, f"Error starting background process: {str(e)}")
                 return redirect('manage_voter_list', short_id=election.short_id)
-    else:
-        form = AllowedEmailForm()
-        bulk_form = BulkUploadForm()
+        
+    if request.headers.get('HX-Request'):
+        return render(request, 'election_core/manage_voter_list_partial.html', {
+            'page_obj': page_obj,
+            'election': election
+        })
         
     return render(request, 'election_core/manage_voter_list.html', {
         'election': election,
-        'allowed_emails': allowed_emails,
+        'page_obj': page_obj,
         'form': form,
         'bulk_form': bulk_form,
         'limit': limit,
@@ -860,31 +1425,46 @@ def export_results_csv(request, short_id):
         messages.error(request, "Access denied.")
         return redirect('home')
         
-    if election.status != 'CLOSED':
-        messages.warning(request, "Result export is only available after the election has been officially CLOSED.")
-        return redirect('election_results', short_id=election.short_id)
-        
-    if election.plan == 'FREE' and not is_admin:
-        messages.warning(request, "Result export is not available on the Free plan. Please upgrade to Basic or higher.")
-        return redirect('election_results', short_id=election.short_id)
+    if election.election_type == 'CONTESTANT':
+        # Contestant elections always allow export and ignore plan limits
+        pass
+    else:
+        if election.status != 'CLOSED' and not is_admin:
+            messages.warning(request, "Result export is only available after the election has been officially CLOSED.")
+            return redirect('election_results', short_id=election.short_id)
+            
+        if election.plan == 'FREE' and not is_admin:
+            messages.warning(request, "Result export is not available on the Free plan. Please upgrade to Basic or higher.")
+            return redirect('election_results', short_id=election.short_id)
         
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{election.title}_results.csv"'
     
-    writer = csv.writer(response)
-    writer.writerow(['Timestamp', 'Position', 'Candidate', 'Verification ID', 'Digital Signature', 'IP Address'])
-    
-    votes = Vote.objects.filter(election=election).select_related('position', 'candidate').order_by('timestamp')
-    
-    for vote in votes:
-        writer.writerow([
-            vote.timestamp,
-            vote.position.title,
-            vote.candidate.full_name,
-            vote.verification_id,
-            vote.signature,
-            vote.ip_address
-        ])
+    if election.election_type == 'CONTESTANT':
+        writer.writerow(['Timestamp', 'Voter Name', 'Voter Email', 'Choice', 'Quantity', 'Amount Paid', 'Reference'])
+        votes = Vote.objects.filter(election=election, is_paid=True).select_related('candidate').order_by('timestamp')
+        for vote in votes:
+            writer.writerow([
+                vote.timestamp,
+                vote.voter_name,
+                vote.voter_email,
+                vote.candidate.full_name,
+                vote.quantity,
+                vote.amount_paid,
+                vote.paystack_reference
+            ])
+    else:
+        writer.writerow(['Timestamp', 'Position', 'Candidate', 'Verification ID', 'Digital Signature', 'IP Address'])
+        votes = Vote.objects.filter(election=election).select_related('position', 'candidate').order_by('timestamp')
+        for vote in votes:
+            writer.writerow([
+                vote.timestamp,
+                vote.position.title,
+                vote.candidate.full_name,
+                vote.verification_id,
+                vote.signature,
+                vote.ip_address
+            ])
         
     return response
 

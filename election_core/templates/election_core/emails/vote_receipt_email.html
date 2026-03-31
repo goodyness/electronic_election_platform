@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #334155; }
+        .container { max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #e2e8f0; border-radius: 24px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .logo { font-size: 24px; font-weight: 900; color: #4f46e5; text-transform: uppercase; letter-spacing: -0.025em; }
+        .content { margin-bottom: 40px; }
+        .receipt-box { background-color: #f8fafc; padding: 24px; border-radius: 16px; margin: 24px 0; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
+        .label { color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; }
+        .value { color: #1e293b; font-weight: 700; }
+        .footer { text-align: center; font-size: 11px; color: #94a3b8; }
+        .btn { display: inline-block; padding: 14px 28px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">FlashVote</div>
+            <h2 style="margin-top: 10px; font-weight: 900; color: #0f172a;">VOTE CONFIRMED</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hi <strong>{{ voter_name }}</strong>,</p>
+            <p>Your vote has been successfully cast and verified for the contest <strong>{{ election_title }}</strong>.</p>
+            
+            <div class="receipt-box">
+                <div class="receipt-row">
+                    <span class="label">Candidate Selected</span>
+                    <span class="value">{{ candidate_name }}</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="label">Amount Paid</span>
+                    <span class="value">₦{{ amount }}</span>
+                </div>
+                <div class="receipt-row" style="margin-top: 20px; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                    <span class="label">Ref ID</span>
+                    <span class="value" style="font-family: monospace;">{{ reference }}</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="label">Timestamp</span>
+                    <span class="value">{{ timestamp }}</span>
+                </div>
+            </div>
+            
+            <p style="font-size: 13px;">Thank you for participating in this contest. Your contribution directly supports the contestants and the organizer.</p>
+        </div>
+        
+        <div class="footer">
+            &copy; {{ current_year }} FlashVote Platform. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

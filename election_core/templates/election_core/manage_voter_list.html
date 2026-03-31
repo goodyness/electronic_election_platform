@@ -2,6 +2,10 @@
 
 {% block title %}Manage Voter List | FlashVote{% endblock %}
 
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-6xl mx-auto py-12 px-6">
     <div class="mb-8">
@@ -70,7 +74,7 @@
         <div class="lg:col-span-2">
             <div class="bg-white rounded-xl border border-slate-200 overflow-hidden min-h-[400px]">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-900">Authorized Voters ({{ allowed_emails|length }})</h3>
+                    <h3 class="font-bold text-slate-900">Authorized Voters ({{ current_count|default:"0" }})</h3>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -81,19 +85,8 @@
                                 <th class="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="text-sm">
-                            {% for item in allowed_emails %}
-                            <tr class="hover:bg-slate-50/50">
-                                <td class="px-6 py-4 font-medium text-slate-700">{{ item.email }}</td>
-                                <td class="px-6 py-4 text-right">
-                                    <a href="{% url 'delete_allowed_email' item.id %}" onclick="return confirm('Remove {{ item.email }}?')" class="text-rose-500 hover:underline font-bold text-xs">Remove</a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="2" class="text-center py-20 text-slate-400 italic">No voters added yet.</td>
-                            </tr>
-                            {% endfor %}
+                        <tbody class="text-sm" id="voter-list-body">
+                            {% include "election_core/manage_voter_list_partial.html" %}
                         </tbody>
                     </table>
                 </div>

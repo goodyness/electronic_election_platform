@@ -1,0 +1,120 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block title %}Manage Tokens | {{ election.title }}{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <div class="flex items-center gap-4">
+            <a href="{% url 'manage_election' election.short_id %}" class="btn btn-circle btn-ghost bg-white border-slate-200 text-slate-400 hover:text-indigo-600">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            </a>
+            <div>
+                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Token Management</h2>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{{ election.title }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Allowed Feed</p>
+                <div class="text-3xl font-black text-slate-900">{{ total_allowed }}</div>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tokens Sent</p>
+                <div class="text-3xl font-black text-indigo-600">{{ total_sent }}</div>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pending Sync</p>
+                <div class="text-3xl font-black text-amber-500">{{ pending }}</div>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tokens Verified</p>
+                <div class="text-3xl font-black text-emerald-500">{{ used_tokens }}</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm text-center">
+            <h3 class="text-xl font-black text-slate-900 mb-4">Batch Token Dispatch</h3>
+            <p class="text-sm font-medium text-slate-500 mb-8 max-w-lg mx-auto">
+                Send a batch of up to 300 tokens to pending voters. To ensure optimal delivery and avoid SMTP throttling, you can dispatch one batch every hour.
+            </p>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="send_tokens" value="1">
+                {% if can_send and pending > 0 %}
+                    <button type="submit" class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none h-14 px-10 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl shadow-indigo-100 transition-all transform hover:-translate-y-1">
+                        Dispatch Tokens Now
+                    </button>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">Will queue up to {% if pending > 300 %}300{% else %}{{ pending }}{% endif %} emails</p>
+                {% elif pending == 0 %}
+                    <button type="button" disabled class="btn bg-slate-100 text-slate-400 border-none h-14 px-10 rounded-2xl font-bold uppercase tracking-widest text-xs">
+                        All Tokens Sent
+                    </button>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">No pending voters found in the Allowed Feed.</p>
+                {% else %}
+                    <button type="button" disabled class="btn bg-slate-100 text-slate-400 border-none h-14 px-10 rounded-2xl font-bold uppercase tracking-widest text-xs">
+                        Cooldown Active
+                    </button>
+                    <p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-4">Next dispatch available in {{ time_remaining }}</p>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+            <!-- Dispatched Tokens -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col min-h-[400px]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Dispatched Tokens</h3>
+                    <div class="badge bg-indigo-100 text-indigo-700 border-none font-bold">{{ total_sent }} Sent</div>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table class="table w-full">
+                        <thead class="bg-slate-50 text-[10px] font-bold uppercase text-slate-400">
+                            <tr>
+                                <th class="px-6 py-4">Voter Email</th>
+                                <th class="px-6 py-4 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm" id="dispatched-body">
+                            {% include "election_core/tokens_dispatched_partial.html" %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pending Tokens -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col min-h-[400px]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Queue: Next to Dispatch</h3>
+                    <div class="badge bg-amber-100 text-amber-700 border-none font-bold">{{ pending }} Remaining</div>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table class="table w-full">
+                        <thead class="bg-slate-50 text-[10px] font-bold uppercase text-slate-400">
+                            <tr>
+                                <th class="px-6 py-4">Voter Email</th>
+                                <th class="px-6 py-4 text-right">Queue</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm" id="pending-body">
+                            {% include "election_core/tokens_pending_partial.html" %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

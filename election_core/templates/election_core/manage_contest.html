@@ -1,0 +1,407 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block title %}Manage Contest | {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-6xl mx-auto space-y-8">
+        <!-- Header -->
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-8 rounded-3xl border border-slate-200">
+            <div>
+                <nav class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2 text-slate-400">
+                    <a href="{% url 'organizer_dashboard' %}" class="hover:text-indigo-600">Dashboard</a>
+                    <span>/</span>
+                    <span class="text-indigo-600">Manage Contest</span>
+                </nav>
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">{{ election.title }}</h2>
+                <div class="flex items-center gap-3 mt-2">
+                    <span class="badge badge-sm bg-indigo-100 text-indigo-700 border-none font-bold uppercase tracking-tighter text-[9px]">CONTESTANT MODE</span>
+                    <span class="text-[10px] font-bold text-slate-400 border-l pl-3 uppercase">ID: {{ election.short_id }}</span>
+                    <div class="flex items-center gap-1.5 border-l pl-3">
+                        <div class="w-1.5 h-1.5 rounded-full {% if election.status == 'ACTIVE' %}bg-emerald-500 animate-pulse{% elif election.status == 'CLOSED' %}bg-slate-300{% else %}bg-amber-400{% endif %}"></div>
+                        <span class="text-[9px] font-bold text-slate-600 uppercase">{{ election.get_status_display }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <!-- Copy Link -->
+                <button id="copyLinkBtn" onclick="copyPublicLink()" class="btn btn-outline btn-sm rounded-xl h-11 px-5 font-bold uppercase text-[10px] tracking-widest flex items-center gap-2 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 transition-all">
+                    <svg id="copyIcon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    <span id="copyLinkText">Copy Link</span>
+                </button>
+                <!-- QR Code -->
+                <button onclick="document.getElementById('qrModal').classList.remove('hidden')" class="btn btn-outline btn-sm rounded-xl h-11 px-5 font-bold uppercase text-[10px] tracking-widest flex items-center gap-2 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 transition-all">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                    <span>QR Code</span>
+                </button>
+                <!-- Public View -->
+                <a href="{% url 'contest_public_id' short_id=election.short_id %}" target="_blank" class="btn btn-outline btn-sm rounded-xl h-11 px-5 font-bold uppercase text-[10px] tracking-widest flex items-center gap-2 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 transition-all">
+                    <span>View Page</span>
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+                {% if election.status != 'ACTIVE' %}
+                <button onclick="changeStatus('activate', 'Go Live', 'Yes, Activate', 'btn-primary')" class="btn btn-primary btn-sm rounded-xl h-11 px-6 font-bold uppercase text-[10px] tracking-widest">
+                    Go Live
+                </button>
+                {% else %}
+                <button onclick="changeStatus('freeze', 'Pause Contest', 'Yes, Pause', 'btn-warning')" class="btn btn-warning btn-sm rounded-xl h-11 px-6 font-bold uppercase text-[10px] tracking-widest">
+                    Pause
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card bg-white p-6 border border-slate-200">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Revenue</p>
+                <h4 class="text-3xl font-black text-slate-900 leading-none">₦{{ total_revenue|floatformat:2 }}</h4>
+                <p class="text-[9px] font-bold text-indigo-500 uppercase mt-2">Organizer Share (100%)</p>
+            </div>
+            <div class="card bg-white p-6 border border-slate-200">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Votes</p>
+                <h4 class="text-3xl font-black text-slate-900 leading-none">{{ total_votes_count|default:0 }}</h4>
+                <p class="text-[9px] font-bold text-slate-400 uppercase mt-2">Aggregated Count</p>
+            </div>
+            <div class="card bg-white p-6 border border-slate-200">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contestants</p>
+                <div class="flex items-center justify-between">
+                    <h4 class="text-3xl font-black text-slate-900 leading-none">
+                        {{ contestants.paginator.count }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="flex border-b border-slate-200">
+            <a href="?tab=contestants" class="px-8 py-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all {% if active_tab == 'contestants' %}border-indigo-600 text-indigo-600{% else %}border-transparent text-slate-400 hover:text-slate-600{% endif %}">
+                Contestants
+            </a>
+            <a href="?tab=revenue" class="px-8 py-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all {% if active_tab == 'revenue' %}border-indigo-600 text-indigo-600{% else %}border-transparent text-slate-400 hover:text-slate-600{% endif %}">
+                Revenue Tracking
+            </a>
+            <a href="?tab=results" class="px-8 py-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all {% if active_tab == 'results' %}border-indigo-600 text-indigo-600{% else %}border-transparent text-slate-400 hover:text-slate-600{% endif %}">
+                Results Leaderboard
+            </a>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden">
+            {% if active_tab == 'contestants' %}
+            <div class="p-8 space-y-8">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">All Contestants</h3>
+                    <a href="{% url 'add_contestant' election.short_id %}" class="btn btn-primary btn-sm rounded-xl font-bold uppercase text-[9px] px-6 h-10">
+                        + Add Contestant
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for cand in contestants %}
+                    <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 group hover:border-indigo-100 transition-all">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                {% if cand.photo %}
+                                <img src="{{ cand.photo.url }}" class="w-12 h-12 rounded-xl object-cover shadow-sm">
+                                {% else %}
+                                <div class="w-12 h-12 rounded-xl bg-slate-200 flex items-center justify-center text-sm font-black text-white">
+                                    {{ cand.full_name|slice:":1" }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-900">{{ cand.full_name }}</h4>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase">Registered Contestant</p>
+                                        <div class="w-1 h-1 rounded-full bg-slate-300"></div>
+                                        <p class="text-[10px] font-black text-indigo-600 uppercase">{{ cand.total_votes|default:0 }} Votes</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="{% url 'edit_candidate' cand.id %}" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-indigo-600">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                </a>
+                                <a href="{% url 'delete_candidate' cand.id %}" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-rose-500">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        {% if cand.bio %}
+                        <p class="text-[10px] text-slate-500 line-clamp-2 leading-relaxed mb-4">{{ cand.bio }}</p>
+                        {% endif %}
+
+                        <div class="flex gap-3 pt-4 border-t border-slate-100">
+                            {% if cand.twitter %}<span class="text-[9px] font-bold text-indigo-400">@{{ cand.twitter }}</span>{% endif %}
+                            {% if cand.tiktok %}<span class="text-[9px] font-bold text-slate-600">TikTok</span>{% endif %}
+                            {% if cand.instagram %}<span class="text-[9px] font-bold text-pink-500">IG</span>{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full py-20 text-center space-y-4">
+                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
+                            <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        </div>
+                        <p class="text-sm font-medium text-slate-400 italic">No contestants enrolled in this contest yet.</p>
+                        <a href="{% url 'add_contestant' election.short_id %}" class="btn btn-indigo-600 btn-sm rounded-xl">Add Your First Contestant</a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Contestants Pagination -->
+                {% if contestants.has_other_pages %}
+                <div class="flex justify-center pt-8">
+                    <div class="join">
+                        {% if contestants.has_previous %}
+                        <a href="?tab=contestants&page_contestants={{ contestants.previous_page_number }}" class="join-item btn btn-sm bg-white border-slate-200">«</a>
+                        {% endif %}
+                        <button class="join-item btn btn-sm bg-white border-slate-200 font-black">PAGE {{ contestants.number }} OF {{ contestants.paginator.num_pages }}</button>
+                        {% if contestants.has_next %}
+                        <a href="?tab=contestants&page_contestants={{ contestants.next_page_number }}" class="join-item btn btn-sm bg-white border-slate-200">»</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% elif active_tab == 'revenue' %}
+            <div class="p-0">
+                <div class="overflow-x-auto">
+                    <table class="table w-full">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="text-[10px] font-black text-slate-400 uppercase tracking-widest py-4 pl-8">Voter</th>
+                                <th class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Candidate</th>
+                                <th class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Qty</th>
+                                <th class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
+                                <th class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Time</th>
+                                <th class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-8">Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for v in revenue_votes %}
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-4 pl-8">
+                                    <div class="text-xs font-bold text-slate-900">{{ v.voter_name }}</div>
+                                    <div class="text-[10px] text-slate-400">{{ v.voter_email }}</div>
+                                </td>
+                                <td>
+                                    <span class="text-xs font-medium text-slate-700">{{ v.candidate.full_name }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-[10px] font-black text-indigo-600">{{ v.quantity }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-xs font-black text-slate-900 uppercase">₦{{ v.amount_paid|floatformat:2 }}</span>
+                                </td>
+                                <td class="text-[10px] text-slate-500">
+                                    {{ v.timestamp|date:"M d, H:i" }}
+                                </td>
+                                <td class="text-right pr-8">
+                                    <span class="text-[9px] font-mono text-slate-400">{{ v.paystack_reference }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="py-16 text-center text-slate-400 text-sm italic">No votes recorded yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Revenue Pagination -->
+                {% if revenue_votes.has_other_pages %}
+                <div class="flex justify-center p-8 bg-slate-50/30 border-t border-slate-100">
+                    <div class="join">
+                        {% if revenue_votes.has_previous %}
+                        <a href="?tab=revenue&page_revenue={{ revenue_votes.previous_page_number }}" class="join-item btn btn-sm bg-white border-slate-200">«</a>
+                        {% endif %}
+                        <button class="join-item btn btn-sm bg-white border-slate-200 font-black">PAGE {{ revenue_votes.number }} OF {{ revenue_votes.paginator.num_pages }}</button>
+                        {% if revenue_votes.has_next %}
+                        <a href="?tab=revenue&page_revenue={{ revenue_votes.next_page_number }}" class="join-item btn btn-sm bg-white border-slate-200">»</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% elif active_tab == 'results' %}
+            <div class="p-8 space-y-8">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Leaderboard</h3>
+                    <div class="flex gap-3">
+                        <a href="{% url 'export_results_csv' election.short_id %}" class="btn btn-outline btn-sm rounded-xl font-bold uppercase text-[9px] px-6 h-10 border-slate-200">
+                            <svg class="w-3.5 h-3.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            Export CSV
+                        </a>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="table w-full">
+                        <thead>
+                            <tr class="text-left border-b border-slate-100">
+                                <th class="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rank</th>
+                                <th class="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Contestant</th>
+                                <th class="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Votes</th>
+                                <th class="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            {% for cand in results %}
+                            <tr class="group hover:bg-slate-50/50 transition-colors">
+                                <td class="py-5">
+                                    <div class="w-8 h-8 rounded-full {% if forloop.first %}bg-amber-100 text-amber-700{% elif forloop.counter == 2 %}bg-slate-100 text-slate-700{% elif forloop.counter == 3 %}bg-orange-100 text-orange-700{% else %}bg-slate-50 text-slate-400{% endif %} flex items-center justify-center text-xs font-black">
+                                        {{ forloop.counter }}
+                                    </div>
+                                </td>
+                                <td class="py-5">
+                                    <div class="flex items-center gap-3">
+                                        {% if cand.photo %}
+                                        <img src="{{ cand.photo.url }}" class="w-10 h-10 rounded-lg object-cover">
+                                        {% else %}
+                                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 uppercase">
+                                            {{ cand.full_name|slice:":1" }}
+                                        </div>
+                                        {% endif %}
+                                        <span class="text-xs font-bold text-slate-700">{{ cand.full_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-5">
+                                    <span class="text-sm font-black text-slate-900">{{ cand.total_votes|default:0 }}</span>
+                                </td>
+                                <td class="py-5 text-right">
+                                    <div class="inline-flex items-center gap-2">
+                                        <div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-indigo-500 rounded-full" style="width: {{ cand.pct }}%"></div>
+                                        </div>
+                                        <span class="text-[10px] font-black text-slate-400">{{ cand.pct }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="py-20 text-center">
+                                    <p class="text-sm font-medium text-slate-400 italic">No activity recorded yet.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function changeStatus(action, title, btnText, btnClass) {
+        if (action === 'activate') {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'update_status' election.short_id 'activate' %}";
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden'; csrf.name = 'csrfmiddlewaretoken'; csrf.value = '{{ csrf_token }}';
+            form.appendChild(csrf);
+            const reasonInput = document.createElement('input');
+            reasonInput.type = 'hidden'; reasonInput.name = 'reason'; reasonInput.value = 'Contest Activation';
+            form.appendChild(reasonInput);
+            document.body.appendChild(form);
+            form.submit();
+            return;
+        }
+
+        Swal.fire({
+            title: title.toUpperCase(),
+            text: 'Provide a reason for this status change:',
+            input: 'textarea',
+            inputPlaceholder: 'e.g. Maintenance, temporary closure...',
+            showCancelButton: true,
+            confirmButtonText: btnText.toUpperCase(),
+            cancelButtonText: 'ABORT',
+            buttonsStyling: false,
+            customClass: {
+                title: 'text-xl font-black text-slate-900 tracking-tight',
+                popup: 'rounded-[2.5rem] p-10',
+                confirmButton: `btn ${btnClass} px-8 rounded-xl h-12 text-[10px] font-black uppercase tracking-widest ml-3`,
+                cancelButton: 'btn btn-ghost border-slate-200 px-8 rounded-xl h-12 text-[10px] font-black uppercase tracking-widest'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{% url 'update_status' election.short_id 'PLACEHOLDER' %}".replace('PLACEHOLDER', action);
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden'; csrf.name = 'csrfmiddlewaretoken'; csrf.value = '{{ csrf_token }}';
+                form.appendChild(csrf);
+                const reasonInput = document.createElement('input');
+                reasonInput.type = 'hidden'; reasonInput.name = 'reason'; reasonInput.value = result.value || 'None';
+                form.appendChild(reasonInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+</script>
+
+<!-- QR Code Modal -->
+<div id="qrModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center shadow-2xl">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scan to Vote</p>
+                <h3 class="text-lg font-black text-slate-900 leading-tight">{{ election.title }}</h3>
+            </div>
+            <button onclick="document.getElementById('qrModal').classList.add('hidden')" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors">
+                <svg class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="qrcode" class="flex justify-center mb-6"></div>
+        <p class="text-[10px] font-mono text-slate-400 break-all mb-6" id="qrUrlDisplay"></p>
+        <button onclick="copyPublicLink()" class="btn btn-primary w-full rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest">
+            Copy Link
+        </button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    let publicUrl = "";
+    {% if election.custom_slug %}
+    publicUrl = "{{ request.scheme }}://{{ request.get_host }}{% url 'contest_public_slug' slug=election.custom_slug %}";
+    {% else %}
+    publicUrl = "{{ request.scheme }}://{{ request.get_host }}{% url 'contest_public_id' short_id=election.short_id %}";
+    {% endif %}
+    document.getElementById('qrUrlDisplay').textContent = publicUrl;
+
+    new QRCode(document.getElementById('qrcode'), {
+        text: publicUrl,
+        width: 200,
+        height: 200,
+        colorDark: '#1e1b4b',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    function copyPublicLink() {
+        navigator.clipboard.writeText(publicUrl).then(() => {
+            const btn = document.getElementById('copyLinkBtn');
+            const txt = document.getElementById('copyLinkText');
+            const icon = document.getElementById('copyIcon');
+            txt.textContent = 'Copied!';
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>';
+            btn.classList.add('border-emerald-400', 'text-emerald-600');
+            setTimeout(() => {
+                txt.textContent = 'Copy Link';
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>';
+                btn.classList.remove('border-emerald-400', 'text-emerald-600');
+            }, 2000);
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'election_core/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Contest Surcharge Matrix | Grand Admin{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#F8F9FC] py-16 px-4" x-data='{ 
+    ranges: ({{ config.contest_charge_config|jsonify|default:'[]' }}).map(r => ({
+        min: r.min || 0,
+        max: r.max || '',
+        displayPercent: (r.percent * 100).toFixed(1)
+    })),
+    addRange() { 
+        this.ranges.push({ min: 0, max: '', displayPercent: 10.0 });
+    },
+    removeRange(index) { 
+        this.ranges.splice(index, 1);
+    },
+    get jsonOutput() {
+        return JSON.stringify(this.ranges.map(r => ({
+            min: parseFloat(r.min) || 0,
+            max: r.max === '' || r.max === null ? null : parseFloat(r.max),
+            percent: parseFloat(r.displayPercent) / 100
+        })));
+    }
+}'>
+    <div class="max-w-5xl mx-auto space-y-10">
+        <!-- Header Section -->
+        <div class="bg-white p-10 rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/20">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight italic">Contest Surcharge Matrix</h2>
+                    <p class="text-slate-500 mt-2 font-medium">Define dynamic fee tiers based on the base voting fee. Higher fees typically warrant lower percentages.</p>
+                </div>
+                <button @click="addRange()" type="button" class="btn btn-primary rounded-2xl h-14 px-8 font-black uppercase text-[10px] tracking-widest gap-3 shadow-lg shadow-indigo-100">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                    New Range Tier
+                </button>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-10">
+            {% csrf_token %}
+            
+            <!-- Hidden Input for Form Submission -->
+            <input type="hidden" name="charges_json" :value="jsonOutput">
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <!-- Main Editor Area -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100">
+                                    <th class="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Min Base Fee (₦)</th>
+                                    <th class="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Max Base Fee (₦)</th>
+                                    <th class="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Surcharge (%)</th>
+                                    <th class="px-8 py-6"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                <template x-for="(range, index) in ranges" :key="index">
+                                    <tr class="group hover:bg-slate-50/50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <input type="number" x-model="range.min" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:border-indigo-500 focus:bg-white outline-none transition-all" placeholder="0">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <input type="number" x-model="range.max" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:border-indigo-500 focus:bg-white outline-none transition-all" placeholder="Infinity (empty)">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="relative">
+                                                <input type="number" step="0.1" x-model="range.displayPercent" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 pr-10 text-xs font-bold text-slate-900 focus:border-indigo-500 focus:bg-white outline-none transition-all" placeholder="10.0">
+                                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300">%</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button @click="removeRange(index)" type="button" class="p-3 text-slate-300 hover:text-rose-500 transition-colors">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <tr x-show="ranges.length === 0">
+                                    <td colspan="4" class="px-8 py-20 text-center">
+                                        <div class="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4">
+                                            <svg class="h-6 w-6 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.268 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">No tiers defined. The system will default to base fees.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="p-8 bg-slate-50/50 border-t border-slate-100 flex justify-end">
+                             <button type="submit" class="btn btn-primary h-14 px-12 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-indigo-100 group">
+                                <span class="flex items-center gap-3">
+                                    Commit Parameters
+                                    <svg class="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Sidebar -->
+                <div class="space-y-8">
+                    <div class="bg-indigo-900 text-white p-10 rounded-[2.5rem] shadow-2xl shadow-indigo-200/50 relative overflow-hidden">
+                        <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
+                        <h3 class="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em] mb-6">Configuration Logic</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <span class="w-6 h-6 rounded-lg bg-indigo-500 flex items-center justify-center text-[10px] font-black shrink-0">1</span>
+                                <p class="text-[11px] leading-relaxed text-indigo-100 font-medium">Define price brackets (Min/Max). For the final tier, leave Max empty (Infinity).</p>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <span class="w-6 h-6 rounded-lg bg-indigo-500 flex items-center justify-center text-[10px] font-black shrink-0">2</span>
+                                <p class="text-[11px] leading-relaxed text-indigo-100 font-medium">Surcharge is a % added to the base fee for voters. A value of <b>10.0</b> means 10%.</p>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <span class="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center text-[10px] font-black shrink-0">3</span>
+                                <p class="text-[11px] leading-relaxed text-indigo-100 font-medium">The organizer always receives their set <b>Base Fee</b>. The surcharge goes to system revenue.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-10 rounded-[2.5rem] border border-slate-200/60 shadow-lg shadow-slate-200/10">
+                        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Integrity Rules</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3 text-[11px] font-bold text-slate-600 uppercase tracking-tight">
+                                <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                No range overlaps
+                            </li>
+                            <li class="flex items-center gap-3 text-[11px] font-bold text-slate-600 uppercase tracking-tight">
+                                <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Decimals allowed
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

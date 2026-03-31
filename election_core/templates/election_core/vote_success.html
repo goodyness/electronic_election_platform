@@ -1,0 +1,40 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}Vote Successful! | FlashVote{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full bg-white rounded-[3rem] p-12 text-center border border-slate-200 shadow-2xl shadow-indigo-100">
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
+            <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+        </div>
+        
+        <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tight mb-4">Vote Confirmed!</h2>
+        <p class="text-slate-500 text-sm font-medium leading-relaxed mb-10">
+            Thank you, <span class="font-bold text-slate-900">{{ vote.voter_name }}</span>! Your vote for <span class="font-bold text-indigo-600">{{ vote.candidate.full_name }}</span> has been successfully recorded and verified.
+        </p>
+
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8 text-left space-y-4">
+            <div class="flex justify-between items-center bg-white px-4 py-2 rounded-xl border border-slate-100">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Votes Cast</span>
+                <span class="text-xs font-black text-indigo-600 uppercase tracking-tight">{{ vote.quantity }}</span>
+            </div>
+            <div class="flex justify-between items-center bg-white px-4 py-2 rounded-xl border border-slate-100">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Amount Paid</span>
+                <span class="text-xs font-black text-slate-900 uppercase tracking-tight">₦{{ vote.amount_paid|floatformat:2 }}</span>
+            </div>
+            <div class="flex justify-between items-center px-4">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Reference</span>
+                <span class="text-[10px] font-mono text-slate-600">{{ vote.paystack_reference }}</span>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <a href="{% url 'contest_public_id' short_id=vote.election.short_id %}" class="btn btn-primary w-full h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-indigo-100">
+                Back to Contest
+            </a>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic pt-4">A receipt has been sent to {{ vote.voter_email }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block title %}Enroll Contestant | {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#fcfcfd] py-16 px-4">
+    <div class="max-w-2xl mx-auto">
+        <!-- Minimal Header -->
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-2xl font-black text-slate-900 uppercase tracking-tight">New Enrollment</h1>
+            <a href="{% url 'manage_contest' election.short_id %}" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-rose-500 transition-colors">Abort</a>
+        </div>
+
+        <div class="bg-white rounded-[2rem] border-2 border-slate-100 shadow-2xl shadow-slate-200/40 p-8 md:p-12">
+            <form method="POST" enctype="multipart/form-data" class="space-y-10">
+                {% csrf_token %}
+                
+                <!-- 1. NAME FIELD FIRST (High Contrast & Outline) -->
+                <div class="form-control">
+                    <label class="label pb-2">
+                        <span class="label-text font-black text-slate-900 uppercase tracking-widest text-[11px]">Contestant Full Name</span>
+                    </label>
+                    {{ form.full_name }}
+                    <label class="label">
+                        <span class="label-text-alt text-[10px] text-slate-400 font-medium italic">Enter the legal or stage name as it will appear on the ballot.</span>
+                    </label>
+                    {% if form.full_name.errors %}<p class="text-[10px] font-bold text-rose-500 uppercase mt-2 ml-1">{{ form.full_name.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- 2. DESCRIPTION / BIO -->
+                <div class="form-control">
+                    <label class="label pb-2">
+                        <span class="label-text font-black text-slate-900 uppercase tracking-widest text-[11px]">Biography / Manifesto</span>
+                    </label>
+                    {{ form.bio }}
+                    <label class="label">
+                        <span class="label-text-alt text-[10px] text-slate-400 font-medium italic">Describe the candidate's core values or mission.</span>
+                    </label>
+                    {% if form.bio.errors %}<p class="text-[10px] font-bold text-rose-500 uppercase mt-2 ml-1">{{ form.bio.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- 3. PHOTO UPLOAD -->
+                <div class="form-control">
+                    <label class="label pb-2 text-center md:text-left">
+                        <span class="label-text font-black text-slate-900 uppercase tracking-widest text-[11px]">Official Portrait</span>
+                    </label>
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div id="image-preview-container" class="w-32 h-32 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden shrink-0">
+                            <div id="preview-placeholder">
+                                <svg class="h-6 w-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            </div>
+                            <img id="image-preview" src="#" class="hidden absolute inset-0 w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <p class="text-[11px] text-slate-500 leading-relaxed">Ensure the photo is clear and professional. This will be visible to all voters during the contest.</p>
+                            <label class="btn btn-sm bg-slate-900 text-white hover:bg-black border-none rounded-xl px-6 cursor-pointer">
+                                Select Image
+                                <input type="file" name="photo" accept="image/*" class="hidden" id="photo-input">
+                            </label>
+                        </div>
+                    </div>
+                    {% if form.photo.errors %}<p class="text-[10px] font-bold text-rose-500 uppercase mt-2 ml-1">{{ form.photo.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- 4. DIGITAL FOOTPRINT (Contrast & Styling) -->
+                <div class="space-y-6 pt-10 border-t-2 border-slate-50">
+                    <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] mb-4">Digital Footprint</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="form-control relative">
+                             <div class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
+                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                             </div>
+                            {{ form.twitter }}
+                        </div>
+                        <div class="form-control relative">
+                            <div class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.9-.32-1.98-.23-2.81.33-.85.51-1.44 1.43-1.58 2.41-.14 1.01.23 2.08.94 2.81.65.7 1.57 1.16 2.5 1.25C13.01 20.62 14.52 19.56 14.93 18c.08-.4.11-.8.11-1.21V.02h-2.52z"/></svg>
+                            </div>
+                            {{ form.tiktok }}
+                        </div>
+                        <div class="form-control relative">
+                            <div class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.012 7.053.07 3.31.241.241 3.31.07 7.053.012 8.333 0 8.741 0 12s.012 3.667.07 4.947c.171 3.743 3.242 6.814 6.984 6.986 1.281.058 1.689.07 4.946.07 3.257 0 3.667-.012 4.947-.07 3.744-.17 6.814-3.242 6.986-6.986.058-1.28.07-1.689.07-4.946 0-3.257-.012-3.667-.07-4.947C23.759 3.31 20.687.241 16.947.07 15.667.012 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                            </div>
+                            {{ form.instagram }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="pt-10">
+                    <button type="submit" class="btn btn-primary w-full h-[5rem] rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-indigo-100 group">
+                        <span class="flex items-center gap-3">
+                            Confirm Enrollment
+                            <svg class="h-4 w-4 group-hover:translate-x-2 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </span>
+                    </button>
+                    <p class="text-center mt-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">FLASHVOTE CONTESTANT MANAGEMENT UNIT v2.1</p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Premium Precise Inputs */
+    .form-control input, .form-control textarea {
+        @apply w-full bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] px-8 py-5 text-[14px] font-bold text-slate-900 transition-all duration-300 outline-none;
+    }
+    .form-control input {
+        @apply h-[4.5rem];
+    }
+    .form-control textarea {
+        @apply h-40 resize-none leading-relaxed;
+    }
+    
+    /* Highlighted Outline focusing on Name field and generally */
+    .form-control input:focus, .form-control textarea:focus {
+        @apply bg-white border-indigo-600 ring-4 ring-indigo-50 shadow-2xl shadow-indigo-100/30;
+    }
+    
+    /* Relative positioning for icon offsets */
+    .form-control.relative input {
+        @apply pl-16;
+    }
+    
+    /* Placeholder refinement */
+    .form-control input::placeholder {
+        @apply text-slate-300 font-medium;
+    }
+</style>
+
+<script>
+    // File upload responsiveness
+    document.getElementById('photo-input').onchange = evt => {
+        const [file] = evt.target.files;
+        if (file) {
+            const preview = document.getElementById('image-preview');
+            const placeholder = document.getElementById('preview-placeholder');
+            const container = document.getElementById('image-preview-container');
+            
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+            container.classList.add('border-indigo-600', 'border-solid');
+            container.classList.remove('border-dashed', 'bg-slate-50');
+        }
+    }
+</script>
+{% endblock %}

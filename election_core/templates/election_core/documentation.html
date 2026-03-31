@@ -13,7 +13,9 @@
                 <nav class="space-y-1">
                     <a href="#getting-started" class="block py-2 px-4 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-sm">Getting Started</a>
                     <a href="#organizer-guide" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Organizer Ops</a>
+                    <a href="#portfolio-management" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Portfolio Mgmt</a>
                     <a href="#voter-guide" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Voter Experience</a>
+                    <a href="#withdrawal-safety" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Withdrawal Safety</a>
                     <a href="#security" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Security Protocols</a>
                     <a href="#audit-integrity" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Audit & Integrity</a>
                     <a href="#analytics" class="block py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors">Turnout Analytics</a>
@@ -80,6 +82,28 @@
                 </div>
             </section>
 
+            <!-- Portfolio Management (NEW) -->
+            <section id="portfolio-management" class="space-y-6 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-indigo-500 rounded-full"></span>
+                    Portfolio Management
+                </h2>
+                <div class="prose prose-slate max-w-none">
+                    <p class="text-slate-600 leading-relaxed text-sm">
+                        The <strong>Elections Portfolio</strong> is the central hub for overseeing multiple voting events. Organizers can toggle between <em>Political</em> and <em>Contestant</em> views, search through historical records, and manage life-cycle actions.
+                    </p>
+                    <div class="p-6 bg-rose-50 rounded-2xl border border-rose-100 flex items-start gap-4">
+                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-rose-200 shrink-0">
+                            <svg class="h-5 w-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Deletion Safety Logic</h4>
+                            <p class="text-xs text-slate-500 mt-1">To protect institutional integrity, only <strong>Draft</strong> or <strong>Closed</strong> elections can be deleted. Live active elections are locked from deletion to prevent accidental data loss during a voting cycle.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Voter Guide -->
             <section id="voter-guide" class="space-y-6 scroll-mt-32">
                 <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
@@ -104,6 +128,24 @@
                         </div>
                         <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Withdrawal Safety (NEW) -->
+            <section id="withdrawal-safety" class="space-y-6 scroll-mt-32">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-4">
+                    <span class="w-2 h-8 bg-indigo-900 rounded-full"></span>
+                    Financial Withdrawal Safety
+                </h2>
+                <div class="prose prose-slate max-w-none">
+                    <p class="text-slate-600 leading-relaxed text-sm">
+                        For Contestant Elections involving financial settlement, FlashVote implements a strict <strong>Idempotency Guard</strong> for withdrawals.
+                    </p>
+                    <ul class="text-sm text-slate-500 space-y-2 list-disc list-inside">
+                        <li><strong>Single Stream:</strong> Organizers can only have one <em>Pending</em> withdrawal request at a time.</li>
+                        <li><strong>Admin Verification:</strong> Every request is audited by the Grand Admin before final disbursement.</li>
+                        <li><strong>Audit Trail:</strong> Notifications are automatically dispatched to both the Organizer and the system administrator upon request and approval.</li>
+                    </ul>
                 </div>
             </section>
 

@@ -16,79 +16,141 @@
             <form method="POST" class="space-y-8">
                 {% csrf_token %}
 
+                {% if form.non_field_errors %}
+                <div class="p-4 bg-red-50 border border-red-100 rounded-2xl">
+                    {% for error in form.non_field_errors %}
+                    <p class="text-[10px] text-red-600 font-bold uppercase tracking-wider text-center">
+                        {{ error }}
+                    </p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if details_form.non_field_errors %}
+                <div class="p-4 bg-red-50 border border-red-100 rounded-2xl">
+                    {% for error in details_form.non_field_errors %}
+                    <p class="text-[10px] text-red-600 font-bold uppercase tracking-wider text-center">
+                        {{ error }}
+                    </p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="form-control">
-                        <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name</span></label>
-                        <input type="text" name="first_name" required value="{{ form.first_name.value|default:'' }}" class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all">
-                        {% if form.first_name.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ form.first_name.errors.0 }}</p>{% endif %}
+                        <label class="label p-0 mb-2"><span
+                                class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">First
+                                Name</span></label>
+                        <input type="text" name="first_name" required value="{{ form.first_name.value|default:'' }}"
+                            class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all">
+                        {% if form.first_name.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{
+                            form.first_name.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="form-control">
-                        <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name</span></label>
-                        <input type="text" name="last_name" required value="{{ form.last_name.value|default:'' }}" class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all">
-                        {% if form.last_name.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ form.last_name.errors.0 }}</p>{% endif %}
+                        <label class="label p-0 mb-2"><span
+                                class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last
+                                Name</span></label>
+                        <input type="text" name="last_name" required value="{{ form.last_name.value|default:'' }}"
+                            class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all">
+                        {% if form.last_name.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{
+                            form.last_name.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
 
                 <div class="form-control">
-                    <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Institutional Registry Email</span></label>
-                    <input type="email" name="email" required value="{{ form.email.value|default:'' }}" class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all" placeholder="name@institution.edu">
-                    {% if form.email.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ form.email.errors.0 }}</p>{% endif %}
+                    <label class="label p-0 mb-2"><span
+                            class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Institutional
+                            Registry Email</span></label>
+                    <input type="email" name="email" required value="{{ form.email.value|default:'' }}"
+                        class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all"
+                        placeholder="name@institution.edu">
+                    {% if form.email.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ form.email.errors.0
+                        }}</p>{% endif %}
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="form-control">
-                        <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student ID / Matric</span></label>
-                        <input type="text" name="matric_number" required value="{{ details_form.matric_number.value|default:'' }}" class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all">
+                        <label class="label p-0 mb-2"><span
+                                class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student
+                                ID / Matric</span></label>
+                        <input type="text" name="matric_number" required
+                            value="{{ details_form.matric_number.value|default:'' }}"
+                            class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all">
+                        {% if details_form.matric_number.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ details_form.matric_number.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="form-control">
-                        <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Institution</span></label>
-                        <div class="h-14 bg-slate-50 border border-slate-200 rounded-2xl px-4 flex items-center overflow-hidden">
-                             <div class="w-full h-full [&_select]:bg-transparent [&_select]:border-none [&_select]:w-full [&_select]:h-full [&_select]:text-sm [&_select]:font-bold [&_select]:text-slate-600 [&_select]:outline-none">
+                        <label class="label p-0 mb-2"><span
+                                class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Institution</span></label>
+                        <div
+                            class="h-14 bg-slate-50 border border-slate-200 rounded-2xl px-4 flex items-center overflow-hidden">
+                            <div
+                                class="w-full h-full [&_select]:bg-transparent [&_select]:border-none [&_select]:w-full [&_select]:h-full [&_select]:text-sm [&_select]:font-bold [&_select]:text-slate-600 [&_select]:outline-none">
                                 {{ form.institution }}
-                             </div>
+                            </div>
                         </div>
+                        {% if form.institution.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ form.institution.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="form-control">
-                        <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Department</span></label>
-                        <input type="text" name="department" required value="{{ details_form.department.value|default:'' }}" class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all uppercase placeholder:text-slate-300" placeholder="e.g. COMP SCI">
+                        <label class="label p-0 mb-2"><span
+                                class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Department</span></label>
+                        <input type="text" name="department" required
+                            value="{{ details_form.department.value|default:'' }}"
+                            class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all uppercase placeholder:text-slate-300"
+                            placeholder="e.g. COMP SCI">
+                        {% if details_form.department.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ details_form.department.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="form-control">
-                        <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faculty</span></label>
-                        <input type="text" name="faculty" required value="{{ details_form.faculty.value|default:'' }}" class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all uppercase placeholder:text-slate-300" placeholder="e.g. SCIENCE">
+                        <label class="label p-0 mb-2"><span
+                                class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faculty</span></label>
+                        <input type="text" name="faculty" required value="{{ details_form.faculty.value|default:'' }}"
+                            class="input input-bordered w-full h-14 rounded-2xl font-medium focus:border-indigo-600 transition-all uppercase placeholder:text-slate-300"
+                            placeholder="e.g. SCIENCE">
+                        {% if details_form.faculty.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ details_form.faculty.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
 
                 <!-- Password Reveal for New Accounts -->
                 <div id="password-section" class="hidden animate-in fade-in slide-in-from-top-4 duration-500">
                     <div class="p-8 bg-indigo-50/50 rounded-3xl border border-indigo-100/50 space-y-6">
-                        <h3 class="text-xs font-black text-indigo-400 uppercase tracking-[0.2em]">New Security Profile</h3>
+                        <h3 class="text-xs font-black text-indigo-400 uppercase tracking-[0.2em]">New Security Profile
+                        </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ show: false }">
                             <div class="form-control">
-                                <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Create Pin</span></label>
+                                <label class="label p-0 mb-2"><span
+                                        class="label-text text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Create
+                                        Pin</span></label>
                                 <div class="relative">
-                                    <input :type="show ? 'text' : 'password'" name="password" class="input input-bordered border-indigo-200 w-full h-12 rounded-xl font-bold pr-14 focus:border-indigo-600 transition-all">
-                                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-[10px] font-bold text-indigo-300 uppercase">
+                                    <input :type="show ? 'text' : 'password'" name="password"
+                                        class="input input-bordered border-indigo-200 w-full h-12 rounded-xl font-bold pr-14 focus:border-indigo-600 transition-all">
+                                    <button type="button" @click="show = !show"
+                                        class="absolute inset-y-0 right-0 px-4 text-[10px] font-bold text-indigo-300 uppercase">
                                         <span x-show="!show">Show</span><span x-show="show" x-cloak>Hide</span>
                                     </button>
                                 </div>
                             </div>
                             <div class="form-control">
-                                <label class="label p-0 mb-2"><span class="label-text text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Confirm Pin</span></label>
-                                <input :type="show ? 'text' : 'password'" name="confirm_password" class="input input-bordered border-indigo-200 w-full h-12 rounded-xl font-bold focus:border-indigo-600 transition-all">
+                                <label class="label p-0 mb-2"><span
+                                        class="label-text text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Confirm
+                                        Pin</span></label>
+                                <input :type="show ? 'text' : 'password'" name="confirm_password"
+                                    class="input input-bordered border-indigo-200 w-full h-12 rounded-xl font-bold focus:border-indigo-600 transition-all">
+                                {% if form.confirm_password.errors %}<p class="text-[10px] text-red-500 mt-2 font-bold">{{ form.confirm_password.errors.0 }}</p>{% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="user-status-msg" class="hidden p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
-                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.1em] text-center italic">Account Recognized. Initializing Secure Node Connection...</p>
+                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.1em] text-center italic">
+                        Account Recognized. Initializing Secure Node Connection...</p>
                 </div>
 
                 <div class="pt-8">
-                    <button type="submit" class="btn btn-primary w-full h-16 rounded-[1.25rem] font-bold uppercase tracking-[0.2em] text-xs shadow-xl shadow-indigo-100">
+                    <button type="submit"
+                        class="btn btn-primary w-full h-16 rounded-[1.25rem] font-bold uppercase tracking-[0.2em] text-xs shadow-xl shadow-indigo-100">
                         Authorize Identity →
                     </button>
                 </div>

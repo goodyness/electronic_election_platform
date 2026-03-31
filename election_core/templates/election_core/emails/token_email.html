@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .box { background-color: #f8fafc; border-radius: 8px; padding: 30px; text-align: center; margin: 20px 0; border: 1px dashed #4f46e5;}
+    .token-code { font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #4f46e5; background: #e0e7ff; padding: 10px; border-radius: 5px; display: inline-block; word-break: break-all; }
+    button.action-btn { background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin-top: 20px;}
+    .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #64748b; }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Your Accreditation Token</h2>
+        </div>
+        <p>Hello Voter,</p>
+        <p>You have been invited to participate in <strong>{{ election_title }}</strong>.</p>
+        <p>Please use the following token to bypass normal OTP verification and access your voting booth.</p>
+        
+        <div class="box">
+            <span class="token-code">{{ token }}</span><br>
+            <p style="font-size: 12px; color: #64748b; margin-top: 10px;">Expires: {{ expires_at }}</p>
+            <a href="{{ login_url }}" class="action-btn" style="color: white; border: none; padding: 12px 24px; border-radius: 6px; background-color: #4f46e5; text-decoration: none;">Go to Voting Portal</a>
+        </div>
+        
+        <p><small>Note: This token is valid for one use only. Keep it secure and do not share it.</small></p>
+
+        <div class="footer">
+            <p>&copy; {{ current_year }} Election System</p>
+        </div>
+    </div>
+</body>
+</html>

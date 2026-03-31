@@ -6,10 +6,10 @@ The Electronic Election Platform is a secure, robust, and scalable web-based vot
 ## Architecture & Tech Stack
 - **Backend Framework:** Django (Python)
 - **Database:** PostgreSQL (Optimized for robust row-level security and high transaction rates)
-- **Authentication:** Custom OTP-based email verification, Role-based Access Control (RBAC)
+- **Authentication:** Custom OTP-based email verification OR Batched UUID Token Verification, Role-based Access Control (RBAC)
 - **Payment Gateway:** Paystack Integration for plan purchases via API integration.
 - **Security:** HMAC-SHA256 signature for vote tampering prevention, comprehensive Audit Logging.
-- **Frontend Engine:** Django Templates augmented with modern CSS libraries (Tailwind/Bootstrap/Alpine) for dynamic UX.
+- **Frontend Engine:** Django Templates augmented with modern CSS libraries (Tailwind/Bootstrap/Alpine) and highly-performant **HTMX** for smooth, asynchronous fragment updates without full-page reloads.
 
 ## Core Features & Modules
 

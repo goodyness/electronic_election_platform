@@ -11,7 +11,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
 
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -22,6 +21,15 @@
     <!-- PWA Integration -->
     <link rel="manifest" href="{% static 'manifest.json' %}">
     <meta name="theme-color" content="#4f46e5">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+    </style>
     <link rel="apple-touch-icon" href="{% static 'election_core/images/pwa_icon.png' %}">
     <script>
         if ('serviceWorker' in navigator) {
@@ -37,25 +45,38 @@
 </head>
 
 <body class="min-h-screen flex flex-col font-sans">
-    <!-- Navbar -->
-    <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-8">
-                    <a href="{% url 'home' %}" class="flex items-center gap-2 group">
-                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold transition-transform group-hover:scale-105">V</div>
-                        <span class="text-xl font-bold text-white tracking-tight">FlashVote</span>
+    <!-- Floating Glass Navbar -->
+    {% block navbar %}
+    <header 
+        x-data="{ mobileMenuOpen: false, lastScroll: 0, hidden: false }" 
+        @scroll.window="
+            hidden = (window.pageYOffset > lastScroll && window.pageYOffset > 100);
+            lastScroll = window.pageYOffset;
+        "
+        :class="{ 
+            'bg-slate-900 border-b border-white/5 shadow-2xl': true,
+            '-translate-y-full': hidden
+        }"
+        class="fixed top-0 left-0 right-0 z-[100] transition-all duration-500 py-4">
+        <!-- Navbar content kept as default for other pages -->
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center gap-16">
+                    <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+                        <div class="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-500/20 transition-all group-hover:scale-110 group-hover:rotate-3">V</div>
+                        <span class="text-2xl font-black text-white tracking-tighter">FlashVote</span>
                     </a>
 
-                    <nav class="hidden md:flex items-center gap-1">
-                        <a href="{% url 'home' %}" class="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white transition-colors">Home</a>
+                    <!-- Desktop Nav -->
+                    <nav class="hidden md:flex items-center gap-1.5 p-1 bg-white/5 backdrop-blur-md rounded-full border border-white/10">
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all">Home</a>
                         {% if user.is_authenticated %}
                             {% if user.role == 'ORGANIZER' %}
-                            <a href="{% url 'organizer_dashboard' %}" class="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white">Dashboard</a>
+                            <a href="{% url 'organizer_dashboard' %}" class="px-5 py-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all">Dashboard</a>
                             {% elif user.role == 'VOTER' %}
-                            <a href="{% url 'voter_dashboard' %}" class="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white">My Votes</a>
+                            <a href="{% url 'voter_dashboard' %}" class="px-5 py-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all">My Votes</a>
                             {% elif user.role == 'GRAND_ADMIN' or user.is_superuser %}
-                            <a href="{% url 'grand_admin_dashboard' %}" class="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white transition-colors">Admin Portal</a>
+                            <a href="{% url 'grand_admin_dashboard' %}" class="px-5 py-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all">Admin Portal</a>
                             {% endif %}
                         {% endif %}
                     </nav>
@@ -64,36 +85,71 @@
                 <div class="flex items-center gap-4">
                     {% if user.is_authenticated %}
                     <div class="dropdown dropdown-end">
-                        <div tabindex="0" role="button" class="flex items-center gap-2 p-1 pl-3 rounded-full border border-slate-800 hover:bg-slate-800 transition-all">
-                            <!-- <span class="text-xs font-bold text-slate-400 tracking-tight">{{ user.username }}</span> -->
-                            <div class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-slate-300 font-bold text-xs">{{ user.username|slice:":1"|upper }}</div>
+                        <div tabindex="0" role="button" class="flex items-center gap-3 p-1 pr-4 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer">
+                            <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-inner">{{ user.username|slice:":1"|upper }}</div>
+                            <span class="text-[11px] font-black text-slate-200 uppercase tracking-widest">{{ user.username }}</span>
                         </div>
-                        <ul tabindex="0" class="mt-4 z-[1] p-2 shadow-2xl shadow-black/50 dropdown-content bg-slate-900 rounded-2xl w-56 border border-slate-800">
-                            <li class="p-4 border-b border-slate-800">
-                                <p class="text-xs font-bold text-white truncate">{{ user.get_full_name|default:user.username }}</p>
-                                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">{{ user.role }}</p>
+                        <ul tabindex="0" class="mt-4 z-[1] p-2 shadow-2xl dropdown-content bg-slate-900 border border-white/10 rounded-2xl w-64 backdrop-blur-2xl">
+                            <li class="p-5 border-b border-white/5">
+                                <p class="text-sm font-bold text-white">{{ user.get_full_name|default:user.username }}</p>
+                                <p class="text-[10px] text-indigo-400 font-black uppercase tracking-[0.2em] mt-1">{{ user.role }}</p>
                             </li>
-                            <li><a href="{% url 'logout' %}" class="py-3 px-4 text-xs font-bold text-rose-400 hover:bg-rose-950/30 flex items-center gap-2 rounded-xl transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                            <li class="mt-2"><a href="{% url 'logout' %}" class="py-3 px-5 text-sm font-bold text-rose-400 hover:bg-rose-500/10 flex items-center gap-3 rounded-xl transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                                 Sign Out
                             </a></li>
                         </ul>
                     </div>
                     {% else %}
-                    <a href="{% url 'login' %}" class="text-sm font-bold text-slate-400 hover:text-white px-4 transition-colors">Login</a>
-                    <a href="{% url 'organizer_signup' %}" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-900/20 hover:bg-indigo-500 transition-all">Get Started</a>
+                    <div class="hidden sm:flex items-center gap-5">
+                        <a href="{% url 'login' %}" class="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">Login</a>
+                        <a href="{% url 'organizer_signup' %}" class="relative group h-12 flex items-center bg-indigo-600 text-white px-8 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-900/40 hover:bg-indigo-500 hover:-translate-y-0.5 transition-all overflow-hidden">
+                            <span class="relative z-10">Get Started</span>
+                            <div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12"></div>
+                        </a>
+                    </div>
                     {% endif %}
+
+                    <!-- Mobile Toggle -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-slate-400 hover:text-white transition-colors">
+                        <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                        <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
             </div>
         </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-cloak
+             class="md:hidden bg-slate-950 border-b border-white/10 px-6 py-10 space-y-6 shadow-2xl">
+            <a href="{% url 'home' %}" class="block text-xl font-black uppercase tracking-widest text-white">Home</a>
+            {% if user.is_authenticated %}
+                {% if user.role == 'ORGANIZER' %}
+                <a href="{% url 'organizer_dashboard' %}" class="block text-xl font-black uppercase tracking-widest text-slate-400">Dashboard</a>
+                {% elif user.role == 'VOTER' %}
+                <a href="{% url 'voter_dashboard' %}" class="block text-xl font-black uppercase tracking-widest text-slate-400">My Votes</a>
+                {% elif user.role == 'GRAND_ADMIN' or user.is_superuser %}
+                <a href="{% url 'grand_admin_dashboard' %}" class="block text-xl font-black uppercase tracking-widest text-slate-400">Admin Portal</a>
+                {% endif %}
+                <a href="{% url 'logout' %}" class="block text-xl font-black uppercase tracking-widest text-rose-400 pt-6 border-t border-white/5">Sign Out</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="block text-xl font-black uppercase tracking-widest text-slate-400">Login</a>
+                <a href="{% url 'organizer_signup' %}" class="block text-xl font-black uppercase tracking-widest text-indigo-400">Get Started</a>
+            {% endif %}
+        </div>
     </header>
+    {% endblock navbar %}
 
     <!-- Main Content -->
-    <main class="flex-grow">
+    <main class="flex-grow pt-24">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
+    {% block footer %}
     <footer class="bg-slate-900 border-t border-slate-800 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-10">
@@ -120,29 +176,62 @@
             </div>
         </div>
     </footer>
+    {% endblock footer %}
 
     <!-- Global Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             {% if messages %}
             {% for message in messages %}
-            Swal.fire({
-                icon: '{{ message.tags|default:"info" }}' === 'error' ? 'error' :
-                    '{{ message.tags|default:"info" }}' === 'success' ? 'success' : 'info',
-                title: 'System Alert',
-                text: '{{ message }}',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
-            });
+            (function() {
+                let iconType = "info";
+                {% if 'error' in message.tags %} iconType = "error"; {% elif 'success' in message.tags %} iconType = "success"; {% endif %}
+                Swal.fire({
+                    icon: iconType,
+                    title: 'System Alert',
+                    text: '{{ message }}',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            })();
             {% endfor %}
             {% endif %}
         });
 
         document.body.addEventListener('htmx:configRequest', (event) => {
             event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+
+        // Global Form Submission Loading State
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            // Avoid adding loader if requested (e.g. via class) or if already loading
+            if (submitBtn && !submitBtn.classList.contains('no-loader')) {
+                // Check if button already has a loading state to prevent redundant triggers
+                if (submitBtn.classList.contains('loading') || submitBtn.disabled) return;
+
+                // Add DaisyUI loading class
+                submitBtn.classList.add('loading');
+                
+                // For buttons that don't use standard DaisyUI loading (or older versions),
+                // we can also add a small spinner element if it doesn't exist
+                if (!submitBtn.querySelector('.loading-spinner')) {
+                    const spinner = document.createElement('span');
+                    spinner.className = 'loading loading-spinner loading-xs mr-2';
+                    submitBtn.prepend(spinner);
+                }
+
+                // Disable to prevent double-clicking
+                // Small timeout to ensure the form actually submits in all browsers
+                setTimeout(() => {
+                    submitBtn.disabled = true;
+                }, 10);
+            }
         });
     </script>
 

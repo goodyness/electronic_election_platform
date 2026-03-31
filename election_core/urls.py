@@ -6,10 +6,14 @@ from . import payment_views
 
 
 urlpatterns = [
-    # Legal
+    # Legal & Information
     path('terms/', views.terms_and_conditions, name='terms_and_conditions'),
     path('privacy/', views.privacy_policy, name='privacy_policy'),
     path('docs/', views.system_documentation, name='system_documentation'),
+    path('compliance/', views.compliance_view, name='compliance'),
+    path('trust-center/', views.trust_center_view, name='trust_center'),
+    path('contact/', views.contact_view, name='contact'),
+    path('about/', views.about_us_view, name='about_us'),
 
     path('', views.home, name='home'),
     path('api/check-user/', views.check_user_exists, name='check_user_exists'),
@@ -22,6 +26,8 @@ urlpatterns = [
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('reset-password/<str:email>/', views.reset_password, name='reset_password'),
     path('dashboard/organizer/', views.organizer_dashboard, name='organizer_dashboard'),
+    path('dashboard/organizer/all-elections/', views.organizer_all_elections, name='organizer_all_elections'),
+    path('election/<str:short_id>/delete/', views.delete_election, name='delete_election'),
     path('dashboard/voter/', views.voter_dashboard, name='voter_dashboard'),
     path('accredit/<str:short_id>/', views.voter_accreditation, name='voter_accreditation'),
     path('vote/<str:short_id>/', views.cast_vote_view, name='cast_vote'),
@@ -31,6 +37,7 @@ urlpatterns = [
     path('asset/i-voted/<str:short_id>/', views.generate_i_voted_asset, name='i_voted_asset'),
     path('share/i-voted/<str:short_id>/', views.i_voted_share_page, name='i_voted_share'),
     path('api/survey/<str:short_id>/', views.submit_sentiment_survey, name='submit_sentiment_survey'),
+    path('api/resend-token/<str:short_id>/', views.resend_token, name='resend_token'),
     
     
     # Grand Admin Views (from admin_views.py)
@@ -42,7 +49,12 @@ urlpatterns = [
     path('grand-admin/toggle-receipts/', admin_views.toggle_system_receipts, name='toggle_system_receipts'),
     path('grand-admin/pricing/', admin_views.manage_plan_pricing, name='manage_plan_pricing'),
     path('grand-admin/elections/', admin_views.list_all_elections, name='list_all_elections'),
+    path('grand-admin/elections/<str:short_id>/toggle-clearance/', admin_views.toggle_election_clearance, name='toggle_election_clearance'),
+    path('grand-admin/elections/<str:short_id>/toggle-auth/', admin_views.toggle_election_auth_type, name='toggle_election_auth_type'),
     path('grand-admin/payments/', admin_views.list_all_payments, name='list_all_payments'),
+    path('grand-admin/withdrawals/', admin_views.admin_withdrawals, name='admin_withdrawals'),
+    path('grand-admin/withdrawals/approve/<int:withdrawal_id>/<str:action>/', admin_views.approve_withdrawal, name='approve_withdrawal'),
+    path('grand-admin/contest-charges/', admin_views.manage_contest_charges, name='manage_contest_charges'),
     
     # Organizer Management
     path('grand-admin/organizers/', admin_views.list_organizers, name='list_organizers'),
@@ -79,8 +91,9 @@ urlpatterns = [
     path('election/<str:short_id>/verify-payment/', payment_views.verify_payment, name='verify_payment'),
     path('paystack/webhook/', payment_views.paystack_webhook, name='paystack_webhook'),
     
-    # Voter List Management
+    # Voter List and Tokens Management
     path('election/<str:short_id>/voter-list/', views.manage_voter_list, name='manage_voter_list'),
+    path('election/<str:short_id>/tokens/', views.manage_tokens, name='manage_tokens'),
     path('allowed-email/<int:email_id>/delete/', views.delete_allowed_email, name='delete_allowed_email'),
     
     # Sophisticated Features
@@ -90,5 +103,17 @@ urlpatterns = [
     path('election/<str:short_id>/war-room/', views.result_war_room, name='result_war_room'),
     path('audit/', views.public_audit, name='public_audit'),
     path('e/<slug:slug>/', views.election_gateway, name='election_gateway'),
+
+    # Contestant Election & Wallet
+    path('contest/<str:short_id>/manage/', views.manage_contest, name='manage_contest'),
+    path('contest/<str:short_id>/add-contestant/', views.add_contestant, name='add_contestant'),
+    path('wallet/', views.wallet_dashboard, name='wallet_dashboard'),
+    path('wallet/withdraw/', views.request_withdrawal, name='request_withdrawal'),
+    path('c/<slug:slug>/', views.contest_public_view, name='contest_public_slug'),
+    path('contest/<str:short_id>/view/', views.contest_public_view, name='contest_public_id'),
+    
+    # Contestant Single Vote Payment
+    path('contest/<str:short_id>/pay-vote/<int:candidate_id>/', views.initiate_contest_vote_payment, name='initiate_contest_vote_payment'),
+    path('contest/verify-vote/', views.verify_contest_vote_payment, name='verify_contest_vote_payment'),
 ]
 

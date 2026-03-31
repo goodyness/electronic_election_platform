@@ -19,8 +19,11 @@
 
             <div class="flex gap-4">
                 {% if organizer.status == 'APPROVED' or user.is_superuser %}
-                <a href="{% url 'create_election' %}" class="btn btn-primary">
-                    New Election
+                <a href="{% url 'create_election' %}?type=POLITICAL" class="btn btn-primary">
+                    Political Election
+                </a>
+                <a href="{% url 'create_election' %}?type=CONTESTANT" class="btn btn-secondary bg-indigo-600 hover:bg-indigo-700 text-white border-none">
+                    Contestant Election
                 </a>
                 {% endif %}
             </div>
@@ -43,10 +46,33 @@
         {% else %}
 
         <!-- Active Elections Grid -->
-        <div class="space-y-6">
-            <div class="flex items-center gap-4 border-b border-slate-200 pb-2">
-                <h3 class="text-xl font-bold text-slate-900">Active Elections</h3>
-                <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-semibold">{{ elections.count }} TOTAL</span>
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl font-bold text-slate-900">Active Elections</h3>
+                    <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-semibold">{{ elections.count }} TOTAL</span>
+                </div>
+                <a href="{% url 'organizer_all_elections' %}" class="text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 group">
+                    View All 
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Wallet Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card bg-indigo-900 text-white p-6 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-indigo-100 text-[10px] font-black uppercase tracking-[0.2em] mb-3">Available Balance</p>
+                        <h4 class="text-4xl font-black mb-6 text-white tracking-tight">₦{{ wallet.balance|floatformat:2 }}</h4>
+                        <a href="{% url 'wallet_dashboard' %}" class="text-xs font-bold text-white bg-indigo-800 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors inline-block">
+                            Manage Wallet & Withdrawals
+                        </a>
+                    </div>
+                    <div class="absolute -right-10 -bottom-10 opacity-10">
+                        <svg class="h-40 w-40" fill="currentColor" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -61,7 +87,7 @@
                                 {{ election.get_status_display }}
                             </span>
                             <span class="text-xs font-medium text-slate-500 border px-2 py-1 rounded">
-                                {{ election.get_plan_display }}
+                                {% if election.election_type == 'CONTESTANT' %}Contestant{% else %}{{ election.get_plan_display }}{% endif %}
                             </span>
                         </div>
                         <h4 class="text-xl font-bold text-slate-900 mb-2">{{ election.title }}</h4>

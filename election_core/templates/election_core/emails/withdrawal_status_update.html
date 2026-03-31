@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; }
+        .header { background-color: {% if withdrawal.status == 'APPROVED' %}#059669{% else %}#dc2626{% endif %}; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { padding: 20px; }
+        .footer { font-size: 12px; color: #64748b; text-align: center; margin-top: 20px; }
+        .info-table { border-collapse: collapse; margin-top: 15px; }
+        .info-table td { padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+        .label { font-weight: bold; color: #64748b; width: 140px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Withdrawal {{ withdrawal.status|title }}</h1>
+        </div>
+        <div class="content">
+            <p>Hello {{ full_name }},</p>
+            <p>Your withdrawal request for ₦{{ withdrawal.amount }} has been <strong>{{ withdrawal.status }}</strong>.</p>
+            
+            <table class="info-table" width="100%">
+                <tr>
+                    <td class="label">Amount:</td>
+                    <td>₦{{ withdrawal.amount }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Status:</td>
+                    <td style="color: {% if withdrawal.status == 'APPROVED' %}#059669{% else %}#dc2626{% endif %}; font-weight: bold;">{{ withdrawal.status }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Reference ID:</td>
+                    <td>#{{ withdrawal.id }}</td>
+                </tr>
+            </table>
+
+            {% if withdrawal.status == 'APPROVED' %}
+                <p style="margin-top: 20px;">The funds have been dispatched to your bank account. Please allow for bank processing time.</p>
+            {% else %}
+                <p style="margin-top: 20px;">If you have any questions regarding this decision, please contact support.</p>
+            {% endif %}
+        </div>
+        <div class="footer">
+            &copy; {% now "Y" %} FlashVote Election System. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

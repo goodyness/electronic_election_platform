@@ -1,0 +1,22 @@
+{% extends 'election_core/base.html' %}
+
+{% block title %}Contest Inactive | FlashVote{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full bg-white rounded-[3rem] p-12 text-center border border-slate-200 shadow-2xl shadow-indigo-100">
+        <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
+            <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        </div>
+        
+        <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tight mb-4">Contest Inactive</h2>
+        <p class="text-slate-500 text-sm font-medium leading-relaxed mb-10">
+            The contest <span class="font-bold text-slate-900">"{{ election.title }}"</span> is currently not accepting votes. It might be in draft mode, paused, or has officially ended.
+        </p>
+
+        <a href="{% url 'home' %}" class="btn btn-primary w-full h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-indigo-100">
+            Return Home
+        </a>
+    </div>
+</div>
+{% endblock %}

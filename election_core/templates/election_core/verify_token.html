@@ -1,0 +1,137 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block title %}Verify Token | {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-slate-100">
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Access Ballot</h2>
+            <p class="text-sm text-slate-500 mt-2">Enter your Accreditation Token for <b>{{ election.title }}</b></p>
+        </div>
+        
+        <form class="divide-y divide-slate-100" method="POST">
+            {% csrf_token %}
+            <div class="py-8">
+                <input type="hidden" name="verify_token" value="1">
+                <div class="space-y-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Token ID</span>
+                        </label>
+                        <input type="text" name="token" placeholder="Paste your token here" required class="w-full bg-slate-50 border-none rounded-xl h-14 px-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all text-center tracking-widest" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-8 space-y-4">
+                <button type="submit" class="btn btn-block bg-indigo-600 hover:bg-indigo-700 text-white border-none h-14 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-indigo-100 transition-all transform hover:-translate-y-0.5">
+                    Unlock Ballot
+                </button>
+                
+                <div class="text-center">
+                    <button id="resend-token-btn" type="button" class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest hover:text-indigo-600 transition-all disabled:text-slate-300 pointer-events-none opacity-50" disabled>
+                        Resend Token <span id="resend-countdown"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resendBtn = document.getElementById('resend-token-btn');
+    const countdownSpan = document.getElementById('resend-countdown');
+    let resendCount = 0;
+    let timer;
+
+    function startCountdown(seconds) {
+        resendBtn.disabled = true;
+        resendBtn.classList.add('pointer-events-none', 'opacity-50');
+        let remaining = seconds;
+        
+        clearInterval(timer);
+        timer = setInterval(() => {
+            if (remaining <= 0) {
+                clearInterval(timer);
+                resendBtn.disabled = false;
+                resendBtn.classList.remove('pointer-events-none', 'opacity-50');
+                countdownSpan.innerText = '';
+            } else {
+                countdownSpan.innerText = `(${remaining}s)`;
+                remaining--;
+            }
+        }, 1000);
+    }
+
+    // Initial 30s countdown
+    startCountdown(30);
+
+    resendBtn.addEventListener('click', async function() {
+        const result = await Swal.fire({
+            title: 'Resend Token?',
+            text: "Please check your email list, search through all folders, or check your SPAM before clicking resend.",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Resend',
+            cancelButtonText: 'I’ll check again',
+            confirmButtonColor: '#4f46e5',
+            customClass: {
+                popup: 'rounded-3xl',
+                confirmButton: 'rounded-xl uppercase font-bold text-[10px] tracking-widest px-8 py-4',
+                cancelButton: 'rounded-xl uppercase font-bold text-[10px] tracking-widest px-8 py-4'
+            }
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch("{% url 'resend_token' short_id=election.short_id %}");
+                const data = await response.json();
+                
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Token Sent',
+                        text: data.message,
+                        timer: 3000,
+                        showConfirmButton: false,
+                        customClass: { popup: 'rounded-3xl' }
+                    });
+                    resendCount++;
+                    // Start 120s countdown if still eligible
+                    if (resendCount < 2) {
+                        startCountdown(120);
+                    } else {
+                        resendBtn.innerText = 'Resend Limit Reached';
+                        resendBtn.disabled = true;
+                        resendBtn.classList.add('opacity-50');
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Request Failed',
+                        text: data.message,
+                        customClass: { popup: 'rounded-3xl' }
+                    });
+                    // If limit already reached on server, disable button
+                    if (data.message.includes('limit reached')) {
+                        resendBtn.innerText = 'Resend Limit Reached';
+                        resendBtn.disabled = true;
+                        resendBtn.classList.add('opacity-50');
+                    }
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'System Error',
+                    text: 'Could not connect to service. Please try again later.',
+                    customClass: { popup: 'rounded-3xl' }
+                });
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

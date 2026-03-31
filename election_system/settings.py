@@ -18,6 +18,7 @@ CORS_ALLOWED_ORIGINS = [
     f'http://{IP_ADDRESS}',
     f'http://[IP_ADDRESS]',
     "http://192.168.1.203:8000",
+    "http://192.168.0.109:8000"
 ]
 
 CORS_ALLOW_METHODS = [
@@ -54,6 +55,7 @@ CSRF_TRUSTED_ORIGINS = [
     f'http://{IP_ADDRESS}',
     f'http://[IP_ADDRESS]',
     "http://192.168.1.203:8000",
+    "http://192.168.0.109:8000"
 ]
 
 INSTALLED_APPS = [
@@ -175,3 +177,8 @@ CELERY_RESULT_BACKEND = config('CELERY_BROKER_URL', default='redis://localhost:6
 
 PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
 PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
+
+# Admin settings
+ADMIN_EMAIL = config('ADMIN_EMAIL', default='adediranadedamolagoodness@gmail.com')
+
+ADMIN_EMAIL = config('ADMIN_EMAIL')

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .box { background-color: #f8fafc; border-radius: 8px; padding: 30px; text-align: center; margin: 20px 0; }
+    button.action-btn { background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
+    .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #64748b; }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Election Clearance Request</h2>
+        </div>
+        <p>Hello Admin,</p>
+        <p>A new election <strong>{{ election_title }}</strong> has been configured by <strong>{{ organizer_name }}</strong> and is pending your clearance to go live.</p>
+        
+        <div class="box">
+            <p>Please review and clear the election from your admin dashboard:</p><br>
+            <a href="{{ dashboard_url }}" class="action-btn" style="color: white; border: none; padding: 12px 24px; border-radius: 6px; background-color: #4f46e5; text-decoration: none;">Review Election</a>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ current_year }} Election System</p>
+        </div>
+    </div>
+</body>
+</html>

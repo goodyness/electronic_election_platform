@@ -1,0 +1,83 @@
+{% extends "election_core/base.html" %}
+
+{% block title %}Trust Center | FlashVote{% endblock %}
+
+{% block navbar %}
+<nav class="navbar bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-[100] px-6 lg:px-16 py-4">
+    <div class="navbar-start">
+        <a href="{% url 'home' %}" class="flex items-center gap-3 group transition-transform hover:scale-105">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">V</div>
+            <span class="text-2xl font-black tracking-tighter text-slate-900">Flash<span class="text-indigo-600">Vote</span></span>
+        </a>
+    </div>
+    <div class="navbar-end">
+        <a href="{% url 'home' %}" class="btn btn-ghost btn-sm font-black uppercase tracking-widest text-xs text-slate-500">Back to Home</a>
+    </div>
+</nav>
+{% endblock navbar %}
+
+{% block content %}
+<div class="bg-slate-50 min-h-screen py-24 px-6 relative overflow-hidden">
+    <!-- Subtle background elements -->
+    <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50"></div>
+    <div class="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-violet-50 rounded-full blur-3xl opacity-50"></div>
+
+    <div class="max-w-5xl mx-auto relative z-10">
+        <div class="mb-20 text-center">
+            <h1 class="text-6xl font-black tracking-tighter text-slate-900 mb-8">Trust <span class="text-indigo-600">Center</span></h1>
+            <p class="text-xl text-slate-500 font-medium max-w-2xl mx-auto">Security isn't an afterthought; it's the core of FlashVote. Explore the protocols that ensure every vote counts.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Cryptographic Security -->
+            <div class="bg-white p-12 rounded-[2.5rem] border border-slate-200 hover:border-indigo-200 transition-all shadow-sm group">
+                <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg shadow-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </div>
+                <h3 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Cryptographic Secrecy</h3>
+                <p class="text-slate-500 font-medium leading-relaxed mb-6">
+                    We use military-grade hashing and encryption to ensure that individual ballots can never be traced back to the voter. Our double-blind receipt system allows you to verify your vote exists without revealing your choice.
+                </p>
+            </div>
+
+            <!-- Immutable Audits -->
+            <div class="bg-white p-12 rounded-[2.5rem] border border-slate-200 hover:border-indigo-200 transition-all shadow-sm group">
+                <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg shadow-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z" /></svg>
+                </div>
+                <h3 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Immutable Audit Logs</h3>
+                <p class="text-slate-500 font-medium leading-relaxed mb-6">
+                    Every system event—from election creation to result sealing—is recorded in a permanent, read-only audit log. This provides a transparent paper trail that impossible to manipulate or delete.
+                </p>
+            </div>
+
+            <!-- Real-time Verifiability -->
+            <div class="bg-white p-12 rounded-[2.5rem] border border-slate-200 hover:border-indigo-200 transition-all shadow-sm group">
+                <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg shadow-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h3 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Real-time Verifiability</h3>
+                <p class="text-slate-500 font-medium leading-relaxed mb-6">
+                    Our War Room allows admins to monitor voting pulse in real-time, ensuring zero downtime and immediate detection of any infrastructure anomalies.
+                </p>
+            </div>
+
+            <!-- Zero-Knowledge Focus -->
+            <div class="bg-white p-12 rounded-[2.5rem] border border-slate-200 hover:border-indigo-200 transition-all shadow-sm group">
+                <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg shadow-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                </div>
+                <h3 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Zero-Knowledge Focus</h3>
+                <p class="text-slate-500 font-medium leading-relaxed mb-6">
+                    We aim to minimize data footprint. FlashVote doesn't need to know who you are to know that you are authorized to vote.
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-20 text-center">
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-xs mb-6">Transparency Matters</p>
+            <a href="{% url 'system_documentation' %}" class="btn btn-primary rounded-2xl px-12 h-16 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-indigo-100">Download Whitepaper</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,192 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block title %}{{ election.title }} | FlashVote Contest{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50">
+    <!-- Hero Banner -->
+    <div class="relative h-64 md:h-96 w-full overflow-hidden">
+        {% if election.contest_image %}
+        <img src="{{ election.contest_image.url }}" class="w-full h-full object-cover">
+        {% else %}
+        <div class="w-full h-full bg-indigo-900 flex items-center justify-center p-12 text-center text-white">
+            <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tight opacity-20">{{ election.title }}</h1>
+        </div>
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+            <div class="max-w-6xl mx-auto">
+                <h1 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-4">{{ election.title }}</h1>
+                <p class="text-indigo-200 text-sm md:text-lg max-w-2xl">{{ election.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto py-12 px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <!-- Left: Candidates Grid -->
+            <div class="lg:col-span-2 space-y-12">
+                {% for pos in positions %}
+                <div class="space-y-6">
+                    <h3 class="text-xl font-black text-slate-900 uppercase tracking-widest border-b border-slate-200 pb-4">{{ pos.title }}</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {% for cand in pos.candidates.all %}
+                        <div class="group card bg-white border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-indigo-100 transition-all rounded-[2rem]">
+                            <div class="relative h-64 overflow-hidden">
+                                {% if cand.photo %}
+                                <img src="{{ cand.photo.url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                {% else %}
+                                <div class="w-full h-full bg-slate-100 flex items-center justify-center text-4xl font-black text-slate-200">{{ cand.full_name|slice:":1" }}</div>
+                                {% endif %}
+                                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-slate-100">
+                                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{{ cand.total_votes }} Votes</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h4 class="text-xl font-black text-slate-900 uppercase mb-1">{{ cand.full_name }}</h4>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">{{ cand.faculty|default:"Independent" }}</p>
+                                
+                                <button onclick="openVoteModal('{{ cand.id }}', '{{ cand.full_name }}')" class="btn btn-primary w-full h-12 rounded-xl font-bold uppercase text-[10px] tracking-widest">
+                                    Cast Vote (₦{{ election.voting_fee|floatformat:0 }})
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-slate-400 italic text-sm">No contestants available in this sector.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="py-24 text-center">
+                    <h2 class="text-2xl font-black text-slate-300 uppercase">Coming Soon</h2>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Right: Stats & Info -->
+            <div class="space-y-8">
+                <div class="bg-indigo-900 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-indigo-100">
+                    <p class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-2">Voting Ends In</p>
+                    <div id="countdown" class="text-3xl font-black tracking-tighter mb-8 tabular-nums">00:00:00:00</div>
+                    
+                    <div class="space-y-6 pt-6 border-t border-indigo-800">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-indigo-300 uppercase tracking-widest">Fee per vote</span>
+                            <span class="font-black">₦{{ election.voting_fee|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-indigo-300 uppercase tracking-widest">Processing Fee</span>
+                            <span class="font-black text-emerald-400">Variable %</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] p-10 border border-slate-200">
+                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest mb-6">How to Vote</h3>
+                    <ul class="space-y-6 text-xs font-medium text-slate-500 list-decimal pl-4">
+                        <li class="pl-2">Select your favorite candidate.</li>
+                        <li class="pl-2">Provide your name and email address.</li>
+                        <li class="pl-2">Pay the voting fee via Paystack.</li>
+                        <li class="pl-2">Receive a confirmation receipt instantly.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vote Modal -->
+<dialog id="voteModal" class="modal">
+    <div class="modal-box max-w-sm rounded-[2.5rem] p-10">
+        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">Vote for <span id="modalCandidateName" class="text-indigo-600"></span></h3>
+        <p class="text-slate-400 text-xs font-medium leading-relaxed mb-8">Each vote costs ₦{{ election.voting_fee|floatformat:2 }}. You can vote as many times as you want.</p>
+        
+        <form id="voteForm" method="POST" action="">
+            {% csrf_token %}
+            <div class="space-y-6" x-data="{ 
+                quantity: 1, 
+                baseFee: {{ election.voting_fee }},
+                get total() { 
+                    let subtotal = this.baseFee * this.quantity;
+                    let surcharge = 0.10; // default
+                    {% for range in config.contest_charge_config %}
+                        if (this.baseFee >= {{ range.min|default:0 }} && (!{{ range.max|default:'null' }} || this.baseFee <= {{ range.max|default:999999999 }})) {
+                            surcharge = {{ range.percent|default:0.10 }};
+                        }
+                    {% endfor %}
+                    return subtotal + (subtotal * surcharge);
+                }
+            }">
+                <div class="form-control">
+                    <label class="label"><span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Your Full Name</span></label>
+                    <input type="text" name="voter_name" class="input input-bordered w-full h-12 rounded-xl text-xs font-bold" required placeholder="Enter your name">
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Address</span></label>
+                    <input type="email" name="voter_email" class="input input-bordered w-full h-12 rounded-xl text-xs font-bold" required placeholder="your@email.com">
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Number of Votes</span></label>
+                    <div class="flex items-center gap-4">
+                        <button type="button" @click="if(quantity > 1) quantity--" class="btn btn-circle btn-ghost btn-sm border border-slate-200">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
+                        </button>
+                        <input type="number" name="quantity" x-model.number="quantity" class="input input-bordered w-24 h-12 rounded-xl text-center font-black text-sm" min="1" required>
+                        <button type="button" @click="quantity++" class="btn btn-circle btn-ghost btn-sm border border-slate-200">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        </button>
+                    </div>
+                    <p class="text-[9px] text-slate-400 mt-2 italic">Minimum 1 vote required.</p>
+                </div>
+                
+                <div class="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100/50">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Charge</span>
+                        <span class="text-lg font-black text-indigo-600" x-text="'₦' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                    </div>
+                    <p class="text-[9px] font-medium text-slate-400 uppercase tracking-widest">Includes processing fees</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest mt-2 shadow-xl shadow-indigo-100">
+                    Proceed to Payment →
+                </button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<script>
+    function openVoteModal(candidateId, name) {
+        document.getElementById('modalCandidateName').innerText = name;
+        document.getElementById('voteForm').action = "{% url 'initiate_contest_vote_payment' election.short_id 0 %}".replace('0', candidateId);
+        document.getElementById('voteModal').showModal();
+    }
+
+    // Countdown Timer Logic
+    const endTime = new Date("{{ election.end_time|date:'Y-m-d H:i:s' }}").getTime();
+    const timer = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = endTime - now;
+        if (distance < 0) {
+            clearInterval(timer);
+            document.getElementById("countdown").innerHTML = "CONTEST CLOSED";
+            return;
+        }
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        document.getElementById("countdown").innerHTML = 
+            days.toString().padStart(2, '0') + ":" + 
+            hours.toString().padStart(2, '0') + ":" + 
+            minutes.toString().padStart(2, '0') + ":" + 
+            seconds.toString().padStart(2, '0');
+    }, 1000);
+</script>
+{% endblock %}

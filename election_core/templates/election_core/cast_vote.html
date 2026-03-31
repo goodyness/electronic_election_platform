@@ -40,7 +40,8 @@
                     {% for candidate in position.candidates.all %}
                     <div x-data="{ showInfo: false }" class="relative">
                         <label class="cursor-pointer block h-full">
-                            <input type="radio" name="position_{{ position.id }}" value="{{ candidate.id }}" required
+                            <input type="radio" name="position_{{ position.id }}" value="{{ candidate.id }}" 
+                                data-candidate-name="{{ candidate.full_name }}" data-position-title="{{ position.title }}" required
                                 @change="selected = '{{ candidate.id }}'" class="peer hidden">
 
                             <!-- Compact Card: Mobile Optimized -->
@@ -79,7 +80,7 @@
                             </div>
                         </label>
 
-                        <!-- Manifesto Modal -->
+                        <!-- Manifesto Modal and show image -->
                         <template x-teleport="body">
                             <div x-show="showInfo" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md" @click="showInfo = false" x-cloak>
                                 <div class="bg-white rounded-[2.5rem] max-w-lg w-full p-10 relative shadow-2xl" @click.stop>
@@ -89,7 +90,18 @@
                                     <div class="text-slate-500 text-sm leading-relaxed max-h-[20rem] overflow-y-auto pr-4 font-medium custom-scrollbar">
                                         {{ candidate.bio|linebreaks|default:"No manifesto records found for this candidate." }}
                                     </div>
+    
+                                    <div class="w-full h-full">
+                                        {% if candidate.photo %}
+                                        <img src="{{ candidate.photo.url }}" alt="{{ candidate.full_name }}" class="w-full h-full object-cover rounded-[2.5rem]">
+                                        {% else %}
+                                        <div class="w-full h-full bg-slate-50 flex items-center justify-center text-xl font-black text-slate-200 border border-slate-100">
+                                            {{ candidate.full_name|slice:":1" }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
+                                
                             </div>
                         </template>
                     </div>
@@ -119,11 +131,20 @@
 <script>
     function confirmSubmit() {
         const form = document.getElementById('ballotForm');
-        const positions = document.querySelectorAll('section');
+        const sections = document.querySelectorAll('section');
         let allSelected = true;
+        let selections = [];
 
-        positions.forEach(section => {
-            if (!section.querySelector('input[type="radio"]:checked')) allSelected = false;
+        sections.forEach(section => {
+            const checked = section.querySelector('input[type="radio"]:checked');
+            if (!checked) {
+                allSelected = false;
+            } else {
+                selections.push({
+                    position: checked.dataset.positionTitle,
+                    candidate: checked.dataset.candidateName
+                });
+            }
         });
 
         if (!allSelected) {
@@ -131,22 +152,36 @@
                 icon: 'warning',
                 title: 'BALLOT INCOMPLETE',
                 text: 'Security protocols require a selection for every sector.',
-                confirmButtonColor: '#4f46e5'
+                confirmButtonColor: '#4f46e5',
+                customClass: { popup: 'rounded-[2.5rem] p-10' }
             });
             return;
         }
 
+        // Build review HTML
+        let reviewHtml = `
+            <div class="text-left space-y-4 my-6 bg-slate-50 p-6 rounded-[2rem] border border-slate-100 max-h-[20rem] overflow-y-auto custom-scrollbar">
+                ${selections.map(s => `
+                    <div class="flex flex-col gap-1 border-b border-slate-200/60 pb-3 last:border-0 last:pb-0">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.position}</span>
+                        <span class="text-xs font-black text-slate-900 uppercase tracking-tight">${s.candidate}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 text-center italic">This transmission is final and cannot be retracted.</p>
+        `;
+
         Swal.fire({
             title: 'VERIFY BALLOT?',
-            text: "This transmission is final and cannot be retracted.",
+            html: reviewHtml,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'CONFIRM VOTE',
-            cancelButtonText: 'REVIEW',
+            cancelButtonText: 'RESELECT',
             reverseButtons: true,
             buttonsStyling: false,
             customClass: {
-                title: 'text-xl font-black text-slate-900 tracking-tight',
+                title: 'text-xl font-black text-slate-900 tracking-tight uppercase',
                 popup: 'rounded-[2.5rem] p-10',
                 confirmButton: 'btn btn-primary px-8 rounded-xl h-12 text-[10px] font-black uppercase tracking-widest ml-3',
                 cancelButton: 'btn btn-ghost border-slate-200 px-8 rounded-xl h-12 text-[10px] font-black uppercase tracking-widest'

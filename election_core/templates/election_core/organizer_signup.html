@@ -40,13 +40,6 @@
                     {% if form.contact.errors %}<p class="text-[10px] text-red-500 mt-1 font-bold">{{ form.contact.errors.0 }}</p>{% endif %}
                 </div>
 
-                <div class="form-control">
-                    <label class="label mb-1 p-0"><span class="label-text text-[10px] font-bold text-slate-400 uppercase tracking-widest">Institution</span></label>
-                    <div class="select-wrapper bg-slate-50 border border-slate-200 rounded-xl px-4 h-12 flex items-center">
-                        {{ form.institution }}
-                    </div>
-                    {% if form.institution.errors %}<p class="text-[10px] text-red-500 mt-1 font-bold">{{ form.institution.errors.0 }}</p>{% endif %}
-                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ show: false }">
                     <div class="form-control">

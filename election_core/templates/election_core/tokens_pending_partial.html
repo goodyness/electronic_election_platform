@@ -1,0 +1,30 @@
+{% for item in pending_page %}
+<tr class="hover:bg-slate-50/50">
+    <td class="px-6 py-4 font-medium text-slate-700">{{ item.email }}</td>
+    <td class="px-6 py-4 text-right">
+        <span class="badge badge-warning badge-sm border-none">Pending</span>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="2" class="text-center py-20 text-slate-400 italic">No pending voters found.</td>
+</tr>
+{% endfor %}
+
+{% if pending_page.has_other_pages %}
+<tr class="bg-white">
+    <td colspan="2" class="p-4 border-t border-slate-100">
+        <div class="flex justify-center">
+            <div class="join">
+                {% if pending_page.has_previous %}
+                <button hx-get="?page_pending={{ pending_page.previous_page_number }}" hx-target="#pending-body" hx-swap="innerHTML" class="btn btn-xs rounded-l-lg h-9 px-4">«</button>
+                {% endif %}
+                <span class="btn btn-xs h-9 px-4 bg-white border-slate-200 text-slate-500 pointer-events-none">Page {{ pending_page.number }} / {{ pending_page.paginator.num_pages }}</span>
+                {% if pending_page.has_next %}
+                <button hx-get="?page_pending={{ pending_page.next_page_number }}" hx-target="#pending-body" hx-swap="innerHTML" class="btn btn-xs rounded-r-lg h-9 px-4">»</button>
+                {% endif %}
+            </div>
+        </div>
+    </td>
+</tr>
+{% endif %}

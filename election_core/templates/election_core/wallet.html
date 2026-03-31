@@ -1,0 +1,156 @@
+{% extends 'election_core/base.html' %}
+{% load static %}
+
+{% block title %}My Wallet | FlashVote{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Wallet Header Card -->
+        <div class="card bg-indigo-900 text-white p-12 rounded-[3rem] shadow-2xl shadow-indigo-100 relative overflow-hidden">
+            <div class="relative z-10">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-300 mb-4">Account Balance</p>
+                <h2 class="text-6xl font-black tracking-tight mb-8">₦{{ wallet.balance|floatformat:2 }}</h2>
+                
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="document.getElementById('withdrawModal').showModal()" class="btn bg-white text-indigo-900 border-none hover:bg-slate-50 px-8 h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl">
+                        Request Withdrawal
+                    </button>
+                    <div class="flex items-center gap-3 bg-indigo-800/50 backdrop-blur-md px-6 rounded-2xl border border-indigo-700">
+                        <span class="text-[10px] font-bold text-indigo-200 uppercase tracking-widest">Withdrawal Fee: ₦500 Flat</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="absolute -right-20 -bottom-20 opacity-10">
+                <svg class="h-80 w-80" fill="currentColor" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2-.9-2-2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Withdrawal History -->
+            <div class="space-y-6">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Payout History</h3>
+                <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="table w-full">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="text-[9px] font-black text-slate-400 uppercase tracking-widest py-4 pl-6">Amount</th>
+                                    <th class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                    <th class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-right pr-6">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for w in withdrawals %}
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="py-4 pl-6">
+                                        <div class="text-xs font-black text-slate-900">₦{{ w.amount|floatformat:2 }}</div>
+                                        <div class="text-[9px] text-slate-400">Fee: ₦{{ w.charge_amount|floatformat:0 }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-xs font-black text-[8px] uppercase tracking-tighter p-2 rounded-lg 
+                                            {% if w.status == 'PENDING' %}bg-amber-100 text-amber-700
+                                            {% elif w.status == 'APPROVED' %}bg-emerald-100 text-emerald-700
+                                            {% else %}bg-rose-100 text-rose-700{% endif %} border-none">
+                                            {{ w.status }}
+                                        </span>
+                                    </td>
+                                    <td class="text-right pr-6">
+                                        <div class="text-[9px] font-bold text-slate-500 uppercase">{{ w.created_at|date:"M d, Y" }}</div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="py-12 text-center text-slate-400 text-xs italic">No withdrawals yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Details & Info -->
+            <div class="space-y-6">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Policy & Limits</h3>
+                <div class="bg-white rounded-[2rem] p-8 border border-slate-200 space-y-8">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900 uppercase mb-1">Minimum Withdrawal</h4>
+                            <p class="text-xs font-medium text-slate-500">₦5,000.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900 uppercase mb-1">Payout Speed</h4>
+                            <p class="text-xs font-medium text-slate-500">24 - 48 Business Hours</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-8 border-t border-slate-100">
+                        <p class="text-[10px] text-slate-400 leading-relaxed italic">
+                            All withdrawals are subject to a flat fee of ₦500 which is deducted from your overall balance. Minimum balance required to withdraw is ₦5,500.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Withdrawal Modal -->
+<dialog id="withdrawModal" class="modal">
+    <div class="modal-box max-w-md rounded-[3rem] p-10 border border-slate-200">
+        <h3 class="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Request Payout</h3>
+        <p class="text-slate-400 text-xs font-medium leading-relaxed mb-8">Funds will be sent to the account details provided below. Double check for accuracy.</p>
+        
+        <form method="POST" action="{% url 'request_withdrawal' %}">
+            {% csrf_token %}
+            <div class="space-y-6">
+                <div class="form-control">
+                    <label class="label"><span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Withdrawal Amount (₦)</span></label>
+                    <input type="number" name="amount" min="5000" placeholder="Min 5000" class="input input-bordered w-full h-14 rounded-2xl text-sm font-bold" required>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Bank Name</span></label>
+                        <input type="text" name="bank_name" placeholder="e.g. Zenith Bank" class="input input-bordered w-full h-14 rounded-2xl text-xs font-bold" required>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Number</span></label>
+                        <input type="text" name="account_number" placeholder="10 Digits" class="input input-bordered w-full h-14 rounded-2xl text-xs font-bold" required>
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Name</span></label>
+                    <input type="text" name="account_name" placeholder="Enter Full Bank Name" class="input input-bordered w-full h-14 rounded-2xl text-xs font-bold" required>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 mt-4">
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <span>Withdrawal Fee</span>
+                        <span class="text-rose-500">₦500.00</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-full h-16 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest mt-8 shadow-2xl shadow-indigo-100">
+                    Confirm Withdrawal
+                </button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+{% endblock %}
